@@ -1,0 +1,61 @@
+{
+  "name": "ribbit",
+  "version": "1.0.0",
+  "description": "A decentralized social media web application based on Ethereum platform. 基于以太坊的去中心化社交程序。",
+  "main": "index.js",
+  "dependencies": {
+    "history": "^4.7.2",
+    "markdown-it": "^8.4.1",
+    "react": "^16.3.2",
+    "react-codemirror": "^1.0.0",
+    "react-dom": "^16.3.2",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
+    "validator": "^9.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^9.6.5",
+    "@types/react": "^16.3.11",
+    "@types/react-codemirror": "^1.0.1",
+    "@types/react-dom": "^16.0.5",
+    "@types/react-router": "^4.0.23",
+    "@types/react-router-dom": "^4.2.6",
+    "awesome-typescript-loader": "^5.0.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "copy-webpack-plugin": "^4.5.1",
+    "css-loader": "^0.28.11",
+    "eslint": "^4.19.1",
+    "http-server": "^0.11.1",
+    "json-loader": "^0.5.7",
+    "less": "^3.0.1",
+    "less-loader": "^4.1.0",
+    "prettier": "^1.12.1",
+    "style-loader": "^0.21.0",
+    "ts-loader": "^4.2.0",
+    "typescript": "^2.8.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.14"
+  },
+  "scripts": {
+    "frontend:dev": "./node_modules/.bin/webpack --config webpack.config.js  --mode development --watch",
+    "frontend:build": "./node_modules/.bin/webpack --config webpack.config.js  --mode production",
+    "server:start": "http-server ./dist -p 12345",
+    "format": "prettier --write --ignore-path .gitignore \"{.,frontend/**}/{*.{js,ts,tsx},*.md,ts*.json}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shd101wyy/ribbit.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shd101wyy/ribbit/issues"
+  },
+  "homepage": "https://github.com/shd101wyy/ribbit#readme"
+}
