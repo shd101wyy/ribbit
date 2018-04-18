@@ -30,6 +30,8 @@ export default class Home extends React.Component<Props, State> {
       return (
         <div className="home">
           <p>{this.state.msg}</p>
+          <h1>Using {user.getNetworkName()}</h1>
+          <p>{user.coinbase}</p>
           {/* <h1> {user.userid + '_' + user.postfix} </h1>
 					<p> {user.dbMoniAddress}</p> */}
           <div className="cards">

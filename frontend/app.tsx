@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Router, Route, Switch } from "react-router";
+// import Web3 from "web3";
 import history from "./lib/history";
 import { User } from "./lib/user";
 
@@ -23,9 +24,11 @@ class App extends React.Component<Props, State> {
       alert("metamask not installed");
     } else {
       console.log("metamask installed");
+      const user = new User(window["web3"]);
+      window["user"] = user;
       this.setState({
         injectWeb3: true,
-        user: new User(window["web3"])
+        user: user
       });
     }
   }

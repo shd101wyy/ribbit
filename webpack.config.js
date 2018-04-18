@@ -11,7 +11,7 @@ module.exports = {
     filename: "[name].bundle.js"
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".less", ".css"]
+    extensions: [".ts", ".tsx", ".js", ".less", ".css", ".json"]
   },
   module: {
     rules: [
@@ -26,12 +26,17 @@ module.exports = {
           { loader: "css-loader" },
           { loader: "less-loader" }
         ]
-      },
+      }/*,
       {
         test: /\.json$/,
-        use: "json-loader"
-      }
+        use: [
+          {loader: "json-loader"}
+        ]
+      }*/
     ]
+  },
+  node: {
+    fs: "empty"
   },
   plugins: [
     new webpack.IgnorePlugin(
