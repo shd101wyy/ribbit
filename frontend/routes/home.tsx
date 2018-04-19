@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { User } from "../lib/user";
+import {Summary, decompressString, generateSummaryFromHTML, renderMarkdown} from "../lib/utility";
 
 import Footer from "../components/footer";
 import Edit from "../components/edit";
@@ -12,12 +13,49 @@ interface Props {
 interface State {
   showEditPanel: boolean;
   msg: string;
+  feeds: Summary[];
+  loading: boolean
 }
 export default class Home extends React.Component<Props, State> {
-  state = {
-    showEditPanel: false,
-    msg: ""
-  };
+  constructor(props:Props) {
+    super(props);
+    this.state = {
+      showEditPanel: false,
+      msg: "",
+      feeds: [],
+      loading: false
+    };  
+  }
+
+  componentDidMount() {
+    this.showUserFeeds(this.props.user)
+  }
+
+  componentWillReceiveProps(newProps:Props) {
+    if (this.props.user !== newProps.user) {
+      this.showUserFeeds(newProps.user)
+    }
+  }
+
+  showUserFeeds(user:User) {
+    if (!user) {
+      return;
+    }
+    this.setState({loading: true}, ()=> {
+      user.getFeedsFromUser(user.coinbase, {num: -1}, async (done, offset, transactionInfo)=> {
+        console.log(done, offset, transactionInfo);
+        if (done) {
+          return this.setState({loading: false});
+        }
+        const message = decompressString(transactionInfo.decode.params[2].value)
+        console.log(message)
+        const summary = await generateSummaryFromHTML(renderMarkdown(message))
+        const feeds = this.state.feeds
+        feeds.push(summary)
+        this.forceUpdate() 
+      })
+    })
+  }
 
   toggleEditPanel = () => {
     const { showEditPanel } = this.state;
@@ -31,11 +69,10 @@ export default class Home extends React.Component<Props, State> {
         <div className="home">
           <p>{this.state.msg}</p>
           <h1>Using {user.getNetworkName()}</h1>
-          <p>{user.coinbase}</p>
-          {/* <h1> {user.userid + '_' + user.postfix} </h1>
-					<p> {user.dbMoniAddress}</p> */}
+          <p>Your address {user.coinbase}</p>
           <div className="cards">
-            {/*this.state.feeds.map((feed, index)=> <Card key={index} feed={feed}></Card>)*/}
+            {this.state.feeds.map((feed, index)=> <Card key={index} summary={feed}></Card>)}
+            <p id="feed-footer"> {this.state.loading ? 'Loading...' : 'No more feeds ;)'} </p>
           </div>
           <div className="floating-button" onClick={this.toggleEditPanel}>
             <i className="fa fa-plus" />

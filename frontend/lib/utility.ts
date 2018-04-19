@@ -1,6 +1,7 @@
 import * as Autolinker from "autolinker";
 import * as validator from "validator";
 import * as MarkdownIt from "../deps/markdown-it";
+import * as LZString from "lz-string";
 
 const md = new MarkdownIt({
   html: true,
@@ -9,7 +10,15 @@ const md = new MarkdownIt({
   breaks: true
 });
 
-export function renderMarkdown(markdown: string) {
+export function compressString(s:string) {
+  return LZString.compressToUTF16(s);
+}
+
+export function decompressString(s:string) {
+  return LZString.decompressFromUTF16(s);
+}
+
+export function renderMarkdown(markdown: string):string {
   return md.render(markdown);
 }
 

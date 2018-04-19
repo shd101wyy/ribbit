@@ -4,6 +4,7 @@ import * as LZString from "lz-string";
 import * as InputDataDecoder from "ethereum-input-data-decoder";
 import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
+import { compressString } from "./utility";
 
 const decoder = new InputDataDecoder(abiArray);
 abiDecoder.addABI(abiArray);
@@ -65,9 +66,6 @@ export class User {
    * @param message the string that you want to post.
    */
   public async postFeed(message: string) {
-    console.log("Post Feed: \n|" + message + "|");
-    // user.contractInstance.setMetaDataJSONStringMap("{a:13}", function(...args){ console.log(args) })
-    // user.contractInstance.getMetaDataJSONStringValue(user.coinbase, function(...args){ console.log(args) })
     let currentFeedInfo = await new Promise((resolve, reject) => {
       this.contractInstance.getCurrentFeedInfo(
         this.coinbase,
@@ -84,22 +82,14 @@ export class User {
     const currentFeedTimestamp = currentFeedInfo[1].toNumber();
     const currentFeedHash = currentFeedInfo[2].toNumber();
     const currentTimestamp = Date.now();
-    const compressedMessage = LZString.compressToUTF16(message);
+    const compressedMessage = compressString(message);
     const messageHash = sha256(
       this.coinbase + currentTimestamp.toString() + message
     );
 
-    console.log("currentFeedInfo: ", currentFeedInfo);
-    console.log("currentFeedBlockNumber: ", currentFeedBlockNumber);
-    console.log("currentFeedTimestmap: " + currentFeedTimestamp);
-    console.log("currentFeedHash: " + currentFeedHash);
-    console.log("messageHash: " + messageHash);
-    console.log("compressedMessage: " + compressedMessage);
-
     const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
       this.coinbase
     );
-    console.log("previousFeedTransactionInfo", previousFeedTransactionInfo);
     const previousFeedTransactionHash = previousFeedTransactionInfo
       ? previousFeedTransactionInfo.hash
       : 0;
@@ -119,7 +109,6 @@ export class User {
           if (error) {
             return reject(error);
           } else {
-            console.log("Feed Posted: " + transactionHash);
             return resolve(transactionHash);
           }
         }
@@ -134,6 +123,7 @@ export class User {
     messageHash: string,
     transactionHash?: string
   ) {
+    /*
     console.log(
       "@getTransactionInfo: ",
       userAddress,
@@ -142,6 +132,7 @@ export class User {
       messageHash,
       transactionHash
     );
+    */
     if (timestamp === 0) {
       return null;
     }
@@ -161,7 +152,7 @@ export class User {
         if (messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
-        return Object.assign(transaction, { decode });
+        return Object.assign(transaction, { decode, timestamp });
       }
     };
 
@@ -180,7 +171,7 @@ export class User {
               }
               const validatedResult = validateTransaction(transaction);
               if (validatedResult) {
-                console.log('transactionHash is valid: ', validatedResult)
+                // console.log('transactionHash is valid: ', validatedResult)
                 return resolve(validatedResult);
               }
             }
@@ -207,7 +198,7 @@ export class User {
       );
     });
 
-    console.log("transactionCount: " + transactionCount);
+    // console.log("transactionCount: " + transactionCount);
 
     for (let i = 0; i < transactionCount; i++) {
       const transaction = (await new Promise((resolve, reject) => {
@@ -225,7 +216,7 @@ export class User {
       })) as any;
       const validatedResult = validateTransaction(transaction);
       if (validatedResult) {
-        console.log("transactionHash is invalid: ", validatedResult);
+        // console.log("transactionHash is invalid: ", validatedResult);
         return validatedResult;
       }
     }
@@ -258,32 +249,41 @@ export class User {
   }
 
   /**
-   *
-   * @param userAddress
-   * @param maxNumber If == -1, then return all the feeds
+   * 
+   * @param userAddress 
+   * @param param1 
+   * @param cb 
    */
   public async getFeedsFromUser(
     userAddress: string,
-    maxNumber: number = -1,
+    {
+      num = -1, // how many feeds to read?
+      blockNumber = 0,
+      timestamp = 0,
+      messageHash = '',
+      transactionHash = null
+    },
     cb: (done: boolean, offset?: number, transactionInfo?: any) => void
   ) {
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentFeedInfo(userAddress, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
+    if (!timestamp) {
+      let currentFeedInfo = await new Promise((resolve, reject) => {
+        this.contractInstance.getCurrentFeedInfo(userAddress, (error, result) => {
+          if (error) {
+            return reject(error);
+          } else {
+            return resolve(result);
+          }
+        });
       });
-    });
-
-    let blockNumber = currentFeedInfo[0].toNumber();
-    let timestamp = currentFeedInfo[1].toNumber();
-    let messageHash = this.web3.toHex(currentFeedInfo[2]);
-    let transactionHash = null;
+  
+      blockNumber = currentFeedInfo[0].toNumber();
+      timestamp = currentFeedInfo[1].toNumber();
+      messageHash = this.web3.toHex(currentFeedInfo[2]);
+      transactionHash = null;
+    }
     let offset = 0;
-    while (offset > maxNumber) {
-      console.log("@@ offset: " + offset);
+    while (offset > num) {
+      // console.log("@@ offset: " + offset);
       const transactionInfo = await this.getTransactionInfo(
         userAddress,
         blockNumber,
@@ -295,7 +295,7 @@ export class User {
         return cb(true); // done.
       } else {
         cb(false, offset, transactionInfo);
-        console.log('Message: ', LZString.decompressFromUTF16(transactionInfo.decode.params[2].value))
+        // console.log('Message: ', LZString.decompressFromUTF16(transactionInfo.decode.params[2].value))
         transactionHash = transactionInfo.decode.params[4].value;
         const receipt = await new Promise((resolve, reject) => {
           this.web3.eth.getTransactionReceipt(
@@ -309,12 +309,11 @@ export class User {
             }
           );
         });
-        console.log("receipt: ", receipt);
         const logs = receipt["logs"] || [];
         if (!logs.length) {
           return cb(true);
         }
-        console.log(abiDecoder.decodeLogs(logs));
+        // TODO: tags
         const decodedLogs = abiDecoder.decodeLogs(logs);
         const PostFeedEvent = decodedLogs.filter(
           x => x.name === "PostFeedEvent"
