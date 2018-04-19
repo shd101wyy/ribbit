@@ -9,6 +9,7 @@ contract Ribbit {
      * 0x1 => likes 
      * 0x2 => dislikes
      * 0x3 => reports
+     * 0x4 => comments
      * 
      * transactionHash => field => value
      */
@@ -40,15 +41,15 @@ contract Ribbit {
             state[transactionHash][fieldsAndValues[i]] = state[transactionHash][fieldsAndValues[i]] + fieldsAndValues[i+1];
         }
     }
-    */
-    function getState(bytes32 transactionHash, uint field) external constant returns (uint)  {
-        return state[transactionHash][field];
-    }
     function increaseStateFieldsByOne(bytes32 transactionHash, uint[] fields) external {
         for (uint i = 0; i < fields.length; i++) {
             uint field = fields[i];
             state[transactionHash][field] = state[transactionHash][field] + 1;
         } 
+    }
+    */
+    function getState(bytes32 transactionHash, uint field) external constant returns (uint)  {
+        return state[transactionHash][field];
     }
     function setMetaDataJSONStringMap(string value) external {
         metaDataJSONStringMap[msg.sender] = value;
@@ -97,6 +98,7 @@ contract Ribbit {
         currentCommentInfoMap[parentTransactionHash][0] = block.number;   
         currentCommentInfoMap[parentTransactionHash][1] = timestamp;    
         currentCommentInfoMap[parentTransactionHash][2] = messageHash;
+        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of comments
         for (uint i = 0; i < tags.length; i++) {
             emit PostTagByTrendEvent(tags[i], previousTagTransactionByTrendHashes[i], currentTagInfoByTrendMap[tags[i]]);
             currentTagInfoByTrendMap[tags[i]][0] = parentTransactionBlockNumber;
@@ -113,5 +115,20 @@ contract Ribbit {
         if (amount2 > 0) {
             appAuthorAddress.transfer(amount2);
         }
+    }
+
+    // Like
+    function like(bytes32 transactionHash) external {
+        state[transactionHash][1] = state[transactionHash][1] + 1;
+    }
+
+    // Dislike
+    function dislike(bytes32 transactionHash) external {
+        state[transactionHash][2] = state[transactionHash][2] + 1;
+    }
+
+    // Report
+    function report(bytes32 transactionHash) external {
+        state[transactionHash][3] = state[transactionHash][3] + 1;
     }
 }
