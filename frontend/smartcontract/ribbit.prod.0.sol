@@ -30,6 +30,8 @@ contract Ribbit {
         owner = msg.sender;
         previousContractAddress = previousContractAddr;
     }
+    /*
+    // These two functions are not safe
     function updateState(bytes32 transactionHash, uint field, uint value) external {
         state[transactionHash][field] = state[transactionHash][field] + value;
     }
@@ -38,8 +40,15 @@ contract Ribbit {
             state[transactionHash][fieldsAndValues[i]] = state[transactionHash][fieldsAndValues[i]] + fieldsAndValues[i+1];
         }
     }
+    */
     function getState(bytes32 transactionHash, uint field) external constant returns (uint)  {
         return state[transactionHash][field];
+    }
+    function increaseStateFieldsByOne(bytes32 transactionHash, uint[] fields) external {
+        for (uint i = 0; i < fields.length; i++) {
+            uint field = fields[i];
+            state[transactionHash][field] = state[transactionHash][field] + 1;
+        } 
     }
     function setMetaDataJSONStringMap(string value) external {
         metaDataJSONStringMap[msg.sender] = value;

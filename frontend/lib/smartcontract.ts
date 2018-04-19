@@ -3,18 +3,6 @@ export const abiArray = [
   {
     constant: false,
     inputs: [
-      { name: "transactionHash", type: "bytes32" },
-      { name: "fieldsAndValues", type: "uint256[]" }
-    ],
-    name: "multipleState",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
       { name: "version", type: "uint256" },
       { name: "timestamp", type: "uint256" },
       { name: "parentTransactionHash", type: "bytes32" },
@@ -125,6 +113,18 @@ export const abiArray = [
     type: "function"
   },
   {
+    constant: false,
+    inputs: [
+      { name: "transactionHash", type: "bytes32" },
+      { name: "fields", type: "uint256[]" }
+    ],
+    name: "increaseStateFieldsByOne",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: true,
     inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
     name: "currentTagInfoByTimeMap",
@@ -149,19 +149,6 @@ export const abiArray = [
     outputs: [{ name: "", type: "address" }],
     payable: false,
     stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "transactionHash", type: "bytes32" },
-      { name: "field", type: "uint256" },
-      { name: "value", type: "uint256" }
-    ],
-    name: "updateState",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -268,4 +255,4 @@ export const abiArray = [
 ];
 export const contractAddress = "0xc514138d0040686da5a93af21647cfe256e04406";
 
-export const abiArrayJSONString = JSON.stringify(abiArray)
+export const abiArrayJSONString = JSON.stringify(abiArray);

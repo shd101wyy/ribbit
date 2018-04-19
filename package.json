@@ -4,9 +4,8 @@
   "description": "A decentralized social media web application based on Ethereum platform. 基于以太坊的去中心化社交程序。",
   "main": "index.js",
   "dependencies": {
+    "abi-decoder": "^1.1.0",
     "autolinker": "^1.6.2",
-    "bn.js": "^4.11.8",
-    "ethereum-input-data-decoder": "0.0.3",
     "history": "^4.7.2",
     "js-sha256": "^0.9.0",
     "lz-string": "^1.4.4",
