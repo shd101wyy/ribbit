@@ -108,7 +108,7 @@ contract Ribbit {
     
     // Send ether 
     function sendEther(bytes32 transactionHash, address postAutherAddress, uint amount1, address appAuthorAddress, uint amount2) payable external {
-        state[transactionHash][0x0] = state[transactionHash][0x0] + amount1;
+        state[transactionHash][0] = state[transactionHash][0] + amount1 + amount2;
         if (amount1 > 0) {
             postAutherAddress.transfer(amount1);
         }
