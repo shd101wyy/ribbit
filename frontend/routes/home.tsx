@@ -1,7 +1,12 @@
 import * as React from "react";
 
 import { User } from "../lib/user";
-import {Summary, decompressString, generateSummaryFromHTML, renderMarkdown} from "../lib/utility";
+import {
+  Summary,
+  decompressString,
+  generateSummaryFromHTML,
+  renderMarkdown
+} from "../lib/utility";
 
 import Footer from "../components/footer";
 import Edit from "../components/edit";
@@ -14,47 +19,55 @@ interface State {
   showEditPanel: boolean;
   msg: string;
   feeds: Summary[];
-  loading: boolean
+  loading: boolean;
 }
 export default class Home extends React.Component<Props, State> {
-  constructor(props:Props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       showEditPanel: false,
       msg: "",
       feeds: [],
       loading: false
-    };  
+    };
   }
 
   componentDidMount() {
-    this.showUserFeeds(this.props.user)
+    this.showUserFeeds(this.props.user);
   }
 
-  componentWillReceiveProps(newProps:Props) {
+  componentWillReceiveProps(newProps: Props) {
     if (this.props.user !== newProps.user) {
-      this.showUserFeeds(newProps.user)
+      this.showUserFeeds(newProps.user);
     }
   }
 
-  showUserFeeds(user:User) {
+  showUserFeeds(user: User) {
     if (!user) {
       return;
     }
-    this.setState({loading: true}, ()=> {
-      user.getFeedsFromUser(user.coinbase, {num: -1}, async (done, offset, transactionInfo)=> {
-        console.log(done, offset, transactionInfo);
-        if (done) {
-          return this.setState({loading: false});
+    this.setState({ loading: true }, () => {
+      user.getFeedsFromUser(
+        user.coinbase,
+        { num: -1 },
+        async (done, offset, transactionInfo) => {
+          console.log(done, offset, transactionInfo);
+          if (done) {
+            return this.setState({ loading: false });
+          }
+          const message = decompressString(
+            transactionInfo.decode.params[2].value
+          );
+          console.log(message);
+          const summary = await generateSummaryFromHTML(
+            renderMarkdown(message)
+          );
+          const feeds = this.state.feeds;
+          feeds.push(summary);
+          this.forceUpdate();
         }
-        const message = decompressString(transactionInfo.decode.params[2].value)
-        console.log(message)
-        const summary = await generateSummaryFromHTML(renderMarkdown(message))
-        const feeds = this.state.feeds
-        feeds.push(summary)
-        this.forceUpdate() 
-      })
-    })
+      );
+    });
   }
 
   toggleEditPanel = () => {
@@ -71,8 +84,13 @@ export default class Home extends React.Component<Props, State> {
           <h1>Using {user.getNetworkName()}</h1>
           <p>Your address {user.coinbase}</p>
           <div className="cards">
-            {this.state.feeds.map((feed, index)=> <Card key={index} summary={feed}></Card>)}
-            <p id="feed-footer"> {this.state.loading ? 'Loading...' : 'No more feeds ;)'} </p>
+            {this.state.feeds.map((feed, index) => (
+              <Card key={index} summary={feed} />
+            ))}
+            <p id="feed-footer">
+              {" "}
+              {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+            </p>
           </div>
           <div className="floating-button" onClick={this.toggleEditPanel}>
             <i className="fa fa-plus" />

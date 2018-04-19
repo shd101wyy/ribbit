@@ -1,43 +1,58 @@
-// out: false 
+// out: false
 
 .app-footer {
-	position: fixed;
-	left: 50%;
-	bottom: 0;	
-	transform: translateX(-50%);
-	width: 100%;
-	max-width: 600px;	
-	height: 56px;
-	padding: 0;
-	background: #673AB7;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-	z-index: 50;
+  position: fixed;
+  left: 48px;
+  bottom: 24px;
+  width: 100%;
+  max-width: 312px;
+  height: 56px;
+  padding: 0;
+  z-index: 50;
 }
 
 .app-footer nav {
-  display: flex;  
-  width: 100%;  
+  display: flex;
+  width: 100%;
   font-size: 100%;
 }
 
 .app-footer nav a {
-  flex-grow: 1;  
-	height: 56px;
-	line-height: 56px;
-	padding: 0 15px;
-	min-width: 50px;
-	text-align: center;
-	background: rgba(255,255,255,0);
-	text-decoration: none;
-	color: #FFF;
-	will-change: background-color;
+  flex-grow: 1;
+  height: 56px;
+  line-height: 56px;
+  padding: 16px;
+  text-align: center;
+  text-decoration: none;
+  color: #000;
+  font-size: 2rem;
+  will-change: background-color;
 }
 
-.app-footer nav a:hover,
-.app-footer nav a:active {
-	background: rgba(0,0,0,0.2);
+#icon-settings {
+  color: #ce7d33;
+  &:hover {
+    color: #b7763a;
+  }
 }
 
-.app-footer nav a.active {
-	background: rgba(0,0,0,0.4);
+#icon-profile {
+  color: #5e7ee2;
+  &:hover {
+    color: #4c68bf;
+  }
+}
+
+#icon-topics {
+  color: #c640ef;
+  &:hover {
+    color: #b039d4;
+  }
+}
+
+#icon-home {
+  color: #4ba5b5;
+  &:hover {
+    color: #368998;
+  }
 }

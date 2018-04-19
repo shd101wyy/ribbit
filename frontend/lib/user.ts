@@ -249,10 +249,10 @@ export class User {
   }
 
   /**
-   * 
-   * @param userAddress 
-   * @param param1 
-   * @param cb 
+   *
+   * @param userAddress
+   * @param param1
+   * @param cb
    */
   public async getFeedsFromUser(
     userAddress: string,
@@ -260,22 +260,25 @@ export class User {
       num = -1, // how many feeds to read?
       blockNumber = 0,
       timestamp = 0,
-      messageHash = '',
+      messageHash = "",
       transactionHash = null
     },
     cb: (done: boolean, offset?: number, transactionInfo?: any) => void
   ) {
     if (!timestamp) {
       let currentFeedInfo = await new Promise((resolve, reject) => {
-        this.contractInstance.getCurrentFeedInfo(userAddress, (error, result) => {
-          if (error) {
-            return reject(error);
-          } else {
-            return resolve(result);
+        this.contractInstance.getCurrentFeedInfo(
+          userAddress,
+          (error, result) => {
+            if (error) {
+              return reject(error);
+            } else {
+              return resolve(result);
+            }
           }
-        });
+        );
       });
-  
+
       blockNumber = currentFeedInfo[0].toNumber();
       timestamp = currentFeedInfo[1].toNumber();
       messageHash = this.web3.toHex(currentFeedInfo[2]);

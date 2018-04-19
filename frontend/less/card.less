@@ -1,158 +1,159 @@
 // out: false
 
 .card {
-    background-color: white;
-    box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
-    color: #4a4a4a;
-    max-width: 100%;
-    position: relative;
-    width: 600px;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 12px 24px 24px;
-  
-    .user-panel {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      margin-bottom: 12px;
-  
-      .profile-image {
-        width: 48px;
-        height: 48px;
-        background-size: cover;
-        background-position: center;      
-        border-radius: 50%;      
-      }
-  
-      .name {
-        margin: 0 12px;
-        margin-right: 6px;      
-        font-weight: 800;
-        font-size: 1.1rem;
-      }
-  
-      .userid {
-        color: #8590a6;
-        font-size: 0.9rem;
-        &:before {
-          content: '@'
-        }
-      }
-  
-      .postfix {
-        color: #8590a6;
-        font-size: 0.9rem;
-        &:before {
-          content: '_'
-        }
-      }
-  
-      .action {
-        font-size: 0.9rem;
-        color: #8590a6;
-        margin-left: 12px;      
-  
-        &:before {
-          content: "\B7";
-          margin-right: 12px;
-        }
-      }
-  
-      .create-time {
-        font-size: 0.9rem;
-        margin-left: 12px;
-        color: #8590a6;
-  
-        &:before {
-          content: "\B7";
-          margin-right: 6px;
-        }
-      }
-    }
-  
-    .content-panel {
-      .cover {
-        width: 100%;
-        height: 126px;
-        background-size: cover;
-        background-position: center;
-        border-radius: 4px;
-      }
-      .title {
-        font-size: 1.6rem;
-        margin: 12px 0;
-      }
-  
-      // https://codepen.io/martinwolf/pen/qlFdp
-      .summary {
-        display: block; /* Fallback for non-webkit */
-        display: -webkit-box;
-        max-width: 100%;
-        max-height: 4.8rem; /* Fallback for non-webkit */
-        margin: 0 auto;
-        font-size: 1rem;
-        line-height: 1.6rem;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-  
-      .images-panel {
-        &.le-four-images, &.gt-four-images {
-          max-width: 400px;
-        }
+  background-color: white;
+  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  color: #4a4a4a;
+  max-width: 100%;
+  position: relative;
+  width: 600px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 12px 24px 24px;
 
-        &.single-image img {
-          max-width: 100%;
-        }
+  .user-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .profile-image {
+      width: 48px;
+      height: 48px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+    }
+
+    .name {
+      margin: 0 12px;
+      margin-right: 6px;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .userid {
+      color: #8590a6;
+      font-size: 0.9rem;
+      &:before {
+        content: "@";
       }
     }
-  
-    @media screen and (max-width: 500px) {
-      padding: 6px;
-  
-      .user-panel {
-        .profile-image {
-          width: 32px;
-          height: 32px;
-        }
-  
-        .name {
-          font-size: 0.8rem;
-        }
-  
-        .userid {
-          font-size: 0.7rem;
-        }
-  
-        .postfix {
-          font-size: 0.7rem;
-          display: none;
-        }
-  
-        .action {
-          margin-left: 6px;        
-          font-size: 0.7rem;
-        }
-  
-        .create-time {
-          font-size: 0.7rem;
-          margin-left: 6px;
-        }
+
+    .postfix {
+      color: #8590a6;
+      font-size: 0.9rem;
+      &:before {
+        content: "_";
       }
-  
-      .content-panel {
-        .summary {
-          font-size: 0.8rem;
-          line-height: 1.2rem;
-          max-height: 3.6rem;
-        }
+    }
+
+    .action {
+      font-size: 0.9rem;
+      color: #8590a6;
+      margin-left: 12px;
+
+      &:before {
+        content: "\B7";
+        margin-right: 12px;
       }
-  
-      .images-panel {
-        padding: 6px;
+    }
+
+    .create-time {
+      font-size: 0.9rem;
+      margin-left: 12px;
+      color: #8590a6;
+
+      &:before {
+        content: "\B7";
+        margin-right: 6px;
       }
     }
   }
+
+  .content-panel {
+    .cover {
+      width: 100%;
+      height: 126px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 4px;
+    }
+    .title {
+      font-size: 1.6rem;
+      margin: 12px 0;
+    }
+
+    // https://codepen.io/martinwolf/pen/qlFdp
+    .summary {
+      display: block; /* Fallback for non-webkit */
+      display: -webkit-box;
+      max-width: 100%;
+      max-height: 4.8rem; /* Fallback for non-webkit */
+      margin: 0 auto;
+      font-size: 1rem;
+      line-height: 1.6rem;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .images-panel {
+      &.le-four-images,
+      &.gt-four-images {
+        max-width: 400px;
+      }
+
+      &.single-image img {
+        max-width: 100%;
+      }
+    }
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 6px;
+
+    .user-panel {
+      .profile-image {
+        width: 32px;
+        height: 32px;
+      }
+
+      .name {
+        font-size: 0.8rem;
+      }
+
+      .userid {
+        font-size: 0.7rem;
+      }
+
+      .postfix {
+        font-size: 0.7rem;
+        display: none;
+      }
+
+      .action {
+        margin-left: 6px;
+        font-size: 0.7rem;
+      }
+
+      .create-time {
+        font-size: 0.7rem;
+        margin-left: 6px;
+      }
+    }
+
+    .content-panel {
+      .summary {
+        font-size: 0.8rem;
+        line-height: 1.2rem;
+        max-height: 3.6rem;
+      }
+    }
+
+    .images-panel {
+      padding: 6px;
+    }
+  }
+}

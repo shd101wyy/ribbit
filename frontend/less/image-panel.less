@@ -1,50 +1,50 @@
 // out: false
 
 .images-panel {
-    padding: 12px 0;
-  
-    .image {
-      background-size: cover;
-      background-position: center;
-    }
-  
-    &.le-four-images {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-  
-      .image-wrapper {
-        width: 50%;
-        position: relative;
-        padding: 3px;
-  
-        .image {
-          width: 100%;
-          height: 0;
-          padding-bottom: 100%;
-        }
+  padding: 12px 0;
+
+  .image {
+    background-size: cover;
+    background-position: center;
+  }
+
+  &.le-four-images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .image-wrapper {
+      width: 50%;
+      position: relative;
+      padding: 3px;
+
+      .image {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%;
       }
-    }
-  
-    &.gt-four-images {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-  
-      .image-wrapper {
-        width: 33.333333%;
-        position: relative;
-        padding: 3px;
-  
-        .image {
-          width: 100%;
-          height: 0;
-          padding-bottom: 100%;
-        }
-      }
-    }
-  
-    @media screen and (max-width: 500px) {
-      padding: 6px 0;    
     }
   }
+
+  &.gt-four-images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .image-wrapper {
+      width: 33.333333%;
+      position: relative;
+      padding: 3px;
+
+      .image {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%;
+      }
+    }
+  }
+
+  @media screen and (max-width: 500px) {
+    padding: 6px 0;
+  }
+}

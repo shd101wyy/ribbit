@@ -11,9 +11,18 @@ export default class Footer extends Component<Props, State> {
     return (
       <div className="app-footer">
         <nav>
-          <Link to="/">Home</Link>
-          <Link to="/">Topic</Link>
-          <Link to="/settings">Settings</Link>
+          <Link to="/settings" id="icon-settings">
+            <i className="fas fa-cog" />
+          </Link>
+          <Link to="/" id="icon-profile">
+            <i className="fas fa-user-circle" />
+          </Link>
+          <Link to="/topics" id="icon-topics">
+            <i className="fab fa-slack-hash" />
+          </Link>
+          <Link to="/" id="icon-home">
+            <i className="fas fa-home" />
+          </Link>
         </nav>
       </div>
     );

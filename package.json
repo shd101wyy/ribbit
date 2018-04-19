@@ -52,7 +52,7 @@
     "frontend:dev": "./node_modules/.bin/webpack --config webpack.config.js  --mode development --watch",
     "frontend:build": "./node_modules/.bin/webpack --config webpack.config.js  --mode production",
     "server:start": "http-server ./dist -p 12345",
-    "format": "prettier --write --ignore-path .gitignore \"{.,frontend/**}/{*.{js,ts,tsx},*.md,ts*.json}\""
+    "format": "prettier --write --ignore-path .gitignore \"{.,frontend/**}/{*.{js,ts,tsx,less},*.md,ts*.json}\""
   },
   "repository": {
     "type": "git",

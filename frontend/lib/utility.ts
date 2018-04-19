@@ -10,15 +10,15 @@ const md = new MarkdownIt({
   breaks: true
 });
 
-export function compressString(s:string) {
+export function compressString(s: string) {
   return LZString.compressToUTF16(s);
 }
 
-export function decompressString(s:string) {
+export function decompressString(s: string) {
   return LZString.decompressFromUTF16(s);
 }
 
-export function renderMarkdown(markdown: string):string {
+export function renderMarkdown(markdown: string): string {
   return md.render(markdown);
 }
 
