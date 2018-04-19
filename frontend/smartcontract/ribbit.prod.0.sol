@@ -2,7 +2,7 @@ pragma solidity ^0.4.0;
 // https://medium.com/daox/three-methods-to-transfer-funds-in-ethereum-by-means-of-solidity-5719944ed6e9
 
 contract Ribbit {
-    address owner;
+    address public owner;
     address public previousContractAddress; 
     /**
      * 0x0 => earnings
@@ -27,7 +27,7 @@ contract Ribbit {
     mapping (bytes32 => uint[3]) public currentTagInfoByTimeMap;
     mapping (bytes32 => uint[3]) public currentTagInfoByTrendMap;
 
-    function Decent(address previousContractAddr) public {
+    constructor(address previousContractAddr) public {
         owner = msg.sender;
         previousContractAddress = previousContractAddr;
     }
