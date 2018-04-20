@@ -10,11 +10,34 @@ const md = new MarkdownIt({
   breaks: true
 });
 
-export function compressString(s: string) {
+export function hexEncode(h: string): string {
+  var hex, i;
+
+  var result = "";
+  for (i = 0; i < h.length; i++) {
+    hex = h.charCodeAt(i).toString(16);
+    result += ("000" + hex).slice(-4);
+  }
+
+  return result;
+}
+
+export function hexDecode(s: string): string {
+  var j;
+  var hexes = s.match(/.{1,4}/g) || [];
+  var back = "";
+  for (j = 0; j < hexes.length; j++) {
+    back += String.fromCharCode(parseInt(hexes[j], 16));
+  }
+
+  return back;
+}
+
+export function compressString(s: string): string {
   return LZString.compressToUTF16(s);
 }
 
-export function decompressString(s: string) {
+export function decompressString(s: string): string {
   return LZString.decompressFromUTF16(s);
 }
 
