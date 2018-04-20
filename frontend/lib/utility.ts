@@ -84,6 +84,9 @@ export async function generateSummaryFromHTML(html: string): Promise<Summary> {
       title = div.children[0].textContent;
       div.children[0].remove();
     }
+  } else if (div.children.length === 1 && div.children[0].tagName === "H1") {
+    summary = div.children[0].textContent;
+    div.children[0].remove();
   }
 
   // Get images

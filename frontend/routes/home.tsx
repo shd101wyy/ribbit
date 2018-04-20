@@ -1,6 +1,8 @@
 import * as React from "react";
 
 import { User } from "../lib/user";
+import { FeedInfo } from "../lib/feed";
+
 import {
   Summary,
   decompressString,
@@ -18,7 +20,7 @@ interface Props {
 interface State {
   showEditPanel: boolean;
   msg: string;
-  feeds: Summary[];
+  feeds: FeedInfo[];
   loading: boolean;
 }
 export default class Home extends React.Component<Props, State> {
@@ -56,14 +58,17 @@ export default class Home extends React.Component<Props, State> {
             return this.setState({ loading: false });
           }
           const message = decompressString(
-            transactionInfo.decode.params[2].value
+            transactionInfo.decodedInputData.params[2].value
           );
-          console.log(message);
+          // console.log(message);
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message)
           );
           const feeds = this.state.feeds;
-          feeds.push(summary);
+          feeds.push({
+            summary,
+            transactionInfo
+          });
           this.forceUpdate();
         }
       );
@@ -84,8 +89,8 @@ export default class Home extends React.Component<Props, State> {
           <h1>Using {user.getNetworkName()}</h1>
           <p>Your address {user.coinbase}</p>
           <div className="cards">
-            {this.state.feeds.map((feed, index) => (
-              <Card key={index} summary={feed} />
+            {this.state.feeds.map((feedInfo, index) => (
+              <Card key={index} feedInfo={feedInfo} />
             ))}
             <p id="feed-footer">
               {" "}

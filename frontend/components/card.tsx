@@ -3,10 +3,12 @@ import { Component } from "react";
 
 import ImagesPanel from "./images-panel";
 
-import { Summary } from "../lib/utility";
+import { FeedInfo } from "../lib/feed";
+import { formatDate } from "../lib/utility";
+import { getTransactionCreationTimestamp } from "../lib/transaction";
 
 interface Props {
-  summary: Summary;
+  feedInfo: FeedInfo;
 }
 interface State {}
 
@@ -18,6 +20,11 @@ export default class Card extends Component<Props, State> {
   }
 
   render() {
+    if (!this.props.feedInfo) {
+      return null;
+    }
+    const summary = this.props.feedInfo.summary;
+    const transactionInfo = this.props.feedInfo.transactionInfo;
     const userPanel = (
       <div className="user-panel">
         <div
@@ -31,29 +38,31 @@ export default class Card extends Component<Props, State> {
         <div className="postfix">c862b4eel</div>
         <div className="action">post feed</div>
         <div className="create-time">
-          <span> 1 hour ago</span>
+          <span>
+            {formatDate(getTransactionCreationTimestamp(transactionInfo))}
+          </span>
         </div>
       </div>
     );
 
-    if (this.props.summary.title) {
+    if (summary.title) {
       // Article
       return (
         <div className="card">
           {userPanel}
           <div className="content-panel">
-            {this.props.summary.images.length ? (
+            {summary.images.length ? (
               <div
                 className="cover"
                 style={{
-                  backgroundImage: `url("${this.props.summary.images[0]}")`
+                  backgroundImage: `url("${summary.images[0]}")`
                 }}
               />
             ) : null}
-            <div className="title">{this.props.summary.title}</div>
+            <div className="title">{summary.title}</div>
             <div
               className="summary"
-              dangerouslySetInnerHTML={{ __html: this.props.summary.summary }}
+              dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
           </div>
           <div className="button-group" />
@@ -67,9 +76,9 @@ export default class Card extends Component<Props, State> {
           <div className="content-panel">
             <div
               className="summary"
-              dangerouslySetInnerHTML={{ __html: this.props.summary.summary }}
+              dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
-            <ImagesPanel images={this.props.summary.images} />
+            <ImagesPanel images={summary.images} />
           </div>
         </div>
       );

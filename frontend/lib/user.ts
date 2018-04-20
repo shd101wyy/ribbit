@@ -4,23 +4,8 @@ import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
 import { compressString, hexEncode } from "./utility";
-
+import { TransactionInfo } from "./transaction";
 abiDecoder.addABI(abiArray);
-
-export interface TransactionInfo {
-  hash: string;
-  nouce: number;
-  blockHash: string;
-  blockNumber: number;
-  transactionIndex: number;
-  from: string;
-  to: string;
-  value: any; // BigNumber
-  gasPrice: any; // BigNumber
-  gas: number;
-  input: string;
-  decodedInputData?: any;
-}
 
 export class User {
   public web3;
@@ -173,21 +158,24 @@ export class User {
    * @param transactionHash
    */
   public async getTransactionInfo(
-    userAddress: string,
+    userAddress: string = "",
     blockNumber: number,
     messageHash: string,
     transactionHash?: string
   ): Promise<TransactionInfo> {
+    // console.log("userAddress: ", userAddress)
+    // console.log("blockNumber: ", blockNumber)
+    // console.log("messageHash: ", messageHash)
+    // console.log("transactionHash: ", transactionHash)
     const validateTransaction = (transaction: any) => {
       if (userAddress && userAddress !== transaction.from) {
         return null;
       }
       const input = transaction.input;
       const decodedInputData = abiDecoder.decodeMethod(input);
-      if (Object.keys(decodedInputData).length === 0) {
+      if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
-        console.log("@1 decodedInputData: ", decodedInputData);
         const messageHash2 = this.web3.toHex(
           this.web3.toBigNumber(decodedInputData.params[3].value)
         );
@@ -297,9 +285,10 @@ export class User {
 
   /**
    *
-   * @param tag hex string of tag.
+   * @param tag original string of tag.
    */
   public async getNewestFeedTransactionFromTagByTime(tag: string) {
+    tag = this.formatTag(tag);
     let currentFeedInfo = await new Promise((resolve, reject) => {
       this.contractInstance.getCurrentTagInfoByTime(tag, (error, result) => {
         if (error) {
@@ -320,9 +309,10 @@ export class User {
 
   /**
    *
-   * @param tag hex string of tag.
+   * @param tag original string of tag.
    */
   public async getNewestFeedTransactionFromTagByTrend(tag: string) {
+    tag = this.formatTag(tag);
     let currentFeedInfo = await new Promise((resolve, reject) => {
       this.contractInstance.getCurrentTagInfoByTrend(tag, (error, result) => {
         if (error) {
@@ -337,7 +327,8 @@ export class User {
     return await this.getTransactionInfo(
       "",
       currentFeedBlockNumber,
-      currentFeedHash
+      currentFeedHash,
+      ""
     );
   }
 
@@ -355,7 +346,11 @@ export class User {
       messageHash = "",
       transactionHash = null
     },
-    cb: (done: boolean, offset?: number, transactionInfo?: any) => void
+    cb: (
+      done: boolean,
+      offset?: number,
+      transactionInfo?: TransactionInfo
+    ) => void
   ) {
     if (!blockNumber) {
       let currentFeedInfo = await new Promise((resolve, reject) => {
@@ -375,6 +370,104 @@ export class User {
       messageHash = this.web3.toHex(currentFeedInfo[1]);
       transactionHash = null;
     }
+    return await this.getFeeds({
+      userAddress,
+      blockNumber,
+      messageHash,
+      num,
+      transactionHash,
+      cb
+    });
+  }
+
+  public async getFeedsFromTagByTime(
+    tag: string,
+    {
+      num = -1, // how many feeds to read?
+      blockNumber = 0,
+      messageHash = "",
+      transactionHash = null
+    },
+    cb: (
+      done: boolean,
+      offset?: number,
+      transactionInfo?: TransactionInfo
+    ) => void
+  ) {
+    tag = this.formatTag(tag);
+    let currentFeedInfo = await new Promise((resolve, reject) => {
+      this.contractInstance.getCurrentTagInfoByTime(tag, (error, result) => {
+        if (error) {
+          return reject(error);
+        } else {
+          return resolve(result);
+        }
+      });
+    });
+    blockNumber = currentFeedInfo[0].toNumber();
+    messageHash = this.web3.toHex(currentFeedInfo[1]);
+    return await this.getFeeds({
+      userAddress: "",
+      blockNumber,
+      messageHash,
+      num,
+      transactionHash,
+      cb
+    });
+  }
+
+  public async getFeedsFromTagByTrend(
+    tag: string,
+    {
+      num = -1, // how many feeds to read?
+      blockNumber = 0,
+      messageHash = "",
+      transactionHash = null
+    },
+    cb: (
+      done: boolean,
+      offset?: number,
+      transactionInfo?: TransactionInfo
+    ) => void
+  ) {
+    tag = this.formatTag(tag);
+    let currentFeedInfo = await new Promise((resolve, reject) => {
+      this.contractInstance.getCurrentTagInfoByTrend(tag, (error, result) => {
+        if (error) {
+          return reject(error);
+        } else {
+          return resolve(result);
+        }
+      });
+    });
+    blockNumber = currentFeedInfo[0].toNumber();
+    messageHash = this.web3.toHex(currentFeedInfo[1]);
+    return await this.getFeeds({
+      userAddress: "",
+      blockNumber,
+      messageHash,
+      num,
+      transactionHash,
+      cb
+    });
+  }
+
+  /**
+   * Generic way of gettings feeds.
+   * @param param0
+   */
+  private async getFeeds({
+    userAddress = "",
+    blockNumber = 0,
+    messageHash = "",
+    num = -1,
+    transactionHash = "",
+    cb = (
+      done: boolean,
+      offset?: number,
+      transactionInfo?: TransactionInfo
+    ) => {}
+  }) {
     let offset = 0;
     while (offset > num) {
       // console.log("@@ offset: " + offset);
@@ -388,7 +481,6 @@ export class User {
         return cb(true); // done.
       } else {
         cb(false, offset, transactionInfo);
-        // console.log('Message: ', LZString.decompressFromUTF16(transactionInfo.decode.params[2].value))
         transactionHash = transactionInfo.decodedInputData.params[4].value;
         const receipt = await new Promise((resolve, reject) => {
           this.web3.eth.getTransactionReceipt(
