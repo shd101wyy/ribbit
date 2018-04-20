@@ -10,6 +10,7 @@ contract Ribbit {
      * 0x2 => dislikes
      * 0x3 => reports
      * 0x4 => comments
+     * 0x5 => reposts
      * 
      * transactionHash => field => value
      */
@@ -56,22 +57,6 @@ contract Ribbit {
     function getMetaDataJSONStringValue(address addr) external constant returns (string) {
         return metaDataJSONStringMap[addr];
     }
-    
-    // Post Feeds 
-    event PostFeedEvent(uint[2] previousFeedTransactionInfo);
-    function postFeed(uint version, uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
-        emit PostFeedEvent(currentFeedInfoMap[msg.sender]);
-        uint blockNumber = block.number;
-        currentFeedInfoMap[msg.sender][0] = blockNumber;
-        currentFeedInfoMap[msg.sender][1] = messageHash;
-        for (uint i = 0; i < tags.length; i++) {
-            currentTagInfoByTimeMap[tags[i]][0] = blockNumber;
-            currentTagInfoByTimeMap[tags[i]][1] = messageHash;
-            
-            currentTagInfoByTrendMap[tags[i]][0] = blockNumber;
-            currentTagInfoByTrendMap[tags[i]][1] = messageHash;
-        }
-    }
     function getCurrentFeedInfo(address authorAddress) external constant returns (uint[2]) {
         return currentFeedInfoMap[authorAddress];
     }
@@ -85,19 +70,94 @@ contract Ribbit {
         return currentCommentInfoMap[parentTransactionHash];
     }
     
-    // Post Comments
-    event PostCommentEvent(uint[2] previousCommentInfo);
-    function postComment(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousCommentTransactionHash, bytes32[] tags) external {
-        emit PostCommentEvent(currentCommentInfoMap[parentTransactionHash]);
-        currentCommentInfoMap[parentTransactionHash][0] = block.number;   
-        currentCommentInfoMap[parentTransactionHash][1] = messageHash;
-        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of comments
+    // Post Feed 
+    event PostEvent(uint[2] previousFeedTransactionInfo);
+    event SavePreviousTagInfoByTimeEvent(bytes32 tag, uint[2] previousTagInfoByTime);
+    event SavePreviousTagInfoByTrendEvent(bytes32 tag, uint[2] previousTagInfoByTrend);
+    function post(uint version, uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
+        emit PostEvent(currentFeedInfoMap[msg.sender]);
+        uint blockNumber = block.number;
+        currentFeedInfoMap[msg.sender][0] = blockNumber;
+        currentFeedInfoMap[msg.sender][1] = messageHash;
+
+        bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
-            currentTagInfoByTrendMap[tags[i]][0] = parentTransactionBlockNumber;
-            currentTagInfoByTrendMap[tags[i]][1] = parentTransactionMessageHash;
+            tag = tags[i];
+            emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
+            currentTagInfoByTimeMap[tag][0] = blockNumber;
+            currentTagInfoByTimeMap[tag][1] = messageHash;
+            
+            emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+            currentTagInfoByTrendMap[tag][0] = blockNumber;
+            currentTagInfoByTrendMap[tag][1] = messageHash;
+        }
+    }
+
+    // Repost Feed
+    event RepostEvent(uint[2] previousFeedTransactionInfo);
+    function repost(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
+        emit RepostEvent(currentFeedInfoMap[msg.sender]);
+        // We can see the sender of feedInfo is not from msg.sender
+        // So this is a repost.
+        currentFeedInfoMap[msg.sender][0] = parentTransactionBlockNumber;
+        currentFeedInfoMap[msg.sender][1] = parentTransactionMessageHash;
+        state[parentTransactionHash][5] = state[parentTransactionHash][5] + 1; // increase number of reposts.
+
+        bytes32 tag;
+        for (uint i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
+                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
+                currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
+            }
         }
     }
     
+    // Make comment
+    event CommentEvent(uint[2] previousCommentInfo);
+    function comment(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousCommentTransactionHash, bytes32[] tags) external {
+        emit CommentEvent(currentCommentInfoMap[parentTransactionHash]);
+        currentCommentInfoMap[parentTransactionHash][0] = block.number;   
+        currentCommentInfoMap[parentTransactionHash][1] = messageHash;
+        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of comments
+        
+        bytes32 tag;
+        for (uint i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
+                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
+                currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
+            }
+        }
+    }
+
+    // Repost and Comment
+    event RepostAndCommentEvent(uint[2] previousFeedTransactionInfo, uint[2] previousCommentInfo);
+    function repostAndComment(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousCommentTransactionHash, bytes32[] tags) external {
+        emit RepostAndCommentEvent(currentFeedInfoMap[msg.sender], currentCommentInfoMap[parentTransactionHash]);
+        uint blockNumber = block.number;
+        
+        currentCommentInfoMap[parentTransactionHash][0] = blockNumber;   
+        currentCommentInfoMap[parentTransactionHash][1] = messageHash;
+        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of comments
+    
+        currentFeedInfoMap[msg.sender][0] = blockNumber;
+        currentFeedInfoMap[msg.sender][1] = messageHash;
+        state[parentTransactionHash][5] = state[parentTransactionHash][5] + 1; // increase number of reposts.
+
+        bytes32 tag;
+        for (uint i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
+                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
+                currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
+            }
+        }
+    }
+
     // Send ether 
     function sendEther(bytes32 transactionHash, address postAutherAddress, uint amount1, address appAuthorAddress, uint amount2) payable external {
         state[transactionHash][0] = state[transactionHash][0] + amount1 + amount2;
