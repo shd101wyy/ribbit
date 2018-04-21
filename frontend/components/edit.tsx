@@ -70,7 +70,7 @@ export default class Edit extends Component<Props, State> {
     return (
       <div className="edit">
         {this.state.previewIsOn ? (
-          <Preview markdown={this.state.code} />
+          <Preview markdown={this.state.code} user={this.props.user} />
         ) : (
           <CodeMirror
             value={this.state.code}

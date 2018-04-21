@@ -129,7 +129,11 @@ export async function generateSummaryFromHTML(html: string): Promise<Summary> {
 
   // get summary
   let plainSummary = "";
-  const maxCharacters = 160;
+  const maxCharacters = 240;
+  const imgElements = [].slice.call(div.getElementsByTagName("img"));
+  for (let i = 0, length = imgElements.length; i < length; i++) {
+    imgElements[i].remove();
+  }
   for (let i = 0; i < div.children.length; i++) {
     const elem = div.children[i];
     if (elem.tagName !== "P") continue;

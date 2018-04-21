@@ -3,7 +3,7 @@ import { Component } from "react";
 
 import ImagesPanel from "./images-panel";
 
-import { FeedInfo } from "../lib/feed";
+import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
 
@@ -25,22 +25,25 @@ export default class Card extends Component<Props, State> {
     }
     const summary = this.props.feedInfo.summary;
     const transactionInfo = this.props.feedInfo.transactionInfo;
+    const userInfo = this.props.feedInfo.userInfo;
     const userPanel = (
       <div className="user-panel">
         <div
           className="profile-image"
           style={{
-            backgroundImage: `url("https://avatars3.githubusercontent.com/u/1908863?s=460&v=4")`
+            backgroundImage: `url("${userInfo.avatar}")`
           }}
         />
-        <div className="name">Yiyi Wang</div>
-        <div className="userid">shd101wyy</div>
-        <div className="postfix">c862b4eel</div>
+        <div className="name">
+          {userInfo.displayName ? userInfo.displayName : "Anonymous"}
+        </div>
+        <div className="user-address">
+          {userInfo.address.slice(0, 6) + "..."}
+        </div>
+        {/* <div className="postfix">c862b4eel</div> */}
         <div className="action">post feed</div>
         <div className="create-time">
-          <span>
-            {formatDate(getTransactionCreationTimestamp(transactionInfo))}
-          </span>
+          <span>{formatFeedCreationTime(this.props.feedInfo)}</span>
         </div>
       </div>
     );

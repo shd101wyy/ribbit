@@ -6,14 +6,18 @@ import Card from "./card";
 
 import * as utility from "../lib/utility";
 import { Summary } from "../lib/utility";
+import { User } from "../lib/user";
+import { FeedInfo } from "../lib/feed";
+import { generateFakeTransactionInfo } from "../lib/transaction";
 
 interface Props {
   markdown: string;
+  user: User;
 }
 
 interface State {
   html: string;
-  summary: Summary;
+  feedInfo: FeedInfo;
 }
 
 export default class Preview extends Component<Props, State> {
@@ -21,12 +25,7 @@ export default class Preview extends Component<Props, State> {
     super(props);
     this.state = {
       html: "",
-      summary: {
-        title: "",
-        summary: "",
-        images: [],
-        tags: []
-      }
+      feedInfo: null
     };
   }
 
@@ -37,21 +36,34 @@ export default class Preview extends Component<Props, State> {
   private renderContent = async () => {
     const html = utility.renderMarkdown(this.props.markdown);
     const summary = await utility.generateSummaryFromHTML(html);
-
-    console.log(html, summary);
+    const userInfo = await this.props.user.getUserInfo(
+      this.props.user.coinbase
+    );
+    const transactionInfo = generateFakeTransactionInfo();
 
     this.setState({
       html,
-      summary
+      feedInfo: {
+        summary,
+        userInfo,
+        transactionInfo
+      }
     });
   };
 
   render() {
-    return (
-      <div className="preview">
-        <Card summary={this.state.summary} />
-        <Article html={this.state.html} />
-      </div>
-    );
+    if (!this.state.feedInfo) {
+      return null;
+    } else {
+      return (
+        <div className="preview">
+          <Card feedInfo={this.state.feedInfo} />
+          {// Only render article if it is article
+          this.state.feedInfo.summary.title ? (
+            <Article html={this.state.html} />
+          ) : null}
+        </div>
+      );
+    }
   }
 }

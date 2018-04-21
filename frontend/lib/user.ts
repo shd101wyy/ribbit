@@ -5,7 +5,33 @@ import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
 import { compressString, hexEncode } from "./utility";
 import { TransactionInfo } from "./transaction";
+import * as Identicon from "identicon.js";
+
 abiDecoder.addABI(abiArray);
+
+export interface UserInfo {
+  /**
+   * User displayName.
+   */
+  displayName: string;
+  /**
+   * User profile avatar image url.
+   */
+  avatar: string;
+  /**
+   * User profile cover image url.
+   */
+  cover: string;
+  /**
+   * User bio.
+   */
+  bio: string;
+
+  /**
+   * user address
+   */
+  address: string;
+}
 
 export class User {
   public web3;
@@ -130,7 +156,7 @@ export class User {
     // => 0x40091f65172c76c5daa276c66cbd1f175fda12d9bd20b842007feed78757a089
 
     return await new Promise((resolve, reject) => {
-      this.contractInstance.postFeed(
+      this.contractInstance.post(
         0, // version
         currentTimestamp, // timestamp
         compressedMessage, // message
@@ -513,5 +539,34 @@ export class User {
         }
       }
     }
+  }
+
+  /**
+   * Load user metadata
+   * @param address
+   */
+  public async getUserInfo(address: string): Promise<UserInfo> {
+    const userInfo = (await new Promise((resolve, reject) => {
+      this.contractInstance.getMetaDataJSONStringValue(
+        address,
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          } else {
+            try {
+              return resolve(JSON.parse(result) || {});
+            } catch (error) {
+              return resolve({});
+            }
+          }
+        }
+      );
+    })) as UserInfo;
+    if (!userInfo.avatar) {
+      userInfo.avatar =
+        "data:image/png;base64," + new Identicon(address, 80).toString();
+    }
+    userInfo.address = address;
+    return userInfo;
   }
 }

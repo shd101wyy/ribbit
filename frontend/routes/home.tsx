@@ -64,10 +64,14 @@ export default class Home extends React.Component<Props, State> {
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message)
           );
+
+          const userInfo = await user.getUserInfo(user.coinbase);
+
           const feeds = this.state.feeds;
           feeds.push({
             summary,
-            transactionInfo
+            transactionInfo,
+            userInfo
           });
           this.forceUpdate();
         }

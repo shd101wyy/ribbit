@@ -111,7 +111,7 @@ contract Ribbit {
             currentTagInfoByTimeMap[tag][0] = blockNumber;
             currentTagInfoByTimeMap[tag][1] = messageHash;
             
-            if (tag >> 20 != 0x0) { // this tag is not a user address.
+            if (tag >> 160 != 0x0) { // this tag is not a user address.
                 emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
                 currentTagInfoByTrendMap[tag][0] = blockNumber;
                 currentTagInfoByTrendMap[tag][1] = messageHash;
@@ -152,7 +152,7 @@ contract Ribbit {
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
-            if (tag >> 20 == 0) { // it's a user address
+            if (tag >> 160 == 0) { // it's a user address
                 emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
@@ -181,7 +181,7 @@ contract Ribbit {
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
-            if (tag >> 20 == 0) { // it's a user address
+            if (tag >> 160 == 0) { // it's a user address
                 emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
