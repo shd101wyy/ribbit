@@ -527,7 +527,7 @@ export class User {
         // TODO: tags
         const decodedLogs = abiDecoder.decodeLogs(logs);
         const PostFeedEvent = decodedLogs.filter(
-          x => x.name === "PostFeedEvent"
+          x => x.name === "PostEvent"
         )[0];
         if (!PostFeedEvent) {
           return cb(true); // done
