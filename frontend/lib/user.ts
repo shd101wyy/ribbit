@@ -3,7 +3,7 @@ import { sha256 } from "js-sha256";
 import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
-import { compressString, hexEncode } from "./utility";
+import { compressString, hexEncode, decompressString } from "./utility";
 import { TransactionInfo } from "./transaction";
 import * as Identicon from "identicon.js";
 
@@ -11,9 +11,9 @@ abiDecoder.addABI(abiArray);
 
 export interface UserInfo {
   /**
-   * User displayName.
+   * User name.
    */
-  displayName: string;
+  name: string;
   /**
    * User profile avatar image url.
    */
@@ -554,7 +554,7 @@ export class User {
             return reject(error);
           } else {
             try {
-              return resolve(JSON.parse(result) || {});
+              return resolve(JSON.parse(decompressString(result)) || {});
             } catch (error) {
               return resolve({});
             }
@@ -566,8 +566,24 @@ export class User {
       userInfo.avatar =
         "data:image/png;base64," + new Identicon(address, 80).toString();
     }
-    userInfo.displayName = userInfo.displayName || "Anonymous";
+    userInfo.name = userInfo.name || "Anonymous";
     userInfo.address = address;
     return userInfo;
+  }
+
+  public async setUserMetadata(userInfo: UserInfo) {
+    delete userInfo["address"]; // no need to save address.
+    return await new Promise((resolve, reject) => {
+      this.contractInstance.setMetaDataJSONStringMap(
+        compressString(JSON.stringify(userInfo)),
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          } else {
+            return resolve(result);
+          }
+        }
+      );
+    });
   }
 }

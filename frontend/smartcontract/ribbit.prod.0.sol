@@ -34,7 +34,7 @@ contract Ribbit {
 
     /**
      * User metadata.
-     * For example, user displayName, profileImage, cover...
+     * For example, user name, profileImage, cover...
      */
     mapping (address => string) public metaDataJSONStringMap;  
     
@@ -73,7 +73,7 @@ contract Ribbit {
     function getState(bytes32 transactionHash, uint field) external constant returns (uint)  {
         return state[transactionHash][field];
     }
-    function setMetaDataJSONStringMap(string value) external {
+    function setMetaDataJSONStringValue(string value) external {
         metaDataJSONStringMap[msg.sender] = value;
     }
     function getMetaDataJSONStringValue(address addr) external constant returns (string) {

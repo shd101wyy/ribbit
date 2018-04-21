@@ -35,7 +35,7 @@ export default class Card extends Component<Props, State> {
           }}
         />
         <div className="name">
-          {userInfo.displayName ? userInfo.displayName : "Anonymous"}
+          {userInfo.name ? userInfo.name : "Anonymous"}
         </div>
         <div className="user-address">
           {userInfo.address.slice(0, 6) + "..."}
