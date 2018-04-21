@@ -8,6 +8,7 @@ import { User } from "./lib/user";
 import "./less/entry.less";
 
 import Home from "./routes/home";
+import Footer from "./components/footer";
 
 interface Props {}
 interface State {

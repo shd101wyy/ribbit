@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { User } from "../lib/user";
+import { User, UserInfo } from "../lib/user";
 import { FeedInfo } from "../lib/feed";
 
 import {
@@ -13,6 +13,8 @@ import {
 import Footer from "../components/footer";
 import Edit from "../components/edit";
 import Card from "../components/card";
+import ProfileCard from "../components/profile-card";
+import { userInfo } from "os";
 
 interface Props {
   user: User;
@@ -22,6 +24,7 @@ interface State {
   msg: string;
   feeds: FeedInfo[];
   loading: boolean;
+  userInfo: UserInfo;
 }
 export default class Home extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -30,17 +33,22 @@ export default class Home extends React.Component<Props, State> {
       showEditPanel: false,
       msg: "",
       feeds: [],
-      loading: false
+      loading: false,
+      userInfo: null
     };
   }
 
   componentDidMount() {
-    this.showUserFeeds(this.props.user);
+    const user = this.props.user;
+    this.showUserFeeds(user);
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (this.props.user !== newProps.user) {
       this.showUserFeeds(newProps.user);
+      newProps.user.getUserInfo(newProps.user.coinbase).then(userInfo => {
+        this.setState({ userInfo });
+      });
     }
   }
 
@@ -89,22 +97,24 @@ export default class Home extends React.Component<Props, State> {
       const user = this.props.user;
       return (
         <div className="home">
-          <p>{this.state.msg}</p>
-          <h1>Using {user.getNetworkName()}</h1>
-          <p>Your address {user.coinbase}</p>
-          <div className="cards">
-            {this.state.feeds.map((feedInfo, index) => (
-              <Card key={index} feedInfo={feedInfo} />
-            ))}
-            <p id="feed-footer">
-              {" "}
-              {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
-            </p>
+          <div className="left-panel">
+            <ProfileCard userInfo={this.state.userInfo} />
           </div>
+          <div className="middle-panel">
+            <div className="cards">
+              {this.state.feeds.map((feedInfo, index) => (
+                <Card key={index} feedInfo={feedInfo} />
+              ))}
+              <p id="feed-footer">
+                {" "}
+                {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+              </p>
+            </div>
+          </div>
+          <div className="right-panel" />
           <div className="floating-button" onClick={this.toggleEditPanel}>
             <i className="fa fa-plus" />
           </div>
-          <Footer />
           {this.state.showEditPanel ? (
             <Edit cancel={this.toggleEditPanel} user={this.props.user} />
           ) : null}

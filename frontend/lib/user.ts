@@ -566,6 +566,7 @@ export class User {
       userInfo.avatar =
         "data:image/png;base64," + new Identicon(address, 80).toString();
     }
+    userInfo.displayName = userInfo.displayName || "Anonymous";
     userInfo.address = address;
     return userInfo;
   }
