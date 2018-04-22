@@ -1,3 +1,6 @@
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, createHashHistory } from "history";
 
-export default createBrowserHistory();
+// this will have problem on GitHub pages because of the basename.  
+// export default createBrowserHistory();
+
+export default createHashHistory();
