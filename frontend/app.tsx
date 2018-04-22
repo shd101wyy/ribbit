@@ -23,9 +23,9 @@ class App extends React.Component<Props, State> {
   };
   componentDidMount() {
     if (typeof window["web3"] === "undefined") {
-      alert("metamask not installed");
+      alert("metamask not installed.");
     } else {
-      console.log("metamask installed!");
+      console.log("metamask installed.");
       const web3 = new Web3(window["web3"].currentProvider);
       const user = new User(web3);
       window["web3"] = web3; // override metamask web3.
@@ -33,6 +33,7 @@ class App extends React.Component<Props, State> {
       user
         .initialize()
         .then(() => {
+          console.log('user initialized.')
           this.setState({
             injectWeb3: true,
             user: user

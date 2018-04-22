@@ -40,16 +40,21 @@ export default class Home extends React.Component<Props, State> {
 
   componentDidMount() {
     const user = this.props.user;
-    this.showUserFeeds(user);
+    this.showUserHome(user);
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (this.props.user !== newProps.user) {
-      this.showUserFeeds(newProps.user);
-      newProps.user.getUserInfo(newProps.user.coinbase).then(userInfo => {
-        this.setState({ userInfo });
-      });
+      this.showUserHome(newProps.user);
     }
+  }
+
+  showUserHome(user:User) {
+    if (!user) return;
+    this.showUserFeeds(user);
+    user.getUserInfo(user.coinbase).then(userInfo => {
+      this.setState({ userInfo });
+    });
   }
 
   showUserFeeds(user: User) {
