@@ -138,6 +138,9 @@ export default class Home extends React.Component<Props, State> {
           <div className="right-panel">
             <div className="post-btn-group" >
               <div className="ribbit-btn btn" onClick={this.toggleEditPanel}><i className="fas fa-pen-square"></i>Ribbit</div>
+              <a href="https://github.com/shd101wyy/ribbit" target="_blank">
+                <div className="github-btn btn"><i className="fab fa-github"></i></div>
+              </a>
             </div>
             {/* <AnnouncementCard /> */}
             <div className="topics-card" />
