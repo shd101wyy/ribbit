@@ -1,0 +1,55 @@
+// out: false
+
+// out: false
+
+.followings-card {
+  padding: 0;
+  margin: 0;
+
+  .title {
+    margin: 0;
+    /* margin-bottom: 12px; */
+    padding: 12px 24px 12px;
+    background-color: #53a1af;
+    color: #fff;
+  }
+
+  .following {
+    color: #4e4e4e;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding: 0 12px;
+
+    .name {
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background-size: cover;
+      border-radius: 50%;
+    }
+
+    .name-group {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      margin-left: 12px;
+    }
+
+    .msg {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: pre;
+    }
+
+    &:hover {
+      background-color: #e8e8e8;
+    }
+  }
+}

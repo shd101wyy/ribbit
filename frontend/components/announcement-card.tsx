@@ -9,10 +9,12 @@ export default class AnnouncementCard extends React.Component<Props, State> {
   }
 
   render() {
-    return <div className="announcement-card card">
-      <div className="top-bar">
-        <i className="fas fa-bullhorn"></i>
+    return (
+      <div className="announcement-card card">
+        <div className="top-bar">
+          <i className="fas fa-bullhorn" />
+        </div>
       </div>
-    </div>
+    );
   }
 }

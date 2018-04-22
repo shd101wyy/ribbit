@@ -15,6 +15,8 @@ import Edit from "../components/edit";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
 import AnnouncementCard from "../components/announcement-card";
+import TopicsCard from "../components/topics-card";
+import FollowingsCard from "../components/followings-card";
 import { userInfo } from "os";
 
 interface Props {
@@ -106,7 +108,10 @@ export default class Home extends React.Component<Props, State> {
         <div className="home">
           <div className="left-panel">
             <ProfileCard userInfo={this.state.userInfo} />
-            <div className="friends-card" />
+            <FollowingsCard
+              user={this.props.user}
+              networkId={this.props.networkId}
+            />
           </div>
           <div className="middle-panel">
             <div className="top-bar card">
@@ -136,14 +141,26 @@ export default class Home extends React.Component<Props, State> {
             </div>
           </div>
           <div className="right-panel">
-            <div className="post-btn-group" >
-              <div className="ribbit-btn btn" onClick={this.toggleEditPanel}><i className="fas fa-pen-square"></i>Ribbit</div>
+            <div className="post-btn-group">
+              <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>
+                <i className="fas fa-pen-square" />Ribbit
+              </div>
               <a href="https://github.com/shd101wyy/ribbit" target="_blank">
-                <div className="github-btn btn"><i className="fab fa-github"></i></div>
+                <div className="github-btn btn">
+                  <i className="fab fa-github" />
+                </div>
+              </a>
+              <a
+                href="https://github.com/shd101wyy/ribbit/issues"
+                target="_blank"
+              >
+                <div className="bug-btn github-btn btn">
+                  <i className="fas fa-bug" />
+                </div>
               </a>
             </div>
             {/* <AnnouncementCard /> */}
-            <div className="topics-card" />
+            <TopicsCard />
           </div>
           {this.state.showEditPanel ? (
             <Edit cancel={this.toggleEditPanel} user={this.props.user} />
