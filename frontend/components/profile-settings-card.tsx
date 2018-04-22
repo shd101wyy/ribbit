@@ -17,6 +17,8 @@ interface State {
 }
 
 export default class ProfileSettingsCard extends React.Component<Props, State> {
+  private cm: HTMLElement;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -32,14 +34,22 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     user
       .getUserInfo(user.coinbase)
       .then(userInfo => {
-        this.setState({
-          name: userInfo.name,
-          avatar: userInfo.avatar.startsWith("data:image")
-            ? ""
-            : userInfo.avatar,
-          cover: userInfo.cover,
-          bio: userInfo.bio || "ribbit, ribbit, ribbit…"
-        });
+        this.setState(
+          {
+            name: userInfo.name,
+            avatar: userInfo.avatar.startsWith("data:image")
+              ? ""
+              : userInfo.avatar,
+            cover: userInfo.cover,
+            bio: userInfo.bio || "ribbit, ribbit, ribbit…"
+          },
+          () => {
+            if (this.cm) {
+              // This is a hack. https://github.com/JedWatson/react-codemirror/issues/121
+              this.cm["codeMirror"].setValue(this.state.bio);
+            }
+          }
+        );
       })
       .catch(error => {
         alert(error);
@@ -62,22 +72,27 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     this.setState({ cover: event.target["value"] });
   };
 
-  publishProfile = event=> {
+  publishProfile = event => {
     const userInfo = {
       name: this.state.name,
       cover: this.state.cover,
       avatar: this.state.avatar,
       bio: this.state.bio,
       address: this.props.user.coinbase
-    }
-    this.props.user.setUserMetadata(userInfo)
-      .then((hash)=> {
-        alert("Published profile to blockchain with transaction hash: " + hash + '\nPlease wait until the transaction finishes.')
+    };
+    this.props.user
+      .setUserMetadata(userInfo)
+      .then(hash => {
+        alert(
+          "Published profile to blockchain with transaction hash: " +
+            hash +
+            "\nPlease wait until the transaction finishes."
+        );
       })
-      .catch((error)=> {
+      .catch(error => {
         alert(error);
-      })
-  }
+      });
+  };
 
   render() {
     const options = {
@@ -123,13 +138,16 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
           <div className="entry markdown-entry">
             <p className="entry-title">Bio (markdown ready): </p>
             <CodeMirror
+              ref={elem => (this.cm = elem)}
               value={this.state.bio}
               onChange={this.updatebio}
               options={options}
             />
           </div>
         </div>
-        <div id="publish-profile" className="btn" onClick={this.publishProfile}>Publish profile to blockchain</div>
+        <div id="publish-profile" className="btn" onClick={this.publishProfile}>
+          Publish profile to blockchain
+        </div>
         <p className="title">Profile preview</p>
         <ProfileCard userInfo={userInfo} />
       </div>

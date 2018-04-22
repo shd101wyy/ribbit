@@ -501,7 +501,9 @@ export class User {
     delete userInfoCopy["address"]; // no need to save address.
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .setMetaDataJSONStringValue(compressString(JSON.stringify(userInfoCopy)))
+        .setMetaDataJSONStringValue(
+          compressString(JSON.stringify(userInfoCopy))
+        )
         .send({ from: this.coinbase })
         .on("error", error => {
           return reject(error);
