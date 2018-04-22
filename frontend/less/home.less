@@ -43,11 +43,11 @@
         justify-content: space-between;
         .icon {
           text-align: center;
-          width: 33.33%;
+          width: 25%;
           padding: 12px;
           font-size: 1.2rem;
           color: #969696;
-  
+
           &:hover {
             cursor: pointer;
             background-color: #e8e8e8;
@@ -67,27 +67,30 @@
     }
   }
 
-  .floating-button {
-    background-color: #f44336;
-    color: #fff;
-    /* padding: 12px; */
-    width: 48px;
-    height: 48px;
-    position: fixed;
-    font-size: 16px;
-    border-radius: 50%;
-    text-align: center;
-    right: 48px;
-    bottom: 24px;
-    box-shadow: 0px 1px 4px 1px rgba(130, 46, 40, 0.36);
-    cursor: pointer;
+  .right-panel {
+    .post-btn-group {
+      .btn {
+        margin: 16px 0 16px 0;
+        /* width: 100%; */
+        text-align: center;
+        padding: 12px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+  
+      .ribbit-btn {
+        background-color: #74a24b;
+        width: 156px;
+        color: #fff;
 
-    i {
-      color: #fff;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+        i {
+          margin-right: 10px;
+        }
+
+        &:hover {
+          background-color: #6e964a;
+        }
+      }
     }
   }
 

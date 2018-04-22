@@ -10,7 +10,7 @@ import {
   generateSummaryFromHTML,
   renderMarkdown
 } from "../lib/utility";
-import Card from "../components/card";
+import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
 
 interface Props {
@@ -100,7 +100,7 @@ export default class profile extends React.Component<Props, State> {
           <ProfileCard userInfo={this.state.userInfo} />
           <div className="cards">
             {this.state.feeds.map((feedInfo, index) => (
-              <Card key={index} feedInfo={feedInfo} />
+              <FeedCard key={index} feedInfo={feedInfo} />
             ))}
             <p id="feed-footer">
               {" "}

@@ -2,7 +2,7 @@ import * as React from "react";
 import { Component } from "react";
 
 import Article from "./article";
-import Card from "./card";
+import FeedCard from "./feed-card";
 
 import * as utility from "../lib/utility";
 import { Summary } from "../lib/utility";
@@ -57,7 +57,7 @@ export default class Preview extends Component<Props, State> {
     } else {
       return (
         <div className="preview">
-          <Card feedInfo={this.state.feedInfo} />
+          <FeedCard feedInfo={this.state.feedInfo} />
           {// Only render article if it is article
           this.state.feedInfo.summary.title ? (
             <Article html={this.state.html} />

@@ -12,8 +12,9 @@ import {
 
 import Footer from "../components/footer";
 import Edit from "../components/edit";
-import Card from "../components/card";
+import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
+import AnnouncementCard from "../components/announcement-card";
 import { userInfo } from "os";
 
 interface Props {
@@ -105,21 +106,28 @@ export default class Home extends React.Component<Props, State> {
         <div className="home">
           <div className="left-panel">
             <ProfileCard userInfo={this.state.userInfo} />
+            <div className="friends-card" />
           </div>
           <div className="middle-panel">
             <div className="top-bar card">
               <div className="search-box-wrapper">
-                <input className="search-box" placeholder={"Paste user address here or the topic string to start searching"} />
+                <input
+                  className="search-box"
+                  placeholder={
+                    "Paste user address here or the topic string to start searching"
+                  }
+                />
               </div>
               <div className="icon-groups">
                 <i className="icon fas fa-home selected" />
                 <i className="icon fab fa-slack-hash" />
+                <i className="icon fas fa-bell" />
                 <i className="icon fas fa-cog" />
               </div>
             </div>
             <div className="cards">
               {this.state.feeds.map((feedInfo, index) => (
-                <Card key={index} feedInfo={feedInfo} />
+                <FeedCard key={index} feedInfo={feedInfo} />
               ))}
               <p id="feed-footer">
                 {" "}
@@ -127,9 +135,12 @@ export default class Home extends React.Component<Props, State> {
               </p>
             </div>
           </div>
-          <div className="right-panel" />
-          <div className="floating-button" onClick={this.toggleEditPanel}>
-            <i className="fa fa-plus" />
+          <div className="right-panel">
+            <div className="post-btn-group" >
+              <div className="ribbit-btn btn" onClick={this.toggleEditPanel}><i className="fas fa-pen-square"></i>Ribbit</div>
+            </div>
+            {/* <AnnouncementCard /> */}
+            <div className="topics-card" />
           </div>
           {this.state.showEditPanel ? (
             <Edit cancel={this.toggleEditPanel} user={this.props.user} />

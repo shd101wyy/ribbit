@@ -12,7 +12,7 @@ interface Props {
 }
 interface State {}
 
-export default class Card extends Component<Props, State> {
+export default class FeedCard extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
