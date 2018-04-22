@@ -107,6 +107,16 @@ export default class Home extends React.Component<Props, State> {
             <ProfileCard userInfo={this.state.userInfo} />
           </div>
           <div className="middle-panel">
+            <div className="top-bar card">
+              <div className="search-box-wrapper">
+                <input className="search-box" placeholder={"Paste user address here or the topic string to start searching"} />
+              </div>
+              <div className="icon-groups">
+                <i className="icon fas fa-home selected" />
+                <i className="icon fab fa-slack-hash" />
+                <i className="icon fas fa-cog" />
+              </div>
+            </div>
             <div className="cards">
               {this.state.feeds.map((feedInfo, index) => (
                 <Card key={index} feedInfo={feedInfo} />
