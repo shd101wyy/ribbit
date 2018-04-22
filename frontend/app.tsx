@@ -9,6 +9,7 @@ import { User } from "./lib/user";
 import "./less/entry.less";
 
 import Home from "./routes/home";
+import Profile from "./routes/profile";
 import Footer from "./components/footer";
 
 interface Props {}
@@ -33,11 +34,18 @@ class App extends React.Component<Props, State> {
       user
         .initialize()
         .then(() => {
-          console.log('user initialized.')
-          this.setState({
-            injectWeb3: true,
-            user: user
-          });
+          console.log("user initialized.");
+          this.setState(
+            {
+              injectWeb3: true,
+              user: user
+            },
+            () => {
+              if (history.location.pathname === "/") {
+                history.push(`/${user.networkId}/`);
+              }
+            }
+          );
         })
         .catch(error => {
           alert(error);
@@ -45,12 +53,41 @@ class App extends React.Component<Props, State> {
     }
   }
   render() {
+    if (!this.state.user) {
+      return (
+        <div className="home">
+          <h1 className="title is-1">
+            Please make sure{" "}
+            <a href="https://metamask.io/" target="_blank">
+              MetaMask
+            </a>{" "}
+            is working in your browser.
+          </h1>
+        </div>
+      );
+    }
     return (
       <Router history={history}>
         <div id="router-container">
           <Route
-            path="/"
-            render={props => <Home user={this.state.user} />}
+            path="/:networkId/"
+            render={props => (
+              <Home
+                networkId={props.match.params["networkId"]}
+                user={this.state.user}
+              />
+            )}
+            exact
+          />
+          <Route
+            path="/:networkId/profile/:userAddress"
+            render={props => (
+              <Profile
+                networkId={props.match.params["networkId"]}
+                user={this.state.user}
+                guestUserAddress={props.match.params["userAddress"]}
+              />
+            )}
             exact
           />
         </div>

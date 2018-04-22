@@ -1,0 +1,35 @@
+// out: false
+
+.profile {
+  width: 100%;
+
+  .profile-card .avatar {
+    width: 100px;
+    height: 100px;
+    top: 212px;
+  }
+  .profile-card {
+    .cover {
+      height: 256px;
+    }
+    .name-group {
+      padding-left: 140px;
+      margin-top: -16px;
+      .name {
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  #feed-footer {
+    margin-bottom: 128px;
+    text-align: center;
+    margin-top: 64px;
+    font-size: 1.6rem;
+  }
+  @media screen and (max-width: 500px) {
+    #feed-footer {
+      font-size: 1rem;
+    }
+  }
+}

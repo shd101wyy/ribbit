@@ -1,0 +1,3 @@
+/**
+ * /:networkId/topic/:topic
+ */

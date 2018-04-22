@@ -485,6 +485,9 @@ export class User {
       ) || ({} as UserInfo);
 
     if (!userInfo.avatar) {
+      if (!address) {
+        address = "0xinvalid_address";
+      }
       userInfo.avatar =
         "data:image/png;base64," + new Identicon(address, 80).toString();
     }
@@ -495,8 +498,19 @@ export class User {
 
   public async setUserMetadata(userInfo: UserInfo) {
     delete userInfo["address"]; // no need to save address.
-    return await this.contractInstance.methods
-      .setMetaDataJSONStringValue(compressString(JSON.stringify(userInfo)))
-      .send({ from: this.coinbase });
+    return new Promise((resolve, reject) => {
+      this.contractInstance.methods
+        .setMetaDataJSONStringValue(compressString(JSON.stringify(userInfo)))
+        .send({ from: this.coinbase })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          return resolve(hash);
+        })
+        .on("receipt", receipt => {
+          console.log("finish setUserMetadata: ", receipt);
+        });
+    });
   }
 }

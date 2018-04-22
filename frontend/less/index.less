@@ -32,3 +32,24 @@ body {
   left: 0;
   overflow: hidden;
 }
+
+// TODO: move to preview.less;
+// Link --------------------
+@urlColor: #08c;
+
+a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+a {
+  // color: #08c;
+  color: @urlColor;
+  text-decoration: none;
+}
+
+a:hover {
+  // color: #0050a3;
+  color: contrast(@urlColor, lighten(@urlColor, 8%), darken(@urlColor, 6%));
+  text-decoration: none;
+}

@@ -18,6 +18,7 @@ import { userInfo } from "os";
 
 interface Props {
   user: User;
+  networkId: number;
 }
 interface State {
   showEditPanel: boolean;
@@ -49,7 +50,7 @@ export default class Home extends React.Component<Props, State> {
     }
   }
 
-  showUserHome(user:User) {
+  showUserHome(user: User) {
     if (!user) return;
     this.showUserFeeds(user);
     user.getUserInfo(user.coinbase).then(userInfo => {
@@ -98,7 +99,7 @@ export default class Home extends React.Component<Props, State> {
   };
 
   render() {
-    if (this.props.user) {
+    if (this.props.user && this.props.user.coinbase) {
       const user = this.props.user;
       return (
         <div className="home">
@@ -129,7 +130,11 @@ export default class Home extends React.Component<Props, State> {
       return (
         <div className="home">
           <h1 className="title is-1">
-            Please make sure metamask is working in yoru browser.
+            Please make sure{" "}
+            <a href="https://metamask.io/" target="_blank">
+              MetaMask
+            </a>{" "}
+            is working in your browser.
           </h1>
         </div>
       );
