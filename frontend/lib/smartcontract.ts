@@ -179,7 +179,7 @@ export const abiArray = [
   {
     constant: false,
     inputs: [{ name: "value", type: "string" }],
-    name: "setMetaDataJSONStringMap",
+    name: "setMetaDataJSONStringValue",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
@@ -400,6 +400,6 @@ export const abiArray = [
     type: "event"
   }
 ];
-export const contractAddress = "0x33ec76d1106731570f502b9b3259ecfd1e829f44";
+export const contractAddress = "0x4fd35d4f81d364a1855d9a66109820a8ec6f9336";
 
 export const abiArrayJSONString = JSON.stringify(abiArray);

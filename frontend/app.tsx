@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Router, Route, Switch } from "react-router";
+const Web3 = require("web3");
 // import Web3 from "web3";
 import history from "./lib/history";
 import { User } from "./lib/user";
@@ -24,13 +25,22 @@ class App extends React.Component<Props, State> {
     if (typeof window["web3"] === "undefined") {
       alert("metamask not installed");
     } else {
-      console.log("metamask installed");
-      const user = new User(window["web3"]);
+      console.log("metamask installed!");
+      const web3 = new Web3(window["web3"].currentProvider);
+      const user = new User(web3);
+      window["web3"] = web3; // override metamask web3.
       window["user"] = user;
-      this.setState({
-        injectWeb3: true,
-        user: user
-      });
+      user
+        .initialize()
+        .then(() => {
+          this.setState({
+            injectWeb3: true,
+            user: user
+          });
+        })
+        .catch(error => {
+          alert(error);
+        });
     }
   }
   render() {

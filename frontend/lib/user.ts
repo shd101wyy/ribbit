@@ -6,6 +6,9 @@ import { off } from "codemirror";
 import { compressString, hexEncode, decompressString } from "./utility";
 import { TransactionInfo } from "./transaction";
 import * as Identicon from "identicon.js";
+import Web3 from "web3";
+import { Contract, Transaction } from "web3/types";
+import { BigNumber } from "bignumber.js";
 
 abiDecoder.addABI(abiArray);
 
@@ -34,19 +37,24 @@ export interface UserInfo {
 }
 
 export class User {
-  public web3;
+  public web3: Web3;
   /**
    * The address of user wallet.
    */
   public coinbase: string;
   /**
-   * Current connected network
+   * Current connected network id
    */
-  public network: string;
+  public networkId: number;
+
+  /**
+   * Current connected network name
+   */
+  private networkName: string;
   /**
    * Smart contract instance
    */
-  public contractInstance;
+  public contractInstance: Contract;
 
   /**
    * version that used to specify the string compression strategy, etc...
@@ -57,29 +65,33 @@ export class User {
    * Constructor
    * @param web3
    */
-  constructor(web3) {
+  constructor(web3: Web3) {
     this.web3 = web3;
-    this.coinbase = this.web3.eth.coinbase;
-    this.network = this.web3.version.network;
-    this.initContractInstance();
   }
 
-  private initContractInstance() {
-    const contract = this.web3.eth.contract(abiArray);
-    this.contractInstance = contract.at(contractAddress);
+  /**
+   * This function should be called immediately after creating User.
+   */
+  public async initialize() {
+    this.coinbase = await this.web3.eth.getCoinbase();
+    this.networkId = await this.web3.eth.net.getId();
+    this.networkName = await this.getNetworkName(this.networkId);
+    this.contractInstance = new this.web3.eth.Contract(
+      abiArray,
+      contractAddress
+    );
   }
 
   /**
    * Get the name of the network
    */
-  public getNetworkName() {
-    const network = this.web3.version.network;
-    switch (network) {
-      case "1":
+  public getNetworkName(networkId: number) {
+    switch (networkId) {
+      case 1:
         return "mainnet";
-      case "2":
+      case 2:
         return "morden test network";
-      case "3":
+      case 3:
         return "ropsten test network";
       default:
         return "unknown network";
@@ -124,23 +136,13 @@ export class User {
         );
       } else {
         tags[i] = validatedTag;
-        console.log(i + " tag: " + validatedTag);
+        // console.log(i + " tag: " + validatedTag);
       }
     }
 
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentFeedInfo(
-        this.coinbase,
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          } else {
-            return resolve(result);
-          }
-        }
-      );
-    });
-
+    let currentFeedInfo = await this.contractInstance.methods
+      .getCurrentFeedInfo(this.coinbase)
+      .call();
     const currentTimestamp = Date.now();
     const compressedMessage = compressString(message);
     const messageHash = sha256(
@@ -152,25 +154,30 @@ export class User {
     );
     const previousFeedTransactionHash = previousFeedTransactionInfo
       ? previousFeedTransactionInfo.hash
-      : 0;
+      : "0x0000000000000000000000000000000000000000000000000000000000000000";
     // => 0x40091f65172c76c5daa276c66cbd1f175fda12d9bd20b842007feed78757a089
 
     return await new Promise((resolve, reject) => {
-      this.contractInstance.post(
-        0, // version
-        currentTimestamp, // timestamp
-        compressedMessage, // message
-        "0x" + messageHash, // messageHash
-        previousFeedTransactionHash, // previousFeedTransactionHash
-        tags, // tags
-        (error, transactionHash) => {
-          if (error) {
-            return reject(error);
-          } else {
-            return resolve(transactionHash);
-          }
-        }
-      );
+      this.contractInstance.methods
+        .post(
+          0, // version
+          currentTimestamp, // timestamp
+          compressedMessage, // message
+          "0x" + messageHash, // messageHash
+          previousFeedTransactionHash, // previousFeedTransactionHash
+          tags // tags
+        )
+        .send({ from: this.coinbase })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          console.log("post feed txHash: ", hash);
+          return resolve(hash);
+        })
+        .on("receipt", receipt => {
+          console.log("post feed receipt", receipt);
+        });
     });
   }
 
@@ -189,12 +196,16 @@ export class User {
     messageHash: string,
     transactionHash?: string
   ): Promise<TransactionInfo> {
-    // console.log("userAddress: ", userAddress)
-    // console.log("blockNumber: ", blockNumber)
-    // console.log("messageHash: ", messageHash)
-    // console.log("transactionHash: ", transactionHash)
-    const validateTransaction = (transaction: any) => {
-      if (userAddress && userAddress !== transaction.from) {
+    // console.log("userAddress: ", userAddress);
+    // console.log("blockNumber: ", blockNumber);
+    // console.log("messageHash: ", messageHash);
+    // console.log("transactionHash: ", transactionHash);
+    const validateTransaction = (transaction: Transaction) => {
+      // It is weird that this.coinbase is all lowercase, but transaction.from is not.
+      if (
+        userAddress &&
+        userAddress.toLowerCase() !== transaction.from.toLowerCase()
+      ) {
         return null;
       }
       const input = transaction.input;
@@ -202,13 +213,13 @@ export class User {
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
-        const messageHash2 = this.web3.toHex(
-          this.web3.toBigNumber(decodedInputData.params[3].value)
-        );
+        const messageHash2 = new BigNumber(
+          decodedInputData.params[3].value
+        ).toString(16);
         if (messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
-        return Object.assign(transaction, {
+        return Object.assign(transaction as object, {
           decodedInputData
         }) as TransactionInfo;
       }
@@ -216,64 +227,29 @@ export class User {
 
     if (transactionHash) {
       try {
-        const transaction = await new Promise<TransactionInfo>(
-          (resolve, reject) => {
-            this.web3.eth.getTransaction(
-              transactionHash,
-              (error, transaction) => {
-                if (error || !transaction) {
-                  return reject(error);
-                }
-                const transactionBlockNumber = transaction.blockNumber;
-                if (transactionBlockNumber !== blockNumber) {
-                  return reject(error);
-                }
-                const validatedResult = validateTransaction(transaction);
-                if (validatedResult) {
-                  // console.log('transactionHash is valid: ', validatedResult)
-                  return resolve(validatedResult);
-                }
-              }
-            );
+        const transaction = await this.web3.eth.getTransaction(transactionHash);
+        if (transaction.blockNumber === blockNumber) {
+          const validatedResult = validateTransaction(transaction);
+          if (validatedResult) {
+            // console.log('transactionHash is valid: ', validatedResult)
+            return validatedResult;
           }
-        );
-        if (transaction) {
-          return transaction;
         }
       } catch (error) {
         // transactionHash is wrong, then check blockNumber and messageHash
       }
     }
 
-    const transactionCount = await new Promise((resolve, reject) => {
-      this.web3.eth.getBlockTransactionCount(
-        blockNumber,
-        (error, transactionCount) => {
-          if (error) {
-            return reject(error);
-          } else {
-            return resolve(transactionCount);
-          }
-        }
-      );
-    });
-
+    const transactionCount = await this.web3.eth.getBlockTransactionCount(
+      blockNumber
+    );
     // console.log("transactionCount: " + transactionCount);
 
     for (let i = 0; i < transactionCount; i++) {
-      const transaction = (await new Promise((resolve, reject) => {
-        this.web3.eth.getTransactionFromBlock(
-          blockNumber,
-          i,
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            } else {
-              return resolve(result);
-            }
-          }
-        );
-      })) as any;
+      const transaction = await this.web3.eth.getTransactionFromBlock(
+        blockNumber,
+        i
+      );
       const validatedResult = validateTransaction(transaction);
       if (validatedResult) {
         // console.log("transactionHash is invalid: ", validatedResult);
@@ -290,17 +266,11 @@ export class User {
    * @param userAddress
    */
   public async getNewestFeedTransactionFromUser(userAddress: string) {
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentFeedInfo(userAddress, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
-      });
-    });
-    const currentFeedBlockNumber = currentFeedInfo[0].toNumber();
-    const currentFeedHash = this.web3.toHex(currentFeedInfo[1]);
+    let currentFeedInfo = await this.contractInstance.methods
+      .getCurrentFeedInfo(userAddress)
+      .call();
+    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
+    const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getTransactionInfo(
       userAddress,
       currentFeedBlockNumber,
@@ -315,17 +285,11 @@ export class User {
    */
   public async getNewestFeedTransactionFromTagByTime(tag: string) {
     tag = this.formatTag(tag);
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentTagInfoByTime(tag, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
-      });
-    });
-    const currentFeedBlockNumber = currentFeedInfo[0].toNumber();
-    const currentFeedHash = this.web3.toHex(currentFeedInfo[1]);
+    const currentFeedInfo = await this.contractInstance.methods
+      .getCurrentTagInfoByTime(tag)
+      .call();
+    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
+    const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getTransactionInfo(
       "",
       currentFeedBlockNumber,
@@ -339,17 +303,11 @@ export class User {
    */
   public async getNewestFeedTransactionFromTagByTrend(tag: string) {
     tag = this.formatTag(tag);
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentTagInfoByTrend(tag, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
-      });
-    });
-    const currentFeedBlockNumber = currentFeedInfo[0].toNumber();
-    const currentFeedHash = this.web3.toHex(currentFeedInfo[1]);
+    const currentFeedInfo = await this.contractInstance.methods
+      .getCurrentTagInfoByTrend(tag)
+      .call();
+    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
+    const currentFeedHash = this.web3.utils.toHex(currentFeedInfo[1]);
     return await this.getTransactionInfo(
       "",
       currentFeedBlockNumber,
@@ -379,21 +337,11 @@ export class User {
     ) => void
   ) {
     if (!blockNumber) {
-      let currentFeedInfo = await new Promise((resolve, reject) => {
-        this.contractInstance.getCurrentFeedInfo(
-          userAddress,
-          (error, result) => {
-            if (error) {
-              return reject(error);
-            } else {
-              return resolve(result);
-            }
-          }
-        );
-      });
-
-      blockNumber = currentFeedInfo[0].toNumber();
-      messageHash = this.web3.toHex(currentFeedInfo[1]);
+      const currentFeedInfo = await this.contractInstance.methods
+        .getCurrentFeedInfo(userAddress)
+        .call();
+      blockNumber = parseInt(currentFeedInfo[0]);
+      messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
       transactionHash = null;
     }
     return await this.getFeeds({
@@ -421,17 +369,11 @@ export class User {
     ) => void
   ) {
     tag = this.formatTag(tag);
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentTagInfoByTime(tag, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
-      });
-    });
-    blockNumber = currentFeedInfo[0].toNumber();
-    messageHash = this.web3.toHex(currentFeedInfo[1]);
+    const currentFeedInfo = await this.contractInstance.methods
+      .getCurrentTagInfoByTime(tag)
+      .call();
+    blockNumber = parseInt(currentFeedInfo[0]);
+    messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getFeeds({
       userAddress: "",
       blockNumber,
@@ -457,17 +399,11 @@ export class User {
     ) => void
   ) {
     tag = this.formatTag(tag);
-    let currentFeedInfo = await new Promise((resolve, reject) => {
-      this.contractInstance.getCurrentTagInfoByTrend(tag, (error, result) => {
-        if (error) {
-          return reject(error);
-        } else {
-          return resolve(result);
-        }
-      });
-    });
-    blockNumber = currentFeedInfo[0].toNumber();
-    messageHash = this.web3.toHex(currentFeedInfo[1]);
+    const currentFeedInfo = await this.contractInstance.methods
+      .getCurrentTagInfoByTrend(tag)
+      .call();
+    blockNumber = parseInt(currentFeedInfo[0]);
+    messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getFeeds({
       userAddress: "",
       blockNumber,
@@ -508,18 +444,9 @@ export class User {
       } else {
         cb(false, offset, transactionInfo);
         transactionHash = transactionInfo.decodedInputData.params[4].value;
-        const receipt = await new Promise((resolve, reject) => {
-          this.web3.eth.getTransactionReceipt(
-            transactionInfo.hash,
-            (error, result) => {
-              if (error) {
-                return reject(error);
-              } else {
-                return resolve(result);
-              }
-            }
-          );
-        });
+        const receipt = await this.web3.eth.getTransactionReceipt(
+          transactionInfo.hash
+        );
         const logs = receipt["logs"] || [];
         if (!logs.length) {
           return cb(true);
@@ -532,8 +459,10 @@ export class User {
         if (!PostFeedEvent) {
           return cb(true); // done
         } else {
-          blockNumber = PostFeedEvent.events[0].value[0].toNumber();
-          messageHash = this.web3.toHex(PostFeedEvent.events[0].value[1]);
+          blockNumber = parseInt(PostFeedEvent.events[0].value[0]);
+          messageHash = new BigNumber(
+            PostFeedEvent.events[0].value[1]
+          ).toString(16);
           offset += 1;
           continue;
         }
@@ -546,44 +475,28 @@ export class User {
    * @param address
    */
   public async getUserInfo(address: string): Promise<UserInfo> {
-    const userInfo = (await new Promise((resolve, reject) => {
-      this.contractInstance.getMetaDataJSONStringValue(
-        address,
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          } else {
-            try {
-              return resolve(JSON.parse(decompressString(result)) || {});
-            } catch (error) {
-              return resolve({});
-            }
-          }
-        }
-      );
-    })) as UserInfo;
+    const userInfo =
+      JSON.parse(
+        decompressString(
+          await this.contractInstance.methods
+            .getMetaDataJSONStringValue(address)
+            .call()
+        )
+      ) || ({} as UserInfo);
+
     if (!userInfo.avatar) {
       userInfo.avatar =
         "data:image/png;base64," + new Identicon(address, 80).toString();
     }
-    userInfo.name = userInfo.name || "Anonymous";
+    userInfo.name = userInfo.name || "Frog_" + address.slice(2, 6);
     userInfo.address = address;
     return userInfo;
   }
 
   public async setUserMetadata(userInfo: UserInfo) {
     delete userInfo["address"]; // no need to save address.
-    return await new Promise((resolve, reject) => {
-      this.contractInstance.setMetaDataJSONStringMap(
-        compressString(JSON.stringify(userInfo)),
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          } else {
-            return resolve(result);
-          }
-        }
-      );
-    });
+    return await this.contractInstance.methods
+      .setMetaDataJSONStringValue(compressString(JSON.stringify(userInfo)))
+      .send({ from: this.coinbase });
   }
 }
