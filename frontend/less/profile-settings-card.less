@@ -1,0 +1,94 @@
+// out: false
+
+.profile-settings-card {
+  padding: 0;
+
+  p.title {
+    padding: 12px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .form {
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+
+    .entry {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      margin-bottom: 8px;
+      align-items: center;
+
+      p.entry-title {
+        width: 126px;
+        font-size: 0.8rem;
+        margin: 0;
+        box-sizing: border-box;
+        border-left: 3px solid #74a24b;
+        padding-left: 8px;
+      }
+
+      &.markdown-entry {
+        flex-direction: column;
+        align-items: normal;
+
+        .entry-title {
+          width: 100%;
+          margin-bottom: 8px;
+        }
+      }
+    }
+
+    .ReactCodeMirror {
+      height: 100px;
+      padding: 8px;
+      background-color: #fff;
+      box-shadow: 0 1px 4px 1px #ececec;
+      font-size: 1.2rem;
+    }
+
+    .CodeMirror {
+      height: 100%;
+    }
+  }
+
+  div#publish-profile {
+    /* margin-left: auto; */
+    margin: 12px auto;
+    /* margin-top: 12px; */
+    /* margin-bottom: 12px; */
+    padding: 8px;
+    background-color: #e85353;
+    color: #fff;
+    width: 256px;
+    text-align: center;
+    border-radius: 2px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: darken(#e85353, 4%);
+    }
+  }
+
+  // TODO: this is the same as the one in profile.less
+  //       so we should remove this duplicate.
+  .profile-card {
+    .cover {
+      height: 256px;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      top: 212px;
+    }
+    .name-group {
+      padding-left: 140px;
+      margin-top: -16px;
+      .name {
+        font-size: 1.4rem;
+      }
+    }
+  }
+}

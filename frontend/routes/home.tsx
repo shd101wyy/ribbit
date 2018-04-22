@@ -17,7 +17,15 @@ import ProfileCard from "../components/profile-card";
 import AnnouncementCard from "../components/announcement-card";
 import TopicsCard from "../components/topics-card";
 import FollowingsCard from "../components/followings-card";
+import ProfileSettingsCard from "../components/profile-settings-card";
 import { userInfo } from "os";
+
+enum HomePanel {
+  FollowingsFeeds,
+  TopicsFeeds,
+  Settings,
+  Notifications
+}
 
 interface Props {
   user: User;
@@ -29,6 +37,7 @@ interface State {
   feeds: FeedInfo[];
   loading: boolean;
   userInfo: UserInfo;
+  panel: HomePanel;
 }
 export default class Home extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -38,7 +47,8 @@ export default class Home extends React.Component<Props, State> {
       msg: "",
       feeds: [],
       loading: false,
-      userInfo: null
+      userInfo: null,
+      panel: HomePanel.FollowingsFeeds
     };
   }
 
@@ -101,7 +111,36 @@ export default class Home extends React.Component<Props, State> {
     this.setState({ showEditPanel: !showEditPanel });
   };
 
+  switchPanel = (panel: HomePanel) => {
+    return event => {
+      this.setState({
+        panel
+      });
+    };
+  };
+
   render() {
+    let middlePanel = null;
+    if (this.state.panel === HomePanel.FollowingsFeeds) {
+      middlePanel = (
+        <div className="cards">
+          {this.state.feeds.map((feedInfo, index) => (
+            <FeedCard key={index} feedInfo={feedInfo} />
+          ))}
+          <p id="feed-footer">
+            {" "}
+            {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+          </p>
+        </div>
+      );
+    } else if (this.state.panel === HomePanel.Settings) {
+      middlePanel = (
+        <div className="settings-panel">
+          <ProfileSettingsCard user={this.props.user} />
+        </div>
+      );
+    }
+
     if (this.props.user && this.props.user.coinbase) {
       const user = this.props.user;
       return (
@@ -124,21 +163,43 @@ export default class Home extends React.Component<Props, State> {
                 />
               </div>
               <div className="icon-groups">
-                <i className="icon fas fa-home selected" />
-                <i className="icon fab fa-slack-hash" />
-                <i className="icon fas fa-bell" />
-                <i className="icon fas fa-cog" />
+                <i
+                  className={
+                    "icon fas fa-home" +
+                    (this.state.panel === HomePanel.FollowingsFeeds
+                      ? " selected"
+                      : "")
+                  }
+                  onClick={this.switchPanel(HomePanel.FollowingsFeeds)}
+                />
+                <i
+                  className={
+                    "icon fab fa-slack-hash" +
+                    (this.state.panel === HomePanel.TopicsFeeds
+                      ? " selected"
+                      : "")
+                  }
+                  onClick={this.switchPanel(HomePanel.TopicsFeeds)}
+                />
+                <i
+                  className={
+                    "icon fas fa-bell" +
+                    (this.state.panel === HomePanel.Notifications
+                      ? " selected"
+                      : "")
+                  }
+                  onClick={this.switchPanel(HomePanel.Notifications)}
+                />
+                <i
+                  className={
+                    "icon fas fa-cog" +
+                    (this.state.panel === HomePanel.Settings ? " selected" : "")
+                  }
+                  onClick={this.switchPanel(HomePanel.Settings)}
+                />
               </div>
             </div>
-            <div className="cards">
-              {this.state.feeds.map((feedInfo, index) => (
-                <FeedCard key={index} feedInfo={feedInfo} />
-              ))}
-              <p id="feed-footer">
-                {" "}
-                {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
-              </p>
-            </div>
+            {middlePanel}
           </div>
           <div className="right-panel">
             <div className="post-btn-group">
