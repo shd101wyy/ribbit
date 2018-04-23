@@ -88,7 +88,7 @@ export default class Home extends React.Component<Props, State> {
             this.props.user
           );
 
-          const userInfo = await user.getUserInfo(user.coinbase);
+          const userInfo = await user.getUserInfo(transactionInfo.from);
 
           const feeds = this.state.feeds;
           feeds.push({
@@ -123,7 +123,7 @@ export default class Home extends React.Component<Props, State> {
             this.props.user
           );
 
-          const userInfo = await user.getUserInfo(user.coinbase);
+          const userInfo = await user.getUserInfo(transactionInfo.from);
 
           const feeds = this.state.feeds;
           feeds.push({
