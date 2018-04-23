@@ -71,7 +71,7 @@ class App extends React.Component<Props, State> {
       <Router history={history}>
         <div id="router-container">
           <Route
-            path="/:networkId/"
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/`}
             render={props => (
               <Home
                 networkId={props.match.params["networkId"]}
@@ -81,7 +81,8 @@ class App extends React.Component<Props, State> {
             exact
           />
           <Route
-            path="/:networkId/profile/:userAddress"
+            path={`${process.env.PUBLIC_URL ||
+              ""}/:networkId/profile/:userAddress`}
             render={props => (
               <Profile
                 networkId={props.match.params["networkId"]}
@@ -92,7 +93,7 @@ class App extends React.Component<Props, State> {
             exact
           />
           <Route
-            path="/:networkId/topic/:topic"
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/topic/:topic`}
             render={props => (
               <Topic
                 networkId={props.match.params["networkId"]}
