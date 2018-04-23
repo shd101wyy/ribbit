@@ -22,7 +22,8 @@ interface State {
   previewIsOn: boolean;
   topics: string[];
   hiddenTopics: { [key: string]: boolean };
-  mentions: string[];
+  mentions: { name: string; address: string }[];
+  hiddenMentions: { [key: string]: boolean }; // key is address
 }
 
 export default class Edit extends Component<Props, State> {
@@ -36,7 +37,8 @@ export default class Edit extends Component<Props, State> {
       previewIsOn: false,
       topics: [],
       hiddenTopics: {},
-      mentions: []
+      mentions: [],
+      hiddenMentions: {}
     };
   }
 
@@ -58,9 +60,13 @@ export default class Edit extends Component<Props, State> {
       renderMarkdown(this.state.code),
       this.props.user
     ).then(({ topics, mentions }) => {
-      if (JSON.stringify(this.state.topics) !== JSON.stringify(topics)) {
+      if (
+        JSON.stringify(this.state.topics) !== JSON.stringify(topics) ||
+        JSON.stringify(this.state.mentions) !== JSON.stringify(mentions)
+      ) {
         this.setState({
-          topics: topics
+          topics,
+          mentions
         });
       }
     });
@@ -80,9 +86,15 @@ export default class Edit extends Component<Props, State> {
 
     // TODO: mentions
     const mentions = [];
+    for (const mention of this.state.mentions) {
+      if (!this.state.hiddenMentions[mention.address]) {
+        mentions.push(mention.address);
+      }
+    }
 
-    console.log("post feed       : ", this.state.code);
-    console.log("     with topics: ", topics);
+    console.log("post feed         : ", this.state.code);
+    console.log("     with topics  : ", topics);
+    console.log("     with mentions: ", mentions);
 
     const tags = [...topics, ...mentions];
     try {
@@ -101,6 +113,13 @@ export default class Edit extends Component<Props, State> {
   private toggleTopic = (topic: string) => {
     return () => {
       this.state.hiddenTopics[topic] = !this.state.hiddenTopics[topic];
+      this.forceUpdate();
+    };
+  };
+
+  private toggleMention = (address: string) => {
+    return () => {
+      this.state.hiddenMentions[address] = !this.state.hiddenMentions[address];
       this.forceUpdate();
     };
   };
@@ -129,6 +148,23 @@ export default class Edit extends Component<Props, State> {
                     onClick={this.toggleTopic(topic)}
                   >
                     {topic}
+                  </div>
+                ))}
+              </div>
+              <p className="title">Mention the following users:</p>
+              <div className="mentions-list">
+                {this.state.mentions.map((mention, offset) => (
+                  <div
+                    className={
+                      "mention " +
+                      (this.state.hiddenMentions[mention.address]
+                        ? "hidden"
+                        : "")
+                    }
+                    key={offset}
+                    onClick={this.toggleMention(mention.address)}
+                  >
+                    {mention.name}
                   </div>
                 ))}
               </div>

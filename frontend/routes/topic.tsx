@@ -64,6 +64,7 @@ export default class profile extends React.Component<Props, State> {
         : this.props.user.getFeedsFromTagByTime
       ).bind(this.props.user);
       fn(topic, { num: -1 }, async (done, offset, transactionInfo) => {
+        console.log(done, offset, transactionInfo);
         if (done) {
           return this.setState({ loading: false });
         }
@@ -112,6 +113,16 @@ export default class profile extends React.Component<Props, State> {
   };
 
   render() {
+    /**
+     * Prevent from loading user address as topic.
+     */
+    if (this.props.user.web3.utils.isAddress(this.props.topic)) {
+      return (
+        <div className="topic-page">
+          <p id="feed-footer">Invalid topic {this.props.topic}</p>
+        </div>
+      );
+    }
     return (
       <div className="topic-page">
         <div className="container">

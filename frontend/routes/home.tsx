@@ -76,7 +76,41 @@ export default class Home extends React.Component<Props, State> {
         user.coinbase,
         { num: -1 },
         async (done, offset, transactionInfo) => {
-          console.log(done, offset, transactionInfo);
+          if (done) {
+            return this.setState({ loading: false });
+          }
+          const message = decompressString(
+            transactionInfo.decodedInputData.params[2].value
+          );
+          // console.log(message);
+          const summary = await generateSummaryFromHTML(
+            renderMarkdown(message),
+            this.props.user
+          );
+
+          const userInfo = await user.getUserInfo(user.coinbase);
+
+          const feeds = this.state.feeds;
+          feeds.push({
+            summary,
+            transactionInfo,
+            userInfo
+          });
+          this.forceUpdate();
+        }
+      );
+    });
+  }
+
+  showNotificationFeeds(user: User) {
+    if (!user) {
+      return;
+    }
+    this.setState({ loading: true }, () => {
+      user.getFeedsFromTagByTime(
+        user.coinbase,
+        { num: -1 },
+        async (done, offset, transactionInfo) => {
           if (done) {
             return this.setState({ loading: false });
           }
@@ -110,9 +144,19 @@ export default class Home extends React.Component<Props, State> {
 
   switchPanel = (panel: HomePanel) => {
     return event => {
-      this.setState({
-        panel
-      });
+      this.setState(
+        {
+          panel,
+          feeds: []
+        },
+        () => {
+          if (panel === HomePanel.FollowingsFeeds) {
+            this.showUserFeeds(this.props.user);
+          } else if (panel === HomePanel.Notifications) {
+            this.showNotificationFeeds(this.props.user);
+          }
+        }
+      );
     };
   };
 
@@ -134,6 +178,18 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="settings-panel">
           <ProfileSettingsCard user={this.props.user} />
+        </div>
+      );
+    } else if (this.state.panel === HomePanel.Notifications) {
+      middlePanel = (
+        <div className="cards">
+          {this.state.feeds.map((feedInfo, index) => (
+            <FeedCard key={index} feedInfo={feedInfo} />
+          ))}
+          <p id="feed-footer">
+            {" "}
+            {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+          </p>
         </div>
       );
     }

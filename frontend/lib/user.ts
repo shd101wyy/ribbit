@@ -106,12 +106,21 @@ export class User {
    * @param tag
    */
   private formatTag(tag: string): string {
+    // check if this is user address
+    if (this.web3.utils.isAddress(tag)) {
+      return tag.toLowerCase().replace(/^0x/, "0x000000000000000000000000"); // to make it 32bytes.
+    }
+
     const compressedTag = compressString(tag.toLowerCase());
-    const hexString = hexEncode(compressedTag);
+    let hexString = hexEncode(compressedTag);
     if (hexString.length >= 64) {
       // greate than bytes32
       return "";
     } else {
+      while (hexString.length !== 64) {
+        // to make it 32bytes.
+        hexString += "0";
+      }
       return "0x" + hexString;
     }
   }
@@ -140,9 +149,6 @@ export class User {
       }
     }
 
-    let currentFeedInfo = await this.contractInstance.methods
-      .getCurrentFeedInfo(this.coinbase)
-      .call();
     const currentTimestamp = Date.now();
     const compressedMessage = compressString(message);
     const messageHash = sha256(
@@ -156,6 +162,9 @@ export class User {
       ? previousFeedTransactionInfo.hash
       : "0x0000000000000000000000000000000000000000000000000000000000000000";
     // => 0x40091f65172c76c5daa276c66cbd1f175fda12d9bd20b842007feed78757a089
+
+    console.log("post    :");
+    console.log("    tags: ", tags);
 
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
@@ -288,7 +297,6 @@ export class User {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(tag)
       .call();
-    console.log(currentFeedInfo);
     const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
     const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getTransactionInfo(
@@ -378,6 +386,7 @@ export class User {
     messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getFeeds({
       userAddress: "",
+      tag,
       blockNumber,
       messageHash,
       num,
@@ -409,6 +418,7 @@ export class User {
     messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getFeeds({
       userAddress: "",
+      tag,
       blockNumber,
       messageHash,
       num,
@@ -423,8 +433,9 @@ export class User {
    * @param param0
    */
   private async getFeeds({
-    eventName = "PostEvent",
+    eventName = "UnknownEvent",
     userAddress = "",
+    tag = "",
     blockNumber = 0,
     messageHash = "",
     num = -1,
@@ -456,14 +467,21 @@ export class User {
         if (!logs.length) {
           return cb(true);
         }
-        // TODO: tags
         const decodedLogs = abiDecoder.decodeLogs(logs);
-        const eventLog = decodedLogs.filter(x => x.name === eventName)[0];
+        let eventLog = null;
+        if (eventName === "PostEvent") {
+          // Post event.
+          eventLog = decodedLogs.filter(x => x.name === eventName)[0];
+        } else {
+          // Tag events.
+          eventLog = decodedLogs.filter(
+            x => x.name === eventName && x.events[1].value === tag
+          )[0];
+        }
         if (!eventLog) {
           return cb(true); // done
         } else {
           blockNumber = parseInt(eventLog.events[0].value[0]);
-          console.log("here: ", eventLog);
           messageHash = new BigNumber(eventLog.events[0].value[1]).toString(16);
           offset += 1;
           continue;
