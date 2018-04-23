@@ -84,7 +84,7 @@ export default class FollowingsCard extends React.Component<Props, State> {
         <p className="title">my followings</p>
         <div className="followings-list">
           <Following
-            userAddress={this.props.user.coinbase}
+            userAddress={this.props.user.accountAddress}
             user={this.props.user}
             networkId={this.props.networkId}
           />

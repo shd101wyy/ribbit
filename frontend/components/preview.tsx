@@ -37,7 +37,7 @@ export default class Preview extends Component<Props, State> {
     const html = renderMarkdown(this.props.markdown);
     const summary = await generateSummaryFromHTML(html, this.props.user);
     const userInfo = await this.props.user.getUserInfo(
-      this.props.user.coinbase
+      this.props.user.accountAddress
     );
     const transactionInfo = generateFakeTransactionInfo();
 

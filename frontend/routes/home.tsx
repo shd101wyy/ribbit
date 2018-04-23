@@ -62,7 +62,7 @@ export default class Home extends React.Component<Props, State> {
   showUserHome(user: User) {
     if (!user) return;
     this.showUserFeeds(user);
-    user.getUserInfo(user.coinbase).then(userInfo => {
+    user.getUserInfo(user.accountAddress).then(userInfo => {
       this.setState({ userInfo });
     });
   }
@@ -73,7 +73,7 @@ export default class Home extends React.Component<Props, State> {
     }
     this.setState({ loading: true }, () => {
       user.getFeedsFromUser(
-        user.coinbase,
+        user.accountAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
           if (done) {
@@ -108,7 +108,7 @@ export default class Home extends React.Component<Props, State> {
     }
     this.setState({ loading: true }, () => {
       user.getFeedsFromTagByTime(
-        user.coinbase,
+        user.accountAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
           if (done) {
@@ -194,7 +194,7 @@ export default class Home extends React.Component<Props, State> {
       );
     }
 
-    if (this.props.user && this.props.user.coinbase) {
+    if (this.props.user && this.props.user.accountAddress) {
       const user = this.props.user;
       return (
         <div className="home">

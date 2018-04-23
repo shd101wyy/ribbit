@@ -39,9 +39,9 @@ export interface UserInfo {
 export class User {
   public web3: Web3;
   /**
-   * The address of user wallet.
+   * The address of current account.
    */
-  public coinbase: string;
+  public accountAddress: string;
   /**
    * Current connected network id
    */
@@ -73,7 +73,7 @@ export class User {
    * This function should be called immediately after creating User.
    */
   public async initialize() {
-    this.coinbase = await this.web3.eth.getCoinbase();
+    this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
     this.contractInstance = new this.web3.eth.Contract(
@@ -148,16 +148,16 @@ export class User {
         // console.log(i + " tag: " + validatedTag);
       }
     }
-    tags = Array.from(new Set(tags)) // Remove duplicate.
+    tags = Array.from(new Set(tags)); // Remove duplicate.
 
     const currentTimestamp = Date.now();
     const compressedMessage = compressString(message);
     const messageHash = sha256(
-      this.coinbase + currentTimestamp.toString() + message
+      this.accountAddress + currentTimestamp.toString() + message
     );
 
     const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
-      this.coinbase
+      this.accountAddress
     );
     const previousFeedTransactionHash = previousFeedTransactionInfo
       ? previousFeedTransactionInfo.hash
@@ -177,7 +177,7 @@ export class User {
           previousFeedTransactionHash, // previousFeedTransactionHash
           tags // tags
         )
-        .send({ from: this.coinbase })
+        .send({ from: this.accountAddress })
         .on("error", error => {
           return reject(error);
         })
@@ -211,7 +211,7 @@ export class User {
     // console.log("messageHash: ", messageHash);
     // console.log("transactionHash: ", transactionHash);
     const validateTransaction = (transaction: Transaction) => {
-      // It is weird that this.coinbase is all lowercase, but transaction.from is not.
+      // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
       if (
         userAddress &&
         userAddress.toLowerCase() !== transaction.from.toLowerCase()
@@ -464,7 +464,7 @@ export class User {
         const receipt = await this.web3.eth.getTransactionReceipt(
           transactionInfo.hash
         );
-        const logs = receipt["logs"] || [];
+        const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null.
         if (!logs.length) {
           return cb(true);
         }
@@ -525,7 +525,7 @@ export class User {
         .setMetaDataJSONStringValue(
           compressString(JSON.stringify(userInfoCopy))
         )
-        .send({ from: this.coinbase })
+        .send({ from: this.accountAddress })
         .on("error", error => {
           return reject(error);
         })

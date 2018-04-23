@@ -32,7 +32,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
   componentDidMount() {
     const user = this.props.user;
     user
-      .getUserInfo(user.coinbase)
+      .getUserInfo(user.accountAddress)
       .then(userInfo => {
         this.setState(
           {
@@ -78,7 +78,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       cover: this.state.cover,
       avatar: this.state.avatar,
       bio: this.state.bio,
-      address: this.props.user.coinbase
+      address: this.props.user.accountAddress
     };
     this.props.user
       .setUserMetadata(userInfo)
@@ -101,7 +101,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       mode: "markdown"
     };
     const userInfo: UserInfo = {
-      address: this.props.user.coinbase,
+      address: this.props.user.accountAddress,
       name: this.state.name,
       avatar: this.state.avatar,
       cover: this.state.cover,
