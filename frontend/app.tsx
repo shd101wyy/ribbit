@@ -69,7 +69,7 @@ class App extends React.Component<Props, State> {
     }
     return (
       <Router history={history}>
-        <div id="router-container">
+        <Switch>
           <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/`}
             render={props => (
@@ -103,7 +103,7 @@ class App extends React.Component<Props, State> {
             )}
             exact
           />
-        </div>
+        </Switch>
       </Router>
     );
   }

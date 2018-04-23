@@ -1,5 +1,6 @@
 import * as React from "react";
 import { User, UserInfo } from "../lib/user";
+import { Link } from "react-router-dom";
 
 interface FollowingProps {
   userAddress: string;
@@ -38,19 +39,19 @@ class Following extends React.Component<FollowingProps, FollowingState> {
     const userInfo = this.state.userInfo;
     if (!userInfo) {
       return (
-        <a
-          href={`/#/${this.props.networkId}/profile/${this.props.userAddress}`}
+        <Link
+          to={`/${this.props.networkId}/profile/${this.props.userAddress}`}
           target="_blank"
         >
           <div className="following">
             <p className="msg">loading {this.props.userAddress}</p>
           </div>
-        </a>
+        </Link>
       );
     }
     return (
-      <a
-        href={`/#/${this.props.networkId}/profile/${this.props.userAddress}`}
+      <Link
+        to={`/${this.props.networkId}/profile/${this.props.userAddress}`}
         target="_blank"
       >
         <div className="following">
@@ -62,7 +63,7 @@ class Following extends React.Component<FollowingProps, FollowingState> {
             <p className="name">{userInfo.name}</p>
           </div>
         </div>
-      </a>
+      </Link>
     );
   }
 }

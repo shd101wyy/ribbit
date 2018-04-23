@@ -143,12 +143,16 @@ export async function generateSummaryFromHTML(
       const mention = tagElem.getAttribute("data-mention");
       const userInfo = await user.getUserInfo(mention);
       tagElem.innerHTML = `<span class="mention">${userInfo.name}</span>`;
-      tagElem.href = `/#/${user.networkId}/profile/${mention}`;
+      tagElem.href = `${window.location.pathname}#/${
+        user.networkId
+      }/profile/${mention}`;
       tagElem.setAttribute("target", "_blank");
     } else if (tagElem.classList.contains("tag-topic")) {
       const topic = tagElem.getAttribute("data-topic");
       tagElem.innerHTML = `<span class="topic">${topic}</span>`;
-      tagElem.href = `/#/${user.networkId}/topic/${topic}`;
+      tagElem.href = `${window.location.pathname}#/${
+        user.networkId
+      }/topic/${topic}`;
       tagElem.setAttribute("target", "_blank");
     } else {
       const error = tagElem.getAttribute("data-error");

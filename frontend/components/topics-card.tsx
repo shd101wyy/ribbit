@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 
 interface TopicProps {
   name: string;
@@ -12,15 +13,15 @@ class Topic extends React.Component<TopicProps, TopicState> {
 
   render() {
     return (
-      <a
-        href={`/#/${this.props.networkId}/topic/${this.props.name}`}
+      <Link
+        to={`/${this.props.networkId}/topic/${this.props.name}`}
         target="_blank"
       >
         <div className="topic">
           <i className="fas fa-hashtag" />
           <span className="name">{this.props.name}</span>
         </div>
-      </a>
+      </Link>
     );
   }
 }
