@@ -106,7 +106,7 @@ export class User {
    * @param tag
    */
   private formatTag(tag: string): string {
-    const compressedTag = compressString(tag);
+    const compressedTag = compressString(tag.toLowerCase());
     const hexString = hexEncode(compressedTag);
     if (hexString.length >= 64) {
       // greate than bytes32
@@ -288,6 +288,7 @@ export class User {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(tag)
       .call();
+    console.log(currentFeedInfo);
     const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
     const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
     return await this.getTransactionInfo(

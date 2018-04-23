@@ -77,10 +77,14 @@ export default class Edit extends Component<Props, State> {
         topics.push(topic);
       }
     }
+
+    // TODO: mentions
+    const mentions = [];
+
     console.log("post feed       : ", this.state.code);
     console.log("     with topics: ", topics);
 
-    const tags = [];
+    const tags = [...topics, ...mentions];
     try {
       await user.postFeed(content, tags);
       window.localStorage["markdown-cache"] = "";
