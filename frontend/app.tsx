@@ -27,7 +27,7 @@ class App extends React.Component<Props, State> {
     let web3 = null;
     if (typeof window["web3"] === "undefined") {
       console.log("metamask not installed.");
-      web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      web3 = new Web3("ws://localhost:8546");
     } else {
       console.log("metamask installed.");
       web3 = new Web3(window["web3"].currentProvider);
