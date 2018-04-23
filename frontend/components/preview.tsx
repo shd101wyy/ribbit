@@ -5,10 +5,10 @@ import Article from "./article";
 import FeedCard from "./feed-card";
 
 import * as utility from "../lib/utility";
-import { Summary } from "../lib/utility";
 import { User } from "../lib/user";
-import { FeedInfo } from "../lib/feed";
+import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
 import { generateFakeTransactionInfo } from "../lib/transaction";
+import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
   markdown: string;
@@ -34,8 +34,8 @@ export default class Preview extends Component<Props, State> {
   }
 
   private renderContent = async () => {
-    const html = utility.renderMarkdown(this.props.markdown);
-    const summary = await utility.generateSummaryFromHTML(html);
+    const html = renderMarkdown(this.props.markdown);
+    const summary = await generateSummaryFromHTML(html, this.props.user);
     const userInfo = await this.props.user.getUserInfo(
       this.props.user.coinbase
     );

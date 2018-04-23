@@ -1,6 +1,7 @@
 import * as React from "react";
 import { UserInfo } from "../lib/user";
-import { decompressString, renderMarkdown } from "../lib/utility";
+import { decompressString } from "../lib/utility";
+import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
   userInfo: UserInfo;

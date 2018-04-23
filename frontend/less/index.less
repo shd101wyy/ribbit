@@ -54,6 +54,7 @@ a:hover {
   text-decoration: none;
 }
 
+// input
 input {
   width: 100%;
   padding: 12px;
@@ -64,5 +65,30 @@ input {
     outline: none;
     background-color: #e3eadd;
     color: #222;
+  }
+}
+
+// tag
+.tag {
+  .topic {
+    border-radius: 2px;
+    cursor: pointer;
+    color: #19a6bf;
+    font-weight: 400;
+
+    &:before {
+      content: "#";
+    }
+  }
+
+  .mention {
+    border-radius: 2px;
+    cursor: pointer;
+    color: #53a1af;
+    font-weight: 600;
+
+    &:before {
+      content: "@";
+    }
   }
 }

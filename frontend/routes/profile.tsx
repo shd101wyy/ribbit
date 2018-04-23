@@ -4,12 +4,9 @@
 
 import * as React from "react";
 import { User, UserInfo } from "../lib/user";
-import { FeedInfo } from "../lib/feed";
-import {
-  decompressString,
-  generateSummaryFromHTML,
-  renderMarkdown
-} from "../lib/utility";
+import { FeedInfo, generateSummaryFromHTML } from "../lib/feed";
+import { decompressString } from "../lib/utility";
+import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
 
@@ -70,7 +67,8 @@ export default class profile extends React.Component<Props, State> {
           );
 
           const summary = await generateSummaryFromHTML(
-            renderMarkdown(message)
+            renderMarkdown(message),
+            this.props.user
           );
 
           const feeds = this.state.feeds;

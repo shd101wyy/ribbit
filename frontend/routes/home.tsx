@@ -1,14 +1,10 @@
 import * as React from "react";
 
 import { User, UserInfo } from "../lib/user";
-import { FeedInfo } from "../lib/feed";
+import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
 
-import {
-  Summary,
-  decompressString,
-  generateSummaryFromHTML,
-  renderMarkdown
-} from "../lib/utility";
+import { decompressString } from "../lib/utility";
+import { renderMarkdown } from "../lib/markdown";
 
 import Footer from "../components/footer";
 import Edit from "../components/edit";
@@ -89,7 +85,8 @@ export default class Home extends React.Component<Props, State> {
           );
           // console.log(message);
           const summary = await generateSummaryFromHTML(
-            renderMarkdown(message)
+            renderMarkdown(message),
+            this.props.user
           );
 
           const userInfo = await user.getUserInfo(user.coinbase);
