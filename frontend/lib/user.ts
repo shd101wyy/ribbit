@@ -111,7 +111,7 @@ export class User {
       return tag.toLowerCase().replace(/^0x/, "0x000000000000000000000000"); // to make it 32bytes.
     }
 
-    const compressedTag = compressString(tag.toLowerCase());
+    const compressedTag = compressString(tag.toLowerCase().replace(/\s/g, ""));
     let hexString = hexEncode(compressedTag);
     if (hexString.length >= 64) {
       // greate than bytes32
@@ -148,6 +148,7 @@ export class User {
         // console.log(i + " tag: " + validatedTag);
       }
     }
+    tags = Array.from(new Set(tags)) // Remove duplicate.
 
     const currentTimestamp = Date.now();
     const compressedMessage = compressString(message);

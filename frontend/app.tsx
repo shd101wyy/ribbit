@@ -24,34 +24,41 @@ class App extends React.Component<Props, State> {
     user: null
   };
   componentDidMount() {
+    let web3 = null;
     if (typeof window["web3"] === "undefined") {
-      alert("metamask not installed.");
+      console.log("metamask not installed.");
+      web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     } else {
       console.log("metamask installed.");
-      const web3 = new Web3(window["web3"].currentProvider);
-      const user = new User(web3);
-      window["web3"] = web3; // override metamask web3.
-      window["user"] = user;
-      user
-        .initialize()
-        .then(() => {
-          console.log("user initialized.");
-          this.setState(
-            {
-              injectWeb3: true,
-              user: user
-            },
-            () => {
-              if (history.location.pathname === "/") {
-                history.push(`/${user.networkId}/`);
-              }
-            }
-          );
-        })
-        .catch(error => {
-          alert(error);
-        });
+      web3 = new Web3(window["web3"].currentProvider);
     }
+    const user = new User(web3);
+    window["web3"] = web3; // override metamask web3.
+    window["user"] = user;
+    user
+      .initialize()
+      .then(() => {
+        console.log("user initialized.");
+        this.setState(
+          {
+            injectWeb3: true,
+            user: user
+          },
+          () => {
+            if (history.location.pathname === "/") {
+              history.push(`/${user.networkId}/`);
+            }
+          }
+        );
+      })
+      .catch(error => {
+        alert(error);
+        this.setState({ user: null }, () => {
+          if (history.location.pathname === "/") {
+            history.push(`/${user.networkId}/`);
+          }
+        });
+      });
   }
   render() {
     if (!this.state.user) {
