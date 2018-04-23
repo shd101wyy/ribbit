@@ -218,7 +218,7 @@ export default class Home extends React.Component<Props, State> {
               </a>
             </div>
             {/* <AnnouncementCard /> */}
-            <TopicsCard />
+            <TopicsCard networkId={this.props.networkId} />
           </div>
           {this.state.showEditPanel ? (
             <Edit cancel={this.toggleEditPanel} user={this.props.user} />

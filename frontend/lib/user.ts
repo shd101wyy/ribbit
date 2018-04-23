@@ -351,7 +351,8 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb
+      cb,
+      eventName: "PostEvent"
     });
   }
 
@@ -381,7 +382,8 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb
+      cb,
+      eventName: "SavePreviousTagInfoByTimeEvent"
     });
   }
 
@@ -411,7 +413,8 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb
+      cb,
+      eventName: "SavePreviousTagInfoByTrendEvent"
     });
   }
 
@@ -420,6 +423,7 @@ export class User {
    * @param param0
    */
   private async getFeeds({
+    eventName = "PostEvent",
     userAddress = "",
     blockNumber = 0,
     messageHash = "",
@@ -454,16 +458,13 @@ export class User {
         }
         // TODO: tags
         const decodedLogs = abiDecoder.decodeLogs(logs);
-        const PostFeedEvent = decodedLogs.filter(
-          x => x.name === "PostEvent"
-        )[0];
-        if (!PostFeedEvent) {
+        const eventLog = decodedLogs.filter(x => x.name === eventName)[0];
+        if (!eventLog) {
           return cb(true); // done
         } else {
-          blockNumber = parseInt(PostFeedEvent.events[0].value[0]);
-          messageHash = new BigNumber(
-            PostFeedEvent.events[0].value[1]
-          ).toString(16);
+          blockNumber = parseInt(eventLog.events[0].value[0]);
+          console.log("here: ", eventLog);
+          messageHash = new BigNumber(eventLog.events[0].value[1]).toString(16);
           offset += 1;
           continue;
         }

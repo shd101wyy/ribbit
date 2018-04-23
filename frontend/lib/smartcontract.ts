@@ -344,8 +344,8 @@ export const abiArray = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "tag", type: "bytes32" },
-      { indexed: false, name: "previousTagInfoByTime", type: "uint256[2]" }
+      { indexed: false, name: "previousTagInfoByTime", type: "uint256[2]" },
+      { indexed: false, name: "tag", type: "bytes32" }
     ],
     name: "SavePreviousTagInfoByTimeEvent",
     type: "event"
@@ -353,19 +353,10 @@ export const abiArray = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "tag", type: "bytes32" },
-      { indexed: false, name: "previousTagInfoByTrend", type: "uint256[2]" }
+      { indexed: false, name: "previousTagInfoByTrend", type: "uint256[2]" },
+      { indexed: false, name: "tag", type: "bytes32" }
     ],
     name: "SavePreviousTagInfoByTrendEvent",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: false, name: "mention", type: "address" },
-      { indexed: false, name: "previousMentionInfo", type: "uint256[2]" }
-    ],
-    name: "SavePreviousMentionEvent",
     type: "event"
   },
   {
@@ -400,6 +391,6 @@ export const abiArray = [
     type: "event"
   }
 ];
-export const contractAddress = "0x4fd35d4f81d364a1855d9a66109820a8ec6f9336";
+export const contractAddress = "0xfb6bc1679704aa014d880263192507958ee4327f";
 
 export const abiArrayJSONString = JSON.stringify(abiArray);

@@ -1,8 +1,8 @@
 import * as React from "react";
 
 interface TopicProps {
-  // topic name
   name: string;
+  networkId: number;
 }
 interface TopicState {}
 class Topic extends React.Component<TopicProps, TopicState> {
@@ -12,15 +12,22 @@ class Topic extends React.Component<TopicProps, TopicState> {
 
   render() {
     return (
-      <div className="topic">
-        <i className="icon fab fa-slack-hash" />
-        <span className="name">{this.props.name}</span>
-      </div>
+      <a
+        href={`/#/${this.props.networkId}/topic/${this.props.name}`}
+        target="_blank"
+      >
+        <div className="topic">
+          <i className="fas fa-hashtag" />
+          <span className="name">{this.props.name}</span>
+        </div>
+      </a>
     );
   }
 }
 
-interface Props {}
+interface Props {
+  networkId: number;
+}
 interface State {}
 export default class TopicsCard extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -32,7 +39,7 @@ export default class TopicsCard extends React.Component<Props, State> {
       <div className="topics-card card">
         <p className="title">my favorite topics</p>
         <div className="topics-list">
-          <Topic name="ribbit" />
+          <Topic name="ribbit" networkId={this.props.networkId} />
         </div>
       </div>
     );

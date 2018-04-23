@@ -94,9 +94,8 @@ contract Ribbit {
     
     // Post Feed 
     event PostEvent(uint[2] previousFeedTransactionInfo);
-    event SavePreviousTagInfoByTimeEvent(bytes32 tag, uint[2] previousTagInfoByTime);
-    event SavePreviousTagInfoByTrendEvent(bytes32 tag, uint[2] previousTagInfoByTrend);
-    event SavePreviousMentionEvent(address mention, uint[2] previousMentionInfo);
+    event SavePreviousTagInfoByTimeEvent(uint[2] previousTagInfoByTime, bytes32 tag);
+    event SavePreviousTagInfoByTrendEvent(uint[2] previousTagInfoByTrend, bytes32 tag);
     function post(uint version, uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
         emit PostEvent(currentFeedInfoMap[msg.sender]);
         uint blockNumber = block.number;
@@ -107,12 +106,12 @@ contract Ribbit {
         uint i;
         for (i = 0; i < tags.length; i++) {
             tag = tags[i];
-            emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
+            emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
             currentTagInfoByTimeMap[tag][0] = blockNumber;
             currentTagInfoByTimeMap[tag][1] = messageHash;
             
             if (tag >> 160 != 0x0) { // this tag is not a user address.
-                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = blockNumber;
                 currentTagInfoByTrendMap[tag][1] = messageHash;
             }
@@ -133,7 +132,7 @@ contract Ribbit {
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
             if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
-                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
                 currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
             }
@@ -153,11 +152,11 @@ contract Ribbit {
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
             if (tag >> 160 == 0) { // it's a user address
-                emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
+                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
             } else if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
-                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
                 currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
             }
@@ -182,11 +181,11 @@ contract Ribbit {
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
             if (tag >> 160 == 0) { // it's a user address
-                emit SavePreviousTagInfoByTimeEvent(tag, currentTagInfoByTimeMap[tag]);
+                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
             } else if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
-                emit SavePreviousTagInfoByTrendEvent(tag, currentTagInfoByTrendMap[tag]);
+                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
                 currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
             }

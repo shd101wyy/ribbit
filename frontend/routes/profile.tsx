@@ -87,13 +87,13 @@ export default class profile extends React.Component<Props, State> {
     const userInfo = this.state.userInfo;
     if (!userInfo) {
       return (
-        <div className="profile">
+        <div className="profile-page">
           Loading user {this.props.guestUserAddress} profile...
         </div>
       );
     }
     return (
-      <div className="profile">
+      <div className="profile-page">
         <div className="container">
           <ProfileCard userInfo={this.state.userInfo} />
           <div className="cards">

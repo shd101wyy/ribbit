@@ -1,0 +1,69 @@
+// out: false;
+
+.topic-page {
+  .topic-card {
+    padding: 0;
+
+    .cover {
+      width: 100%;
+      height: 256px;
+      background-color: rgba(113, 178, 56, 0.3);
+      background-size: cover;
+    }
+
+    .title {
+      padding: 24px 12px 12px 24px;
+      font-size: 1.6rem;
+      font-style: italic;
+      background-color: rgba(53, 53, 53, 0.8);
+      color: #fff;
+      margin-top: -65px;
+      margin-bottom: 0;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: row;
+
+      .btn {
+        text-align: center;
+        width: 25%;
+        padding: 12px;
+        font-size: 1rem;
+        color: #969696;
+        width: 50%;
+
+        i {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          cursor: pointer;
+          background-color: #e8e8e8;
+          color: #222;
+        }
+
+        &.selected {
+          color: #fff;
+          background-color: #74a24b;
+
+          &:hover {
+            background-color: #6e964a;
+          }
+        }
+      }
+    }
+  }
+
+  #feed-footer {
+    margin-bottom: 128px;
+    text-align: center;
+    margin-top: 64px;
+    font-size: 1.6rem;
+  }
+  @media screen and (max-width: 500px) {
+    #feed-footer {
+      font-size: 1rem;
+    }
+  }
+}

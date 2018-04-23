@@ -10,6 +10,7 @@ import "./less/entry.less";
 
 import Home from "./routes/home";
 import Profile from "./routes/profile";
+import Topic from "./routes/topic";
 import Footer from "./components/footer";
 
 interface Props {}
@@ -86,6 +87,17 @@ class App extends React.Component<Props, State> {
                 networkId={props.match.params["networkId"]}
                 user={this.state.user}
                 guestUserAddress={props.match.params["userAddress"]}
+              />
+            )}
+            exact
+          />
+          <Route
+            path="/:networkId/topic/:topic"
+            render={props => (
+              <Topic
+                networkId={props.match.params["networkId"]}
+                user={this.state.user}
+                topic={props.match.params["topic"]}
               />
             )}
             exact
