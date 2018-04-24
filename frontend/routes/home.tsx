@@ -34,6 +34,7 @@ interface State {
   loading: boolean;
   userInfo: UserInfo;
   panel: HomePanel;
+  searchBoxValue: string;
 }
 export default class Home extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -44,7 +45,8 @@ export default class Home extends React.Component<Props, State> {
       feeds: [],
       loading: false,
       userInfo: null,
-      panel: HomePanel.FollowingsFeeds
+      panel: HomePanel.FollowingsFeeds,
+      searchBoxValue: ""
     };
   }
 
@@ -166,6 +168,31 @@ export default class Home extends React.Component<Props, State> {
     };
   };
 
+  searchBoxKeydown = event => {
+    const searchValue = this.state.searchBoxValue.trim();
+    if (!searchValue.length) {
+      return;
+    }
+    if (event.which === 13) {
+      // enter key
+      if (this.props.user.web3.utils.isAddress(this.state.searchBoxValue)) {
+        window.open(
+          `${window.location.pathname}#/${
+            this.props.user.networkId
+          }/profile/${searchValue}`,
+          "_blank"
+        );
+      } else {
+        window.open(
+          `${window.location.pathname}#/${
+            this.props.user.networkId
+          }/topic/${encodeURIComponent(searchValue)}`,
+          "_blank"
+        );
+      }
+    }
+  };
+
   render() {
     let middlePanel = null;
     if (this.state.panel === HomePanel.FollowingsFeeds) {
@@ -217,8 +244,13 @@ export default class Home extends React.Component<Props, State> {
                 <input
                   className="search-box"
                   placeholder={
-                    "Paste user address here or the topic string to start searching"
+                    "Enter user address here or the topic that you are interested to start searching"
                   }
+                  value={this.state.searchBoxValue}
+                  onChange={event => {
+                    this.setState({ searchBoxValue: event.target.value });
+                  }}
+                  onKeyDown={this.searchBoxKeydown}
                 />
               </div>
               <div className="icon-groups">

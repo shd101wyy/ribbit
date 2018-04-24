@@ -26,17 +26,17 @@ export default class FeedCard extends Component<Props, State> {
     this.props.user.like(hash);
   };
 
-  repost = ()=> {
+  repost = () => {
     alert("Not implemented");
-  }
+  };
 
-  reply = ()=> {
+  reply = () => {
     alert("Not implemented");
-  }
+  };
 
-  donate = ()=> {
+  donate = () => {
     alert("Not implemented");
-  }
+  };
 
   render() {
     if (!this.props.feedInfo) {
