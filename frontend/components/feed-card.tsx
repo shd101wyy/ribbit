@@ -2,6 +2,7 @@ import * as React from "react";
 import { Component } from "react";
 
 import ImagesPanel from "./images-panel";
+import UserTopPanel from "./user-top-panel";
 
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
@@ -56,41 +57,6 @@ export default class FeedCard extends Component<Props, State> {
     const stateInfo = this.props.feedInfo.stateInfo;
     const repostUserInfo = this.props.feedInfo.repostUserInfo;
     const feedType = this.props.feedInfo.feedType;
-    const userPanel = (
-      <div className="user-panel">
-        <div
-          className="profile-image"
-          style={{
-            backgroundImage: `url("${userInfo.avatar}")`
-          }}
-        />
-        <div className="name">
-          {userInfo.name ? userInfo.name : "Anonymous"}
-        </div>
-        <div className="user-address">
-          {userInfo.address.slice(0, 6) + "..."}
-        </div>
-        {/* <div className="postfix">c862b4eel</div> */}
-        <div className="action">post feed</div>
-        <div className="create-time">
-          <span>{formatFeedCreationTime(this.props.feedInfo)}</span>
-        </div>
-      </div>
-    );
-    const topBar =
-      feedType === "repost" ? (
-        <div className="top-bar">
-          <i className="fas fa-retweet" />
-          <Link
-            to={`/${this.props.user.networkId}/profile/${
-              repostUserInfo.address
-            }`}
-          >
-            {repostUserInfo.name}
-          </Link>
-          <span>reposted</span>
-        </div>
-      ) : null;
 
     const bottomButtonGroup = (
       <div className="bottom-button-group">
@@ -117,8 +83,7 @@ export default class FeedCard extends Component<Props, State> {
       // Article
       return (
         <div className="card">
-          {topBar}
-          {userPanel}
+          <UserTopPanel user={this.props.user} feedInfo={this.props.feedInfo} />
           <div className="content-panel">
             {summary.images.length ? (
               <div
@@ -141,8 +106,7 @@ export default class FeedCard extends Component<Props, State> {
       // Normal
       return (
         <div className="card">
-          {topBar}
-          {userPanel}
+          <UserTopPanel feedInfo={this.props.feedInfo} user={this.props.user} />
           <div className="content-panel">
             <div
               className="summary"

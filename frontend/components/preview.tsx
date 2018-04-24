@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Component } from "react";
 
-import Article from "./article";
+import ArticleCard from "./article-card";
 import FeedCard from "./feed-card";
 
 import * as utility from "../lib/utility";
@@ -17,7 +17,6 @@ interface Props {
 }
 
 interface State {
-  html: string;
   feedInfo: FeedInfo;
 }
 
@@ -25,7 +24,6 @@ export default class Preview extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      html: "",
       feedInfo: null
     };
   }
@@ -44,7 +42,6 @@ export default class Preview extends Component<Props, State> {
     const stateInfo = generateFakeStateInfo();
 
     this.setState({
-      html,
       feedInfo: {
         summary,
         userInfo,
@@ -64,7 +61,10 @@ export default class Preview extends Component<Props, State> {
           <FeedCard feedInfo={this.state.feedInfo} user={this.props.user} />
           {// Only render article if it is article
           this.state.feedInfo.summary.title ? (
-            <Article html={this.state.html} />
+            <ArticleCard
+              feedInfo={this.state.feedInfo}
+              user={this.props.user}
+            />
           ) : null}
         </div>
       );

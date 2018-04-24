@@ -13,82 +13,6 @@
   padding: 12px 24px 20px;
   text-align: left;
 
-  .top-bar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    font-size: 0.8rem;
-    margin-bottom: 16px;
-
-    i {
-      margin-right: 8px;
-    }
-
-    a {
-      margin-right: 4px;
-    }
-  }
-
-  .user-panel {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 12px;
-
-    .profile-image {
-      width: 48px;
-      height: 48px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-    }
-
-    .name {
-      margin: 0 12px;
-      margin-right: 6px;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .user-address {
-      color: #8590a6;
-      font-size: 0.9rem;
-      &:before {
-        content: "@";
-      }
-    }
-
-    .postfix {
-      color: #8590a6;
-      font-size: 0.9rem;
-      &:before {
-        content: "_";
-      }
-    }
-
-    .action {
-      font-size: 0.9rem;
-      color: #8590a6;
-      margin-left: 12px;
-
-      &:before {
-        content: "\B7";
-        margin-right: 12px;
-      }
-    }
-
-    .create-time {
-      font-size: 0.9rem;
-      margin-left: 12px;
-      color: #8590a6;
-
-      &:before {
-        content: "\B7";
-        margin-right: 6px;
-      }
-    }
-  }
-
   .content-panel {
     .cover {
       width: 100%;
@@ -149,36 +73,6 @@
 
   @media screen and (max-width: 500px) {
     padding: 6px;
-
-    .user-panel {
-      .profile-image {
-        width: 32px;
-        height: 32px;
-      }
-
-      .name {
-        font-size: 0.8rem;
-      }
-
-      .user-address {
-        font-size: 0.7rem;
-      }
-
-      .postfix {
-        font-size: 0.7rem;
-        display: none;
-      }
-
-      .action {
-        margin-left: 6px;
-        font-size: 0.7rem;
-      }
-
-      .create-time {
-        font-size: 0.7rem;
-        margin-left: 6px;
-      }
-    }
 
     .content-panel {
       .summary {

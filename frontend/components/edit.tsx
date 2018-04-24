@@ -131,7 +131,7 @@ export default class Edit extends Component<Props, State> {
       mode: "markdown"
     };
     return (
-      <div className="edit">
+      <div className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}>
         {this.state.previewIsOn ? (
           <div>
             {/* topics */}
@@ -173,11 +173,13 @@ export default class Edit extends Component<Props, State> {
             <Preview markdown={this.state.code} user={this.props.user} />
           </div>
         ) : (
-          <CodeMirror
-            value={this.state.code}
-            onChange={this.updateCode}
-            options={options}
-          />
+          <div className="editor-wrapper">
+            <CodeMirror
+              value={this.state.code}
+              onChange={this.updateCode}
+              options={options}
+            />
+          </div>
         )}
         <div className="button-group">
           {this.state.previewIsOn ? (

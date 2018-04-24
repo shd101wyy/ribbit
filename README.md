@@ -16,9 +16,10 @@ github: http://shd101wyy.github.io/ribbit/
 ## Development
 
 ```bash
-npm install 
-npm run frontend:dev   # start building and watching.
-npm run server:start     # start a static http server.
+npm install
+npm run frontend:dev     # start building and watching.
+                         # then open a new terminal and run =>
+npm run server:start     # start a static http server at address http://127.0.0.1:12345.
 ```
 
 ## Deployment

@@ -39,6 +39,7 @@ export interface Summary {
   summary: string;
   images: string[]; // If has `title`, then images[0] is cover.
   tags: string[]; // TODO: support tags
+  html: string; // original html
 }
 
 export async function getTopicsAndMentionsFromHTML(
@@ -205,7 +206,8 @@ export async function generateSummaryFromHTML(
     title: title,
     summary: summary,
     images: images,
-    tags: []
+    tags: [],
+    html
   };
 }
 

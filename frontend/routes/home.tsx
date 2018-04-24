@@ -121,6 +121,7 @@ export default class Home extends React.Component<Props, State> {
         user.accountAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
+          console.log("showNotificationFeeds: ", done, offset, transactionInfo);
           if (done) {
             return this.setState({ loading: false });
           }
