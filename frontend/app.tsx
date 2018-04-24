@@ -106,7 +106,7 @@ class App extends React.Component<Props, State> {
               <Topic
                 networkId={props.match.params["networkId"]}
                 user={this.state.user}
-                topic={props.match.params["topic"]}
+                topic={decodeURIComponent(props.match.params["topic"])}
               />
             )}
             exact

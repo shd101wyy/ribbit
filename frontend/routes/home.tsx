@@ -90,11 +90,14 @@ export default class Home extends React.Component<Props, State> {
 
           const userInfo = await user.getUserInfo(transactionInfo.from);
 
+          const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+
           const feeds = this.state.feeds;
           feeds.push({
             summary,
             transactionInfo,
-            userInfo
+            userInfo,
+            stateInfo
           });
           this.forceUpdate();
         }
@@ -125,11 +128,14 @@ export default class Home extends React.Component<Props, State> {
 
           const userInfo = await user.getUserInfo(transactionInfo.from);
 
+          const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+
           const feeds = this.state.feeds;
           feeds.push({
             summary,
             transactionInfo,
-            userInfo
+            userInfo,
+            stateInfo
           });
           this.forceUpdate();
         }
@@ -166,7 +172,7 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} />
+            <FeedCard key={index} feedInfo={feedInfo} user={this.props.user} />
           ))}
           <p id="feed-footer">
             {" "}
@@ -184,7 +190,7 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} />
+            <FeedCard key={index} feedInfo={feedInfo} user={this.props.user} />
           ))}
           <p id="feed-footer">
             {" "}

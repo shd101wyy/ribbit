@@ -5,10 +5,20 @@ import {
 } from "./transaction";
 import { UserInfo, User } from "./user";
 
+export interface StateInfo {
+  earnings: number;
+  likes: number;
+  dislikes: number;
+  reports: number;
+  replies: number;
+  reposts: number;
+}
+
 export interface FeedInfo {
   summary: Summary;
   transactionInfo: TransactionInfo;
   userInfo: UserInfo;
+  stateInfo: StateInfo;
 }
 
 export function formatFeedCreationTime(feedInfo: FeedInfo) {
@@ -187,5 +197,16 @@ export async function generateSummaryFromHTML(
     summary: summary,
     images: images,
     tags: []
+  };
+}
+
+export function generateFakeStateInfo(): StateInfo {
+  return {
+    earnings: 0,
+    likes: 0,
+    dislikes: 0,
+    reports: 0,
+    replies: 0,
+    reposts: 0
   };
 }

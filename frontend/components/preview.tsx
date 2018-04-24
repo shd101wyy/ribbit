@@ -9,6 +9,7 @@ import { User } from "../lib/user";
 import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
 import { generateFakeTransactionInfo } from "../lib/transaction";
 import { renderMarkdown } from "../lib/markdown";
+import { generateFakeStateInfo } from "../lib/feed";
 
 interface Props {
   markdown: string;
@@ -40,13 +41,15 @@ export default class Preview extends Component<Props, State> {
       this.props.user.accountAddress
     );
     const transactionInfo = generateFakeTransactionInfo();
+    const stateInfo = generateFakeStateInfo();
 
     this.setState({
       html,
       feedInfo: {
         summary,
         userInfo,
-        transactionInfo
+        transactionInfo,
+        stateInfo
       }
     });
   };
@@ -57,7 +60,7 @@ export default class Preview extends Component<Props, State> {
     } else {
       return (
         <div className="preview">
-          <FeedCard feedInfo={this.state.feedInfo} />
+          <FeedCard feedInfo={this.state.feedInfo} user={this.props.user} />
           {// Only render article if it is article
           this.state.feedInfo.summary.title ? (
             <Article html={this.state.html} />

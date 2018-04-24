@@ -10,7 +10,7 @@
   width: 580px;
   max-width: 100%;
   margin: 16px auto;
-  padding: 12px 24px 24px;
+  padding: 12px 24px 20px;
   text-align: left;
 
   .user-panel {
@@ -30,8 +30,8 @@
     .name {
       margin: 0 12px;
       margin-right: 6px;
-      font-weight: 800;
-      font-size: 1.1rem;
+      font-weight: 600;
+      font-size: 1rem;
     }
 
     .user-address {
@@ -110,6 +110,23 @@
 
       &.single-image img {
         max-width: 100%;
+      }
+    }
+
+    .bottom-button-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-top: 14px;
+
+      .btn {
+        margin-right: 28px;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      i {
+        margin-right: 6px;
       }
     }
   }

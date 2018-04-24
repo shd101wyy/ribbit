@@ -10,6 +10,8 @@ import Web3 from "web3";
 import { Contract, Transaction } from "web3/types";
 import { BigNumber } from "bignumber.js";
 
+import { StateInfo } from "./feed";
+
 abiDecoder.addABI(abiArray);
 
 export interface UserInfo {
@@ -534,6 +536,64 @@ export class User {
         })
         .on("receipt", receipt => {
           console.log("finish setUserMetadata: ", receipt);
+        });
+    });
+  }
+
+  public async getFeedStateInfo(transactionHash: string): Promise<StateInfo> {
+    const earnings = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 0).call()
+    );
+    const likes = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 1).call()
+    );
+    const dislikes = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 2).call()
+    );
+    const reports = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 3).call()
+    );
+    const replies = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 4).call()
+    );
+    const reposts = parseInt(
+      await this.contractInstance.methods.getState(transactionHash, 5).call()
+    );
+    return {
+      earnings,
+      likes,
+      dislikes,
+      reports,
+      replies,
+      reposts
+    };
+  }
+
+  /**
+   * Like a feed
+   * @param transactionHash
+   */
+  public async like(transactionHash: string): Promise<string> {
+    if (!transactionHash) {
+      return;
+    }
+    transactionHash = transactionHash.trim();
+    if (!transactionHash.length) {
+      return;
+    }
+
+    return new Promise<string>((resolve, reject) => {
+      this.contractInstance.methods
+        .like(transactionHash)
+        .send({
+          from: this.accountAddress
+        })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          console.log("like: ", hash);
+          return resolve(hash);
         });
     });
   }

@@ -6,9 +6,11 @@ import ImagesPanel from "./images-panel";
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
+import { User } from "../lib/user";
 
 interface Props {
   feedInfo: FeedInfo;
+  user: User;
 }
 interface State {}
 
@@ -19,6 +21,23 @@ export default class FeedCard extends Component<Props, State> {
     this.state = {};
   }
 
+  like = () => {
+    const hash = this.props.feedInfo.transactionInfo.hash;
+    this.props.user.like(hash);
+  };
+
+  repost = ()=> {
+    alert("Not implemented");
+  }
+
+  reply = ()=> {
+    alert("Not implemented");
+  }
+
+  donate = ()=> {
+    alert("Not implemented");
+  }
+
   render() {
     if (!this.props.feedInfo) {
       return null;
@@ -26,6 +45,7 @@ export default class FeedCard extends Component<Props, State> {
     const summary = this.props.feedInfo.summary;
     const transactionInfo = this.props.feedInfo.transactionInfo;
     const userInfo = this.props.feedInfo.userInfo;
+    const stateInfo = this.props.feedInfo.stateInfo;
     const userPanel = (
       <div className="user-panel">
         <div
@@ -44,6 +64,27 @@ export default class FeedCard extends Component<Props, State> {
         <div className="action">post feed</div>
         <div className="create-time">
           <span>{formatFeedCreationTime(this.props.feedInfo)}</span>
+        </div>
+      </div>
+    );
+
+    const bottomButtonGroup = (
+      <div className="bottom-button-group">
+        <div className="reply-btn btn" onClick={this.reply}>
+          <i className="far fa-comment" />
+          <span className="comment-num">{stateInfo.replies || ""}</span>
+        </div>
+        <div className="repost-btn btn" onClick={this.repost}>
+          <i className="fas fa-retweet" />
+          <span className="comment-num">{stateInfo.reposts || ""}</span>
+        </div>
+        <div className="like-btn btn" onClick={this.like}>
+          <i className="far fa-heart" />
+          <span className="comment-num">{stateInfo.likes || ""}</span>
+        </div>
+        <div className="donate-btn btn" onClick={this.donate}>
+          <i className="fas fa-dollar-sign" />
+          <span className="comment-num">{stateInfo.earnings || ""}</span>
         </div>
       </div>
     );
@@ -82,6 +123,7 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
             <ImagesPanel images={summary.images} />
+            {bottomButtonGroup}
           </div>
         </div>
       );

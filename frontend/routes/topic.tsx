@@ -81,11 +81,16 @@ export default class profile extends React.Component<Props, State> {
           transactionInfo.from
         );
 
+        const stateInfo = await this.props.user.getFeedStateInfo(
+          transactionInfo.hash
+        );
+
         const feeds = this.state.feeds;
         feeds.push({
           summary,
           transactionInfo,
-          userInfo
+          userInfo,
+          stateInfo
         });
         if (offset === 0 && sorting === TopicSorting.ByTrend) {
           this.setState({
@@ -163,7 +168,11 @@ export default class profile extends React.Component<Props, State> {
           </div>
           <div className="cards">
             {this.state.feeds.map((feedInfo, index) => (
-              <FeedCard key={index} feedInfo={feedInfo} />
+              <FeedCard
+                key={index}
+                feedInfo={feedInfo}
+                user={this.props.user}
+              />
             ))}
             <p id="feed-footer">
               {" "}

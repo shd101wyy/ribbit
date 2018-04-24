@@ -71,11 +71,16 @@ export default class profile extends React.Component<Props, State> {
             this.props.user
           );
 
+          const stateInfo = await this.props.user.getFeedStateInfo(
+            transactionInfo.hash
+          );
+
           const feeds = this.state.feeds;
           feeds.push({
             summary,
             transactionInfo,
-            userInfo: this.state.userInfo
+            userInfo: this.state.userInfo,
+            stateInfo
           });
           this.forceUpdate();
         }
@@ -98,7 +103,11 @@ export default class profile extends React.Component<Props, State> {
           <ProfileCard userInfo={this.state.userInfo} />
           <div className="cards">
             {this.state.feeds.map((feedInfo, index) => (
-              <FeedCard key={index} feedInfo={feedInfo} />
+              <FeedCard
+                key={index}
+                feedInfo={feedInfo}
+                user={this.props.user}
+              />
             ))}
             <p id="feed-footer">
               {" "}
