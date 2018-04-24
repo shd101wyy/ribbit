@@ -49,7 +49,8 @@ export default class Preview extends Component<Props, State> {
         summary,
         userInfo,
         transactionInfo,
-        stateInfo
+        stateInfo,
+        feedType: "post" // TODO: support differnet feedType.
       }
     });
   };

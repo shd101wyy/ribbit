@@ -81,9 +81,13 @@ export default class Home extends React.Component<Props, State> {
           if (done) {
             return this.setState({ loading: false });
           }
+          if (transactionInfo.decodedInputData.name !== "post") return;
           const message = decompressString(
-            transactionInfo.decodedInputData.params[2].value
+            transactionInfo.decodedInputData.params["message"].value
           );
+
+          const feedType = transactionInfo.decodedInputData.name;
+
           // console.log(message);
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message),
@@ -99,7 +103,8 @@ export default class Home extends React.Component<Props, State> {
             summary,
             transactionInfo,
             userInfo,
-            stateInfo
+            stateInfo,
+            feedType
           });
           this.forceUpdate();
         }
@@ -120,8 +125,11 @@ export default class Home extends React.Component<Props, State> {
             return this.setState({ loading: false });
           }
           const message = decompressString(
-            transactionInfo.decodedInputData.params[2].value
+            transactionInfo.decodedInputData.params["message"].value
           );
+
+          const feedType = transactionInfo.decodedInputData.name;
+
           // console.log(message);
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message),
@@ -137,7 +145,8 @@ export default class Home extends React.Component<Props, State> {
             summary,
             transactionInfo,
             userInfo,
-            stateInfo
+            stateInfo,
+            feedType
           });
           this.forceUpdate();
         }
@@ -308,6 +317,11 @@ export default class Home extends React.Component<Props, State> {
               >
                 <div className="bug-btn github-btn btn">
                   <i className="fas fa-bug" />
+                </div>
+              </a>
+              <a href="https://ethgasstation.info/" target="_blank">
+                <div className="github-btn btn">
+                  <i className="fas fa-fire" />
                 </div>
               </a>
             </div>

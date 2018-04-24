@@ -124,8 +124,13 @@ contract Ribbit {
         emit RepostEvent(currentFeedInfoMap[msg.sender]);
         // We can see the sender of feedInfo is not from msg.sender
         // So this is a repost.
-        currentFeedInfoMap[msg.sender][0] = parentTransactionBlockNumber;
+
+        // These two lines are wrong entries, it will load other user's posts instead of this repost...
+        // currentFeedInfoMap[msg.sender][0] = parentTransactionBlockNumber;
+        // currentFeedInfoMap[msg.sender][1] = parentTransactionMessageHash;
+        currentFeedInfoMap[msg.sender][0] = block.number;
         currentFeedInfoMap[msg.sender][1] = parentTransactionMessageHash;
+
         state[parentTransactionHash][5] = state[parentTransactionHash][5] + 1; // increase number of reposts.
 
         bytes32 tag;
@@ -246,6 +251,5 @@ contract Ribbit {
     // Report user
     function reportUser(address userAddress) external {
         userState[userAddress][2] = userState[userAddress][2] + 1;
-    }
-    
+    }    
 }

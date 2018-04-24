@@ -1,8 +1,17 @@
 # ribbit
 
-A decentralized social media web application based on Ethereum platform. 基于以太坊的去中心化社交程序。
+> I hope we didn't unleash a beast.
+
+A decentralized social media web application based on Ethereum platform.  
+基于以太坊的去中心化社交程序。
 
 github: http://shd101wyy.github.io/ribbit/
+
+## Usage
+
+1.  Install [MetaMask](https://metamask.io/) in your Chrome browser and launch it.
+2.  Switch to `Ropsten Testnet`. Get coints from faucet by clicking `Buy` button (don't worry, it's all fake money).
+3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit.
 
 ## Development
 

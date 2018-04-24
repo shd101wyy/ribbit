@@ -17,8 +17,17 @@ export interface StateInfo {
 export interface FeedInfo {
   summary: Summary;
   transactionInfo: TransactionInfo;
+  /**
+   * author info of this feed
+   */
   userInfo: UserInfo;
   stateInfo: StateInfo;
+
+  /**
+   * who reposts this feed.
+   */
+  repostUserInfo?: UserInfo;
+  feedType: string; // post | repost | repostAndReply
 }
 
 export function formatFeedCreationTime(feedInfo: FeedInfo) {

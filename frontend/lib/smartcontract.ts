@@ -391,6 +391,17 @@ export const abiArray = [
     type: "event"
   }
 ];
-export const contractAddress = "0xfb6bc1679704aa014d880263192507958ee4327f";
+
+export function getContractAddress(networkId: number) {
+  if (networkId === 3) {
+    // Ropsten
+    return "0xcaf1dff421c5905086ce59029329a854d3c19437";
+  } else if (networkId === 1) {
+    // mainnet
+    return null;
+  } else {
+    return null;
+  }
+}
 
 export const abiArrayJSONString = JSON.stringify(abiArray);

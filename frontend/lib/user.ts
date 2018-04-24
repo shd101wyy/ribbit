@@ -1,18 +1,41 @@
-import { contractAddress, abiArray } from "./smartcontract";
+import { getContractAddress, abiArray } from "./smartcontract";
 import { sha256 } from "js-sha256";
 import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
 import { compressString, hexEncode, decompressString } from "./utility";
-import { TransactionInfo } from "./transaction";
+import {
+  TransactionInfo,
+  DecodedLogData,
+  transformDecodedInputData,
+  transformDecodedLogData
+} from "./transaction";
 import * as Identicon from "identicon.js";
 import Web3 from "web3";
-import { Contract, Transaction } from "web3/types";
+import { Contract, Transaction, Log } from "web3/types";
 import { BigNumber } from "bignumber.js";
 
 import { StateInfo } from "./feed";
 
 abiDecoder.addABI(abiArray);
+
+function decodeMethod(input: string) {
+  const decodedInputData = abiDecoder.decodeMethod(input);
+  if (!decodedInputData) {
+    return null;
+  } else {
+    return transformDecodedInputData(decodedInputData);
+  }
+}
+
+function decodeLogs(logs: Log[]) {
+  const decodedLogData = abiDecoder.decodeLogs(logs);
+  if (!decodedLogData) {
+    return null;
+  } else {
+    return transformDecodedLogData(decodedLogData);
+  }
+}
 
 export interface UserInfo {
   /**
@@ -80,7 +103,7 @@ export class User {
     this.networkName = await this.getNetworkName(this.networkId);
     this.contractInstance = new this.web3.eth.Contract(
       abiArray,
-      contractAddress
+      getContractAddress(this.networkId)
     );
   }
 
@@ -194,6 +217,70 @@ export class User {
   }
 
   /**
+   * Repost a feed
+   */
+  public async repost(parentTransactionHash: string) {
+    // 1. Get parentTransactionBlockNumber and parentTransactionMessageHash
+    const parentTransaction = await this.web3.eth.getTransaction(
+      parentTransactionHash
+    );
+    const parentTransactionBlockNumber = parentTransaction.blockNumber;
+    const decodedInputData = decodeMethod(parentTransaction.input);
+    if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
+      return null;
+    }
+    // TODO: now we only support repost original article.
+    if (decodedInputData.name !== "post") {
+      throw "Not implemented `repost` function" +
+        JSON.stringify(decodedInputData, null, "  ");
+    }
+    const parentTransactionMessageHash = new BigNumber(
+      decodedInputData.params["messageHash"].value
+    ).toString(16);
+    // console.log('parentTransactionBlockNumber: ' + parentTransactionBlockNumber)
+    // console.log('parentTransactionMessageHash: ', parentTransactionMessageHash)
+
+    // 2. Get previousFeedTransactionHash
+    const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
+      this.accountAddress
+    );
+    const previousFeedTransactionHash = previousFeedTransactionInfo.hash;
+
+    // 3. Analyze tags
+    //    If the parentTransaction is the original `post` method, then add its tags.
+    // TODO: Need discussion of the tags.
+    //       https://github.com/shd101wyy/ribbit/issues/4
+    let tags = [];
+    if (decodedInputData.name === "post") {
+      tags = decodedInputData.params["tags"].value;
+    }
+
+    return new Promise((resolve, reject) => {
+      this.contractInstance.methods
+        .repost(
+          0,
+          Date.now(),
+          parentTransactionHash,
+          parentTransactionBlockNumber,
+          "0x" + parentTransactionMessageHash,
+          previousFeedTransactionHash,
+          tags
+        )
+        .send({ from: this.accountAddress })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          console.log("repost txHash: ", hash);
+          return resolve(hash);
+        })
+        .on("receipt", receipt => {
+          console.log("repost receipt: ", receipt);
+        });
+    });
+  }
+
+  /**
    * If transactionHash is provided, then get transactionInfo based on that trasactionHash,
    * then compare the data with blockNumber and messageHash.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
@@ -214,20 +301,35 @@ export class User {
     // console.log("transactionHash: ", transactionHash);
     const validateTransaction = (transaction: Transaction) => {
       // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
+      // This code is wrong for `repost` event, userAddress !== transaction.from.
       if (
         userAddress &&
         userAddress.toLowerCase() !== transaction.from.toLowerCase()
       ) {
         return null;
       }
+
       const input = transaction.input;
-      const decodedInputData = abiDecoder.decodeMethod(input);
+      const decodedInputData = decodeMethod(input);
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
-        const messageHash2 = new BigNumber(
-          decodedInputData.params[3].value
-        ).toString(16);
+        // TODO: Add this line for the case when user liked another user's post,
+        //       And that user visit `Notification` panel, decodeInputsData.params[3]
+        //       doesn't exist.
+        if (decodedInputData.name === "like") {
+          return null;
+        }
+        let messageHash2 = null;
+        if (decodedInputData.name === "post") {
+          messageHash2 = new BigNumber(
+            decodedInputData.params["messageHash"].value
+          ).toString(16);
+        } else if (decodedInputData.name === "repost") {
+          messageHash2 = new BigNumber(
+            decodedInputData.params["parentTransactionMessageHash"].value
+          ).toString(16);
+        }
         if (messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
@@ -363,7 +465,7 @@ export class User {
       num,
       transactionHash,
       cb,
-      eventName: "PostEvent"
+      eventNames: ["PostEvent", "RepostEvent"]
     });
   }
 
@@ -395,7 +497,7 @@ export class User {
       num,
       transactionHash,
       cb,
-      eventName: "SavePreviousTagInfoByTimeEvent"
+      eventNames: ["SavePreviousTagInfoByTimeEvent"]
     });
   }
 
@@ -427,7 +529,7 @@ export class User {
       num,
       transactionHash,
       cb,
-      eventName: "SavePreviousTagInfoByTrendEvent"
+      eventNames: ["SavePreviousTagInfoByTrendEvent"]
     });
   }
 
@@ -436,7 +538,7 @@ export class User {
    * @param param0
    */
   private async getFeeds({
-    eventName = "UnknownEvent",
+    eventNames = [],
     userAddress = "",
     tag = "",
     blockNumber = 0,
@@ -448,6 +550,19 @@ export class User {
       offset?: number,
       transactionInfo?: TransactionInfo
     ) => {}
+  }: {
+    eventNames: string[];
+    userAddress?: string;
+    tag?: string;
+    blockNumber: number;
+    messageHash: string;
+    num: number;
+    transactionHash: string;
+    cb: (
+      done: boolean,
+      offset?: number,
+      transactionInfo?: TransactionInfo
+    ) => void;
   }) {
     let offset = 0;
     while (offset > num) {
@@ -462,7 +577,21 @@ export class User {
         return cb(true); // done.
       } else {
         cb(false, offset, transactionInfo);
-        transactionHash = transactionInfo.decodedInputData.params[4].value;
+        if (transactionInfo.decodedInputData.name === "post") {
+          transactionHash =
+            transactionInfo.decodedInputData.params[
+              "previousFeedTransactionHash"
+            ].value;
+        } else if (transactionInfo.decodedInputData.name === "repost") {
+          transactionHash =
+            transactionInfo.decodedInputData.params[
+              "previousFeedTransactionHash"
+            ].value;
+        } else {
+          // wrong event
+          console.log("getFeeds wrong transactionInfo: ", transactionInfo);
+          return cb(true);
+        }
         const receipt = await this.web3.eth.getTransactionReceipt(
           transactionInfo.hash
         );
@@ -470,22 +599,53 @@ export class User {
         if (!logs.length) {
           return cb(true);
         }
-        const decodedLogs = abiDecoder.decodeLogs(logs);
-        let eventLog = null;
-        if (eventName === "PostEvent") {
-          // Post event.
-          eventLog = decodedLogs.filter(x => x.name === eventName)[0];
+        const decodedLogs = decodeLogs(logs);
+        let eventLog: DecodedLogData = null;
+        if (
+          eventNames.indexOf("PostEvent") >= 0 ||
+          eventNames.indexOf("RepostEvent") >= 0
+        ) {
+          // PostEvent or RepostEvent.
+          eventLog = decodedLogs.filter(
+            x => eventNames.indexOf(x.name) >= 0
+          )[0];
         } else {
           // Tag events.
           eventLog = decodedLogs.filter(
-            x => x.name === eventName && x.events[1].value === tag
+            x => x.name === eventNames[0] && x.events["tag"].value === tag
           )[0];
         }
         if (!eventLog) {
           return cb(true); // done
         } else {
-          blockNumber = parseInt(eventLog.events[0].value[0]);
-          messageHash = new BigNumber(eventLog.events[0].value[1]).toString(16);
+          if (eventLog.name === "SavePreviousTagInfoByTrendEvent") {
+            blockNumber = parseInt(
+              eventLog.events["previousTagInfoByTrend"].value[0]
+            );
+            messageHash = new BigNumber(
+              eventLog.events["previousTagInfoByTrend"].value[1]
+            ).toString(16);
+          } else if (eventLog.name === "SavePreviousTagInfoByTimeEvent") {
+            blockNumber = parseInt(
+              eventLog.events["previousTagInfoByTime"].value[0]
+            );
+            messageHash = new BigNumber(
+              eventLog.events["previousTagInfoByTime"].value[1]
+            ).toString(16);
+          } else if (
+            eventLog.name === "PostEvent" ||
+            eventLog.name === "RepostEvent"
+          ) {
+            blockNumber = parseInt(
+              eventLog.events["previousFeedTransactionInfo"].value[0]
+            );
+            messageHash = new BigNumber(
+              eventLog.events["previousFeedTransactionInfo"].value[1]
+            ).toString(16);
+          } else {
+            throw "Error: Invalid eventLog" +
+              JSON.stringify(eventLog, null, "  ");
+          }
           offset += 1;
           continue;
         }

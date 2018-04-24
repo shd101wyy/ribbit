@@ -13,6 +13,7 @@ import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
+import { TransactionInfo } from "../lib/transaction";
 
 interface Props {
   user: User;
@@ -63,43 +64,58 @@ export default class profile extends React.Component<Props, State> {
         ? this.props.user.getFeedsFromTagByTrend
         : this.props.user.getFeedsFromTagByTime
       ).bind(this.props.user);
-      fn(topic, { num: -1 }, async (done, offset, transactionInfo) => {
-        console.log(done, offset, transactionInfo);
-        if (done) {
-          return this.setState({ loading: false });
-        }
-        const message = decompressString(
-          transactionInfo.decodedInputData.params[2].value
-        );
+      fn(
+        topic,
+        { num: -1 },
+        async (
+          done: boolean,
+          offset: number,
+          transactionInfo: TransactionInfo
+        ) => {
+          console.log(done, offset, transactionInfo);
+          if (done) {
+            return this.setState({ loading: false });
+          }
+          const message = decompressString(
+            transactionInfo.decodedInputData.params["message"].value
+          );
 
-        const summary = await generateSummaryFromHTML(
-          renderMarkdown(message),
-          this.props.user
-        );
+          // TODO: topics shouldn't display reply, repost, and repostAndReply
+          const feedType = transactionInfo.decodedInputData.name;
+          if (feedType !== "post") {
+            return;
+          }
 
-        const userInfo = await this.props.user.getUserInfo(
-          transactionInfo.from
-        );
+          const summary = await generateSummaryFromHTML(
+            renderMarkdown(message),
+            this.props.user
+          );
 
-        const stateInfo = await this.props.user.getFeedStateInfo(
-          transactionInfo.hash
-        );
+          const userInfo = await this.props.user.getUserInfo(
+            transactionInfo.from
+          );
 
-        const feeds = this.state.feeds;
-        feeds.push({
-          summary,
-          transactionInfo,
-          userInfo,
-          stateInfo
-        });
-        if (offset === 0 && sorting === TopicSorting.ByTrend) {
-          this.setState({
-            cover: userInfo.cover
+          const stateInfo = await this.props.user.getFeedStateInfo(
+            transactionInfo.hash
+          );
+
+          const feeds = this.state.feeds;
+          feeds.push({
+            summary,
+            transactionInfo,
+            userInfo,
+            stateInfo,
+            feedType
           });
-        } else {
-          this.forceUpdate();
+          if (offset === 0 && sorting === TopicSorting.ByTrend) {
+            this.setState({
+              cover: userInfo.cover
+            });
+          } else {
+            this.forceUpdate();
+          }
         }
-      });
+      );
     });
   }
 

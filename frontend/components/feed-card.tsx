@@ -7,6 +7,7 @@ import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
 import { User } from "../lib/user";
+import { Link } from "react-router-dom";
 
 interface Props {
   feedInfo: FeedInfo;
@@ -27,7 +28,14 @@ export default class FeedCard extends Component<Props, State> {
   };
 
   repost = () => {
-    alert("Not implemented");
+    this.props.user
+      .repost(this.props.feedInfo.transactionInfo.hash)
+      .then(hash => {
+        // do nothing.
+      })
+      .catch(error => {
+        alert(error);
+      });
   };
 
   reply = () => {
@@ -46,6 +54,8 @@ export default class FeedCard extends Component<Props, State> {
     const transactionInfo = this.props.feedInfo.transactionInfo;
     const userInfo = this.props.feedInfo.userInfo;
     const stateInfo = this.props.feedInfo.stateInfo;
+    const repostUserInfo = this.props.feedInfo.repostUserInfo;
+    const feedType = this.props.feedInfo.feedType;
     const userPanel = (
       <div className="user-panel">
         <div
@@ -67,6 +77,20 @@ export default class FeedCard extends Component<Props, State> {
         </div>
       </div>
     );
+    const topBar =
+      feedType === "repost" ? (
+        <div className="top-bar">
+          <i className="fas fa-retweet" />
+          <Link
+            to={`/${this.props.user.networkId}/profile/${
+              repostUserInfo.address
+            }`}
+          >
+            {repostUserInfo.name}
+          </Link>
+          <span>reposted</span>
+        </div>
+      ) : null;
 
     const bottomButtonGroup = (
       <div className="bottom-button-group">
@@ -93,6 +117,7 @@ export default class FeedCard extends Component<Props, State> {
       // Article
       return (
         <div className="card">
+          {topBar}
           {userPanel}
           <div className="content-panel">
             {summary.images.length ? (
@@ -116,6 +141,7 @@ export default class FeedCard extends Component<Props, State> {
       // Normal
       return (
         <div className="card">
+          {topBar}
           {userPanel}
           <div className="content-panel">
             <div

@@ -9,6 +9,7 @@ import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
+import { BigNumber } from "bignumber.js";
 
 interface Props {
   user: User;
@@ -59,29 +60,75 @@ export default class profile extends React.Component<Props, State> {
         userAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
+          console.log("showUserFeeds: ", done, offset, transactionInfo);
           if (done) {
             return this.setState({ loading: false });
           }
-          const message = decompressString(
-            transactionInfo.decodedInputData.params[2].value
-          );
+          const feedType = transactionInfo.decodedInputData.name;
 
-          const summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.user
-          );
+          let message, summary, userInfo, repostUserInfo;
+          if (feedType === "post") {
+            message = decompressString(
+              transactionInfo.decodedInputData.params["message"].value
+            );
+
+            summary = await generateSummaryFromHTML(
+              renderMarkdown(message),
+              this.props.user
+            );
+
+            userInfo = await this.props.user.getUserInfo(userAddress);
+          } else if (feedType === "repost") {
+            // Get parent transactionInfo
+            transactionInfo = await this.props.user.getTransactionInfo(
+              "",
+              parseInt(
+                transactionInfo.decodedInputData.params[
+                  "parentTransactionBlockNumber"
+                ].value
+              ),
+              new BigNumber(
+                transactionInfo.decodedInputData.params[
+                  "parentTransactionMessageHash"
+                ].value
+              ).toString(16),
+              transactionInfo.decodedInputData.params["parentTransactionHash"]
+                .value
+            );
+
+            // who reposts the feed
+            repostUserInfo = await this.props.user.getUserInfo(userAddress);
+
+            // author of the original feed
+            userInfo = await this.props.user.getUserInfo(transactionInfo.from);
+
+            message = decompressString(
+              transactionInfo.decodedInputData.params["message"].value
+            );
+
+            summary = await generateSummaryFromHTML(
+              renderMarkdown(message),
+              this.props.user
+            );
+          } else {
+            throw "Invalid feed type: " + feedType;
+          }
 
           const stateInfo = await this.props.user.getFeedStateInfo(
             transactionInfo.hash
           );
 
           const feeds = this.state.feeds;
-          feeds.push({
+          const feedInfo = {
             summary,
             transactionInfo,
-            userInfo: this.state.userInfo,
-            stateInfo
-          });
+            userInfo,
+            stateInfo,
+            feedType,
+            repostUserInfo
+          };
+          console.log("render feed: ", offset, feedInfo);
+          feeds.push(feedInfo);
           this.forceUpdate();
         }
       );
