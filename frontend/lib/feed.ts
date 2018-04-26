@@ -1,9 +1,10 @@
-import { formatDate } from "./utility";
+import { formatDate, decompressString } from "./utility";
 import {
   TransactionInfo,
   getTransactionCreationTimestamp
 } from "./transaction";
 import { UserInfo, User } from "./user";
+import { renderMarkdown } from "./markdown";
 
 export interface StateInfo {
   earnings: number;
@@ -213,4 +214,76 @@ export function generateFakeStateInfo(): StateInfo {
     reports: 0,
     replies: 0
   };
+}
+
+export async function generateFeedInfoFromTransactionInfo(
+  user: User,
+  transactionInfo: TransactionInfo
+): Promise<FeedInfo> {
+  if (!transactionInfo) {
+    return null;
+  }
+  const feedType = transactionInfo.decodedInputData.name;
+
+  let message, summary, userInfo, repostUserInfo;
+  if (feedType === "post") {
+    message = decompressString(
+      transactionInfo.decodedInputData.params["message"].value
+    );
+
+    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+
+    userInfo = await user.getUserInfo(transactionInfo.from);
+  } else if (feedType === "upvote") {
+    const repostUserAddress = transactionInfo.from;
+    // Get parent transactionInfo
+    transactionInfo = await user.getTransactionInfo(
+      "",
+      parseInt(
+        transactionInfo.decodedInputData.params["parentTransactionBlockNumber"]
+          .value
+      ),
+      new BigNumber(
+        transactionInfo.decodedInputData.params[
+          "parentTransactionMessageHash"
+        ].value
+      ).toString(16),
+      transactionInfo.decodedInputData.params["parentTransactionHash"].value
+    );
+
+    // who reposts the feed
+    repostUserInfo = await user.getUserInfo(repostUserAddress);
+
+    // author of the original feed
+    userInfo = await user.getUserInfo(transactionInfo.from);
+
+    message = decompressString(
+      transactionInfo.decodedInputData.params["message"].value
+    );
+
+    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+  } else if (feedType === "reply") {
+    message = decompressString(
+      transactionInfo.decodedInputData.params["message"].value
+    );
+
+    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+
+    userInfo = await user.getUserInfo(transactionInfo.from);
+  } else {
+    throw "Invalid feed type: " + feedType;
+  }
+
+  const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+
+  const feedInfo: FeedInfo = {
+    summary,
+    transactionInfo,
+    userInfo,
+    stateInfo,
+    feedType,
+    repostUserInfo
+  };
+
+  return feedInfo;
 }

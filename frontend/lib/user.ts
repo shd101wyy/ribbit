@@ -136,6 +136,11 @@ export class User {
       return tag.toLowerCase().replace(/^0x/, "0x000000000000000000000000"); // to make it 32bytes.
     }
 
+    // check if this is transaction hash
+    if (tag.startsWith("0x") && tag.length === 66) {
+      return tag.toLowerCase();
+    }
+
     return "0x" + sha256(tag.toLowerCase().replace(/\s/g, ""));
 
     /*
@@ -446,6 +451,7 @@ export class User {
         if (messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
+        transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         return Object.assign(transaction as object, {
           decodedInputData
         }) as TransactionInfo;
@@ -599,8 +605,10 @@ export class User {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(tag)
       .call();
-    blockNumber = parseInt(currentFeedInfo[0]);
-    messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
+    if (!blockNumber) {
+      blockNumber = parseInt(currentFeedInfo[0]);
+      messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
+    }
     return await this.getFeeds({
       userAddress: "",
       tag,
