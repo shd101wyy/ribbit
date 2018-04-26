@@ -5,7 +5,11 @@ import ArticleCard from "../components/article-card";
 import { User, UserInfo, decodeMethod } from "../lib/user";
 import { decompressString } from "../lib/utility";
 import { TransactionInfo } from "../lib/transaction";
-import { generateSummaryFromHTML, FeedInfo } from "../lib/feed";
+import {
+  generateSummaryFromHTML,
+  FeedInfo,
+  generateFeedInfoFromTransactionInfo
+} from "../lib/feed";
 import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
@@ -43,79 +47,28 @@ export default class Tx extends React.Component<Props, State> {
           msg: `Invalid transaction ${transactionHash}`
         });
       } else {
-        console.log(transaction, decodedInputData);
         let transactionInfo = Object.assign(transaction as object, {
           decodedInputData
         }) as TransactionInfo;
-        const feedType = decodedInputData.name;
-
-        // same as the one in profile.tsx
-        let message, summary, userInfo, repostUserInfo;
-        if (feedType === "post") {
-          message = decompressString(
-            transactionInfo.decodedInputData.params["message"].value
+        try {
+          const feedInfo = await generateFeedInfoFromTransactionInfo(
+            user,
+            transactionInfo
           );
-
-          summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.user
-          );
-
-          userInfo = await this.props.user.getUserInfo(transaction.from);
-        } else if (feedType === "upvote") {
-          // Get parent transactionInfo
-          transactionInfo = await this.props.user.getTransactionInfo(
-            "",
-            parseInt(
-              transactionInfo.decodedInputData.params[
-                "parentTransactionBlockNumber"
-              ].value
-            ),
-            new BigNumber(
-              transactionInfo.decodedInputData.params[
-                "parentTransactionMessageHash"
-              ].value
-            ).toString(16),
-            transactionInfo.decodedInputData.params["parentTransactionHash"]
-              .value
-          );
-
-          // who reposts the feed
-          repostUserInfo = await this.props.user.getUserInfo(transaction.from);
-
-          // author of the original feed
-          userInfo = await this.props.user.getUserInfo(transactionInfo.from);
-
-          message = decompressString(
-            transactionInfo.decodedInputData.params["message"].value
-          );
-
-          summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.user
-          );
-        } else {
-          throw "Invalid feed type: " + feedType;
+          if (feedInfo) {
+            this.setState({ feedInfo });
+          }
+        } catch (error) {
+          console.log(error);
+          this.setState({
+            msg: `Invalid transaction ${transactionHash}`
+          });
         }
-
-        const stateInfo = await this.props.user.getFeedStateInfo(
-          transactionInfo.hash
-        );
-        const feedInfo = {
-          summary,
-          transactionInfo,
-          userInfo,
-          stateInfo,
-          feedType,
-          repostUserInfo
-        };
-        this.setState({
-          feedInfo
-        });
       }
     } catch (error) {
+      console.log(error);
       this.setState({
-        msg: error.toString()
+        msg: `Invalid transaction ${transactionHash}`
       });
     }
   }

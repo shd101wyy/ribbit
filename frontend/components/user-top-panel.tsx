@@ -47,7 +47,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
           {userInfo.address.slice(0, 6) + "..."}
         </div>
         {/* <div className="postfix">c862b4eel</div> */}
-        <div className="action">post feed</div>
+        {/* <div className="action">post feed</div> */}
         <div className="create-time">
           <span>{formatFeedCreationTime(this.props.feedInfo)}</span>
         </div>

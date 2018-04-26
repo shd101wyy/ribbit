@@ -8,7 +8,11 @@
 
 import * as React from "react";
 import { User, UserInfo } from "../lib/user";
-import { FeedInfo, generateSummaryFromHTML } from "../lib/feed";
+import {
+  FeedInfo,
+  generateSummaryFromHTML,
+  generateFeedInfoFromTransactionInfo
+} from "../lib/feed";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
@@ -76,43 +80,26 @@ export default class profile extends React.Component<Props, State> {
           if (done) {
             return this.setState({ loading: false });
           }
-          const message = decompressString(
-            transactionInfo.decodedInputData.params["message"].value
-          );
-
-          // TODO: topics shouldn't display reply, repost, and repostAndReply
-          const feedType = transactionInfo.decodedInputData.name;
-          if (feedType !== "post") {
+          if (this.state.sorting !== sorting) {
             return;
           }
 
-          const summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.user
-          );
-
-          const userInfo = await this.props.user.getUserInfo(
-            transactionInfo.from
-          );
-
-          const stateInfo = await this.props.user.getFeedStateInfo(
-            transactionInfo.hash
-          );
-
-          const feeds = this.state.feeds;
-          feeds.push({
-            summary,
-            transactionInfo,
-            userInfo,
-            stateInfo,
-            feedType
-          });
-          if (offset === 0 && sorting === TopicSorting.ByTrend) {
-            this.setState({
-              cover: userInfo.cover
-            });
-          } else {
-            this.forceUpdate();
+          try {
+            const feedInfo = await generateFeedInfoFromTransactionInfo(
+              this.props.user,
+              transactionInfo
+            );
+            const feeds = this.state.feeds;
+            feeds.push(feedInfo);
+            if (offset === 0 && sorting === TopicSorting.ByTrend) {
+              this.setState({
+                cover: feedInfo.userInfo.cover
+              });
+            } else {
+              this.forceUpdate();
+            }
+          } catch (error) {
+            console.log(error);
           }
         }
       );

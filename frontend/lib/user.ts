@@ -406,8 +406,8 @@ export class User {
    * then compare the data with blockNumber and messageHash.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
    * @param userAddress sender of this transaction. If `userAddress` is not provided, then it means you are querying other's transactionInfo.
-   * @param blockNumber
-   * @param messageHash
+   * @param blockNumber block number
+   * @param messageHash message hash without `0x` at start.
    * @param transactionHash
    */
   public async getTransactionInfo(

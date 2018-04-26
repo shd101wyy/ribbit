@@ -25,7 +25,6 @@
     font-size: 0.8rem;
   }
 
-
   #feed-footer {
     margin-bottom: 128px;
     text-align: center;
@@ -40,12 +39,21 @@
 }
 
 .article-panel {
-  .feed-card.card {
-    margin-top: 0;
-    margin-bottom: 0;
-  
-    &:last-child {
-      margin-bottom: 32px;
+  .replies {
+    .feed-card.card {
+      margin-top: 0;
+      margin-bottom: 0;
+
+      &:last-child {
+        margin-bottom: 32px;
+      }
+    }
+  }
+
+  .parent {
+    .feed-card.card {
+      margin-top: 24px;
+      margin-bottom: 0;
     }
   }
 }
