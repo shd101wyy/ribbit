@@ -33,12 +33,31 @@ export default class Tx extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.analyzeTransaction();
+    this.analyzeTransaction(
+      this.props.transactionHash,
+      this.props.networkId,
+      this.props.user
+    );
   }
 
-  async analyzeTransaction() {
-    const transactionHash = this.props.transactionHash;
-    const user = this.props.user;
+  componentWillReceiveProps(newProps: Props) {
+    if (
+      newProps.transactionHash !== this.props.transactionHash ||
+      newProps.networkId !== this.props.networkId
+    ) {
+      this.analyzeTransaction(
+        newProps.transactionHash,
+        newProps.networkId,
+        newProps.user
+      );
+    }
+  }
+
+  async analyzeTransaction(
+    transactionHash: string,
+    networkId: number,
+    user: User
+  ) {
     try {
       const transaction = await user.web3.eth.getTransaction(transactionHash);
       const decodedInputData = decodeMethod(transaction.input);

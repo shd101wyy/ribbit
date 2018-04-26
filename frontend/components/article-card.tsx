@@ -45,8 +45,18 @@ export default class ArticleCard extends Component<Props, State> {
       nextProps.feedInfo.transactionInfo.hash !==
       this.props.feedInfo.transactionInfo.hash
     ) {
-      this.loadParent(nextProps.feedInfo);
-      this.loadReplies(nextProps.feedInfo);
+      // reset state
+      this.setState(
+        {
+          replies: [],
+          loadingReplies: false,
+          parent: null
+        },
+        () => {
+          this.loadParent(nextProps.feedInfo);
+          this.loadReplies(nextProps.feedInfo);
+        }
+      );
     }
   }
 

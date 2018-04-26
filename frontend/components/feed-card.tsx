@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Component } from "react";
+import { Link } from "react-router-dom";
 
 import ImagesPanel from "./images-panel";
 import UserTopPanel from "./user-top-panel";
@@ -9,7 +10,7 @@ import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
 import { User } from "../lib/user";
-import { Link } from "react-router-dom";
+import hashHistory from "../lib/history";
 
 interface Props {
   feedInfo: FeedInfo;
@@ -49,11 +50,22 @@ export default class FeedCard extends Component<Props, State> {
     if (!this.props.feedInfo.transactionInfo.hash) {
       return;
     }
-    window.open(
+    /* window.open(
       `${window.location.pathname}#/${this.props.user.networkId}/tx/${
         this.props.feedInfo.transactionInfo.hash
       }`,
-      "_blank"
+    );
+    */
+    console.log(
+      "push: ",
+      `/${this.props.user.networkId}/tx/${
+        this.props.feedInfo.transactionInfo.hash
+      }`
+    );
+    hashHistory.push(
+      `/${this.props.user.networkId}/tx/${
+        this.props.feedInfo.transactionInfo.hash
+      }`
     );
   };
 
