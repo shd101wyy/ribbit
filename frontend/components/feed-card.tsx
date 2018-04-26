@@ -23,16 +23,22 @@ export default class FeedCard extends Component<Props, State> {
     this.state = {};
   }
 
-  like = () => {
-    const hash = this.props.feedInfo.transactionInfo.hash;
-    this.props.user.like(hash);
-  };
-
-  repost = () => {
+  upvote = () => {
     this.props.user
-      .repost(this.props.feedInfo.transactionInfo.hash)
+      .upvote(this.props.feedInfo.transactionInfo.hash)
       .then(hash => {
         // do nothing.
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
+  downvote = () => {
+    this.props.user
+      .downvote(this.props.feedInfo.transactionInfo.hash)
+      .then(hash => {
+        // do nothing
       })
       .catch(error => {
         alert(error);
@@ -60,17 +66,20 @@ export default class FeedCard extends Component<Props, State> {
 
     const bottomButtonGroup = (
       <div className="bottom-button-group">
+        <div className="upvote-btn btn" onClick={this.upvote}>
+          <i className="fas fa-caret-up">
+            {stateInfo.upvotes ? (
+              <span className="upvote-num">{stateInfo.upvotes}</span>
+            ) : null}
+          </i>
+        </div>
+        <div className="downvote-btn btn" onClick={this.downvote}>
+          <i className="fas fa-caret-down" />
+          {/* <span className="downvote-num">{stateInfo.downvotes || ""}</span> */}
+        </div>
         <div className="reply-btn btn" onClick={this.reply}>
           <i className="far fa-comment" />
           <span className="comment-num">{stateInfo.replies || ""}</span>
-        </div>
-        <div className="repost-btn btn" onClick={this.repost}>
-          <i className="fas fa-retweet" />
-          <span className="comment-num">{stateInfo.reposts || ""}</span>
-        </div>
-        <div className="like-btn btn" onClick={this.like}>
-          <i className="far fa-heart" />
-          <span className="comment-num">{stateInfo.likes || ""}</span>
         </div>
         <div className="donate-btn btn" onClick={this.donate}>
           <i className="fas fa-dollar-sign" />

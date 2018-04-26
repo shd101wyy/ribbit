@@ -1,15 +1,6 @@
 // Smart contract information
 export const abiArray = [
   {
-    constant: false,
-    inputs: [{ name: "tag", type: "bytes32" }],
-    name: "dislikeTag",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
     constant: true,
     inputs: [{ name: "addr", type: "address" }],
     name: "getMetaDataJSONStringValue",
@@ -25,6 +16,15 @@ export const abiArray = [
     outputs: [{ name: "", type: "uint256[2]" }],
     payable: false,
     stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [{ name: "userAddress", type: "address" }],
+    name: "downvoteUser",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -58,22 +58,15 @@ export const abiArray = [
     type: "function"
   },
   {
-    constant: false,
+    constant: true,
     inputs: [
-      { name: "version", type: "uint256" },
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "parentTransactionBlockNumber", type: "uint256" },
-      { name: "parentTransactionMessageHash", type: "uint256" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "previousReplyTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
+      { name: "tag", type: "bytes32" },
+      { name: "field", type: "uint256" }
     ],
-    name: "reply",
-    outputs: [],
+    name: "getTagState",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -87,18 +80,18 @@ export const abiArray = [
   },
   {
     constant: true,
-    inputs: [{ name: "parentTransactionHash", type: "bytes32" }],
-    name: "getCurrentReplyInfo",
-    outputs: [{ name: "", type: "uint256[2]" }],
+    inputs: [{ name: "", type: "address" }],
+    name: "metaDataJSONStringMap",
+    outputs: [{ name: "", type: "string" }],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "address" }],
-    name: "metaDataJSONStringMap",
-    outputs: [{ name: "", type: "string" }],
+    inputs: [],
+    name: "version",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -113,25 +106,6 @@ export const abiArray = [
     type: "function"
   },
   {
-    constant: false,
-    inputs: [
-      { name: "version", type: "uint256" },
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "parentTransactionBlockNumber", type: "uint256" },
-      { name: "parentTransactionMessageHash", type: "uint256" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "previousReplyTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
-    ],
-    name: "repostAndReply",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
     constant: true,
     inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
     name: "currentFeedInfoMap",
@@ -142,8 +116,15 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [{ name: "userAddress", type: "address" }],
-    name: "dislikeUser",
+    inputs: [
+      { name: "timestamp", type: "uint256" },
+      { name: "parentTransactionHash", type: "bytes32" },
+      { name: "parentTransactionBlockNumber", type: "uint256" },
+      { name: "parentTransactionMessageHash", type: "uint256" },
+      { name: "previousFeedTransactionHash", type: "bytes32" },
+      { name: "tags", type: "bytes32[]" }
+    ],
+    name: "upvote",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
@@ -151,11 +132,26 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [{ name: "transactionHash", type: "bytes32" }],
-    name: "like",
+    inputs: [
+      { name: "timestamp", type: "uint256" },
+      { name: "message", type: "string" },
+      { name: "messageHash", type: "uint256" },
+      { name: "previousFeedTransactionHash", type: "bytes32" },
+      { name: "tags", type: "bytes32[]" }
+    ],
+    name: "post",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "previousContract",
+    outputs: [{ name: "", type: "address" }],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -178,20 +174,11 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [{ name: "value", type: "string" }],
-    name: "setMetaDataJSONStringValue",
+    inputs: [{ name: "tag", type: "bytes32" }],
+    name: "upvoteTag",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
-    name: "currentReplyInfoMap",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
     type: "function"
   },
   {
@@ -201,23 +188,6 @@ export const abiArray = [
     outputs: [{ name: "", type: "address" }],
     payable: false,
     stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "version", type: "uint256" },
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "parentTransactionBlockNumber", type: "uint256" },
-      { name: "parentTransactionMessageHash", type: "uint256" },
-      { name: "previousFeedTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
-    ],
-    name: "repost",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -236,21 +206,33 @@ export const abiArray = [
     type: "function"
   },
   {
+    constant: false,
+    inputs: [{ name: "tag", type: "bytes32" }],
+    name: "downvoteTag",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: true,
-    inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-    name: "userState",
+    inputs: [
+      { name: "userAddress", type: "address" },
+      { name: "field", type: "uint256" }
+    ],
+    name: "getUserState",
     outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
-    constant: false,
-    inputs: [{ name: "transactionHash", type: "bytes32" }],
-    name: "dislike",
-    outputs: [],
+    constant: true,
+    inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
+    name: "userState",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -273,8 +255,8 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [{ name: "tag", type: "bytes32" }],
-    name: "likeTag",
+    inputs: [{ name: "userAddress", type: "address" }],
+    name: "upvoteUser",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
@@ -291,15 +273,8 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [
-      { name: "version", type: "uint256" },
-      { name: "timestamp", type: "uint256" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "previousFeedTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
-    ],
-    name: "post",
+    inputs: [{ name: "value", type: "string" }],
+    name: "setMetaDataJSONStringValue",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
@@ -307,8 +282,18 @@ export const abiArray = [
   },
   {
     constant: false,
-    inputs: [{ name: "userAddress", type: "address" }],
-    name: "likeUser",
+    inputs: [
+      { name: "timestamp", type: "uint256" },
+      { name: "parentTransactionHash", type: "bytes32" },
+      { name: "parentTransactionBlockNumber", type: "uint256" },
+      { name: "parentTransactionMessageHash", type: "uint256" },
+      { name: "message", type: "string" },
+      { name: "messageHash", type: "uint256" },
+      { name: "previousReplyTransactionHash", type: "bytes32" },
+      { name: "tags", type: "bytes32[]" },
+      { name: "mode", type: "uint256" }
+    ],
+    name: "reply",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
@@ -324,7 +309,19 @@ export const abiArray = [
     type: "function"
   },
   {
-    inputs: [{ name: "previousContractAddr", type: "address" }],
+    constant: false,
+    inputs: [{ name: "transactionHash", type: "bytes32" }],
+    name: "downvote",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      { name: "_previousContractAddress", type: "address" },
+      { name: "_version", type: "uint256" }
+    ],
     payable: false,
     stateMutability: "nonpayable",
     type: "constructor"
@@ -334,17 +331,17 @@ export const abiArray = [
     inputs: [
       {
         indexed: false,
-        name: "previousFeedTransactionInfo",
+        name: "previousFeedInfo",
         type: "uint256[2]"
       }
     ],
-    name: "PostEvent",
+    name: "SavePreviousFeedInfoEvent",
     type: "event"
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "previousTagInfoByTime", type: "uint256[2]" },
+      { indexed: false, name: "previousTagInfo", type: "uint256[2]" },
       { indexed: false, name: "tag", type: "bytes32" }
     ],
     name: "SavePreviousTagInfoByTimeEvent",
@@ -353,41 +350,10 @@ export const abiArray = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "previousTagInfoByTrend", type: "uint256[2]" },
+      { indexed: false, name: "previousTagInfo", type: "uint256[2]" },
       { indexed: false, name: "tag", type: "bytes32" }
     ],
     name: "SavePreviousTagInfoByTrendEvent",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: "previousFeedTransactionInfo",
-        type: "uint256[2]"
-      }
-    ],
-    name: "RepostEvent",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [{ indexed: false, name: "previousReplyInfo", type: "uint256[2]" }],
-    name: "ReplyEvent",
-    type: "event"
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: "previousFeedTransactionInfo",
-        type: "uint256[2]"
-      },
-      { indexed: false, name: "previousReplyInfo", type: "uint256[2]" }
-    ],
-    name: "RepostAndReplyEvent",
     type: "event"
   }
 ];
@@ -395,7 +361,7 @@ export const abiArray = [
 export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
-    return "0xcaf1dff421c5905086ce59029329a854d3c19437";
+    return "0xa3689053ca20dd7e6a7480a1bcdf5618fd145aa4";
   } else if (networkId === 1) {
     // mainnet
     return null;

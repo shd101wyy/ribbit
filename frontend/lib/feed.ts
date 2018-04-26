@@ -7,11 +7,10 @@ import { UserInfo, User } from "./user";
 
 export interface StateInfo {
   earnings: number;
-  likes: number;
-  dislikes: number;
+  upvotes: number;
+  downvotes: number;
   reports: number;
   replies: number;
-  reposts: number;
 }
 
 export interface FeedInfo {
@@ -214,10 +213,9 @@ export async function generateSummaryFromHTML(
 export function generateFakeStateInfo(): StateInfo {
   return {
     earnings: 0,
-    likes: 0,
-    dislikes: 0,
+    upvotes: 0,
+    downvotes: 0,
     reports: 0,
-    replies: 0,
-    reposts: 0
+    replies: 0
   };
 }

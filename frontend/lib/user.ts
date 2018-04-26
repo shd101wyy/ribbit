@@ -199,7 +199,6 @@ export class User {
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .post(
-          0, // version
           currentTimestamp, // timestamp
           compressedMessage, // message
           messageHash, // messageHash
@@ -221,9 +220,9 @@ export class User {
   }
 
   /**
-   * Repost a feed
+   * upvote a feed
    */
-  public async repost(parentTransactionHash: string) {
+  public async upvote(parentTransactionHash: string) {
     // 1. Get parentTransactionBlockNumber and parentTransactionMessageHash
     const parentTransaction = await this.web3.eth.getTransaction(
       parentTransactionHash
@@ -261,8 +260,7 @@ export class User {
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .repost(
-          0,
+        .upvote(
           Date.now(),
           parentTransactionHash,
           parentTransactionBlockNumber,
@@ -275,11 +273,32 @@ export class User {
           return reject(error);
         })
         .on("transactionHash", hash => {
-          console.log("repost txHash: ", hash);
+          console.log("upvote txHash: ", hash);
           return resolve(hash);
         })
         .on("receipt", receipt => {
-          console.log("repost receipt: ", receipt);
+          console.log("upvote receipt: ", receipt);
+        });
+    });
+  }
+
+  /**
+   * downvote a feed
+   */
+  public async downvote(parentTransactionHash: string) {
+    return new Promise((resolve, reject) => {
+      this.contractInstance.methods
+        .downvote(parentTransactionHash)
+        .send({ from: this.accountAddress })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          console.log("downvote txHash: ", hash);
+          return resolve(hash);
+        })
+        .on("receipt", receipt => {
+          console.log("downvote receipt: ", receipt);
         });
     });
   }
@@ -318,18 +337,15 @@ export class User {
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
-        // TODO: Add this line for the case when user liked another user's post,
-        //       And that user visit `Notification` panel, decodeInputsData.params[3]
-        //       doesn't exist.
-        if (decodedInputData.name === "like") {
-          return null;
-        }
         let messageHash2 = null;
-        if (decodedInputData.name === "post") {
+        if (
+          decodedInputData.name === "post" ||
+          decodedInputData.name === "reply"
+        ) {
           messageHash2 = new BigNumber(
             decodedInputData.params["messageHash"].value
           ).toString(16);
-        } else if (decodedInputData.name === "repost") {
+        } else if (decodedInputData.name === "upvote") {
           messageHash2 = new BigNumber(
             decodedInputData.params["parentTransactionMessageHash"].value
           ).toString(16);
@@ -468,8 +484,7 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb,
-      eventNames: ["PostEvent", "RepostEvent"]
+      cb
     });
   }
 
@@ -500,8 +515,7 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb,
-      eventNames: ["SavePreviousTagInfoByTimeEvent"]
+      cb
     });
   }
 
@@ -532,8 +546,7 @@ export class User {
       messageHash,
       num,
       transactionHash,
-      cb,
-      eventNames: ["SavePreviousTagInfoByTrendEvent"]
+      cb
     });
   }
 
@@ -542,7 +555,6 @@ export class User {
    * @param param0
    */
   private async getFeeds({
-    eventNames = [],
     userAddress = "",
     tag = "",
     blockNumber = 0,
@@ -555,7 +567,6 @@ export class User {
       transactionInfo?: TransactionInfo
     ) => {}
   }: {
-    eventNames: string[];
     userAddress?: string;
     tag?: string;
     blockNumber: number;
@@ -586,10 +597,15 @@ export class User {
             transactionInfo.decodedInputData.params[
               "previousFeedTransactionHash"
             ].value;
-        } else if (transactionInfo.decodedInputData.name === "repost") {
+        } else if (transactionInfo.decodedInputData.name === "upvote") {
           transactionHash =
             transactionInfo.decodedInputData.params[
               "previousFeedTransactionHash"
+            ].value;
+        } else if (transactionInfo.decodedInputData.name === "reply") {
+          transactionHash =
+            transactionInfo.decodedInputData.params[
+              "previousReplyTransactionHash"
             ].value;
         } else {
           // wrong event
@@ -605,46 +621,37 @@ export class User {
         }
         const decodedLogs = decodeLogs(logs);
         let eventLog: DecodedLogData = null;
-        if (
-          eventNames.indexOf("PostEvent") >= 0 ||
-          eventNames.indexOf("RepostEvent") >= 0
-        ) {
+        if (!tag) {
           // PostEvent or RepostEvent.
           eventLog = decodedLogs.filter(
-            x => eventNames.indexOf(x.name) >= 0
+            x => x.name === "SavePreviousFeedInfoEvent"
           )[0];
         } else {
           // Tag events.
           eventLog = decodedLogs.filter(
-            x => x.name === eventNames[0] && x.events["tag"].value === tag
+            x =>
+              (x.name === "SavePreviousTagInfoByTimeEvent" ||
+                x.name === "SavePreviousTagInfoByTrendEvent") &&
+              x.events["tag"].value === tag
           )[0];
         }
         if (!eventLog) {
           return cb(true); // done
         } else {
-          if (eventLog.name === "SavePreviousTagInfoByTrendEvent") {
-            blockNumber = parseInt(
-              eventLog.events["previousTagInfoByTrend"].value[0]
-            );
-            messageHash = new BigNumber(
-              eventLog.events["previousTagInfoByTrend"].value[1]
-            ).toString(16);
-          } else if (eventLog.name === "SavePreviousTagInfoByTimeEvent") {
-            blockNumber = parseInt(
-              eventLog.events["previousTagInfoByTime"].value[0]
-            );
-            messageHash = new BigNumber(
-              eventLog.events["previousTagInfoByTime"].value[1]
-            ).toString(16);
-          } else if (
-            eventLog.name === "PostEvent" ||
-            eventLog.name === "RepostEvent"
+          if (
+            eventLog.name === "SavePreviousTagInfoByTrendEvent" ||
+            eventLog.name === "SavePreviousTagInfoByTimeEvent"
           ) {
+            blockNumber = parseInt(eventLog.events["previousTagInfo"].value[0]);
+            messageHash = new BigNumber(
+              eventLog.events["previousTagInfo"].value[1]
+            ).toString(16);
+          } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
             blockNumber = parseInt(
-              eventLog.events["previousFeedTransactionInfo"].value[0]
+              eventLog.events["previousFeedInfo"].value[0]
             );
             messageHash = new BigNumber(
-              eventLog.events["previousFeedTransactionInfo"].value[1]
+              eventLog.events["previousFeedInfo"].value[1]
             ).toString(16);
           } else {
             throw "Error: Invalid eventLog" +
@@ -708,28 +715,24 @@ export class User {
     const earnings = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 0).call()
     );
-    const likes = parseInt(
+    const upvotes = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 1).call()
     );
-    const dislikes = parseInt(
+    const downvotes = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 2).call()
     );
-    const reports = parseInt(
+    const replies = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 3).call()
     );
-    const replies = parseInt(
+    const reports = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 4).call()
-    );
-    const reposts = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 5).call()
     );
     return {
       earnings,
-      likes,
-      dislikes,
+      upvotes,
+      downvotes,
       reports,
-      replies,
-      reposts
+      replies
     };
   }
 

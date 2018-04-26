@@ -128,9 +128,9 @@ contract Ribbit {
     }
     
     // Post Feed 
-    event SavePreviousFeedInfoEvent(uint[2] previousFeedTransactionInfo);
-    event SavePreviousTagInfoByTimeEvent(uint[2] previousTagInfoByTime, bytes32 tag);
-    event SavePreviousTagInfoByTrendEvent(uint[2] previousTagInfoByTrend, bytes32 tag);
+    event SavePreviousFeedInfoEvent(uint[2] previousFeedInfo);
+    event SavePreviousTagInfoByTimeEvent(uint[2] previousTagInfo, bytes32 tag);
+    event SavePreviousTagInfoByTrendEvent(uint[2] previousTagInfo, bytes32 tag);
     function post(uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
         emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
         uint blockNumber = block.number;
@@ -195,6 +195,12 @@ contract Ribbit {
         uint blockNumber = block.number;
         state[parentTransactionHash][3] = state[parentTransactionHash][3] + 1; // increase number of replies
         
+        if (mode == 1) { // show in user's timeline.
+            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            currentFeedInfoMap[msg.sender][0] = blockNumber;
+            currentFeedInfoMap[msg.sender][1] = messageHash;
+        }
+
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];

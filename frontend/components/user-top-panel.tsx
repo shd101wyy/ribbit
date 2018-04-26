@@ -41,9 +41,8 @@ export default class UserTopPanel extends React.Component<Props, State> {
     );
 
     const topBar =
-      feedInfo.feedType === "repost" ? (
+      feedInfo.feedType === "upvote" ? (
         <div className="top-bar">
-          <i className="fas fa-retweet" />
           <Link
             to={`/${this.props.user.networkId}/profile/${
               feedInfo.repostUserInfo.address
@@ -51,7 +50,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
           >
             {feedInfo.repostUserInfo.name}
           </Link>
-          <span>reposted</span>
+          <span>upvoted</span>
         </div>
       ) : null;
 

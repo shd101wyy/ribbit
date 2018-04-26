@@ -60,7 +60,7 @@ export default class profile extends React.Component<Props, State> {
         userAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
-          console.log("showUserFeeds: ", done, offset, transactionInfo);
+          // console.log("showUserFeeds: ", done, offset, transactionInfo);
           if (done) {
             return this.setState({ loading: false });
           }
@@ -78,7 +78,7 @@ export default class profile extends React.Component<Props, State> {
             );
 
             userInfo = await this.props.user.getUserInfo(userAddress);
-          } else if (feedType === "repost") {
+          } else if (feedType === "upvote") {
             // Get parent transactionInfo
             transactionInfo = await this.props.user.getTransactionInfo(
               "",

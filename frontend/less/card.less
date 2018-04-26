@@ -63,6 +63,33 @@
         margin-right: 28px;
         font-size: 0.9rem;
         cursor: pointer;
+
+        &.upvote-btn,
+        &.downvote-btn {
+          padding: 6px 10px;
+          background-color: #dff1cf;
+          color: #74a24b;
+          border-radius: 2px;
+          margin-right: 6px;
+          max-width: 50px;
+
+          &:hover {
+            background-color: darken(#dff1cf, 8%);
+          }
+
+          i {
+            margin: 0;
+          }
+
+          span {
+            margin-left: 4px;
+            font-family: "Helvetica Neue", arial, sans-serif !important;
+          }
+        }
+
+        &.downvote-btn {
+          margin-right: 28px;
+        }
       }
 
       i {
