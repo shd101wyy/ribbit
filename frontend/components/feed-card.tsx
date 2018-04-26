@@ -17,10 +17,30 @@ interface Props {
 interface State {}
 
 export default class FeedCard extends Component<Props, State> {
+  private elem: HTMLDivElement;
   constructor(props: Props) {
     super(props);
 
     this.state = {};
+  }
+
+  componentDidMount() {
+    this.addTargetBlankToAnchorElements();
+  }
+
+  componentDidUpdate() {
+    this.addTargetBlankToAnchorElements();
+  }
+
+  addTargetBlankToAnchorElements() {
+    if (!this.elem) {
+      return;
+    }
+    const anchorElements = this.elem.getElementsByTagName("A");
+    for (let i = 0; i < anchorElements.length; i++) {
+      const anchorElement = anchorElements[i];
+      anchorElement.setAttribute("target", "_blank");
+    }
   }
 
   upvote = () => {
@@ -104,6 +124,7 @@ export default class FeedCard extends Component<Props, State> {
             ) : null}
             <div className="title">{summary.title}</div>
             <div
+              ref={elem => (this.elem = elem)}
               className="summary"
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
@@ -118,6 +139,7 @@ export default class FeedCard extends Component<Props, State> {
           <UserTopPanel feedInfo={this.props.feedInfo} user={this.props.user} />
           <div className="content-panel">
             <div
+              ref={elem => (this.elem = elem)}
               className="summary"
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />

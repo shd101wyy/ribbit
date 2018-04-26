@@ -104,16 +104,11 @@ export async function generateSummaryFromHTML(
         src = imgElement.src;
       cover = src;
       title = div.children[1].textContent;
-
-      div.children[0].remove();
-      div.children[1].remove();
     } else {
       title = div.children[0].textContent;
-      div.children[0].remove();
     }
   } else if (div.children.length === 1 && div.children[0].tagName === "H1") {
     summary = div.children[0].textContent;
-    div.children[0].remove();
   }
 
   // Get images
@@ -154,38 +149,39 @@ export async function generateSummaryFromHTML(
     }
   }
 
-  // render tags
-  const tagElems = div.getElementsByClassName("tag");
-  for (let i = 0; i < tagElems.length; i++) {
-    const tagElem = tagElems[i] as HTMLAnchorElement;
-    if (tagElem.classList.contains("tag-mention")) {
-      const mention = tagElem.getAttribute("data-mention");
-      const userInfo = await user.getUserInfo(mention);
-      tagElem.innerHTML = `<span class="mention">${userInfo.name}</span>`;
-      tagElem.href = `${window.location.pathname}#/${
-        user.networkId
-      }/profile/${mention}`;
-      tagElem.setAttribute("target", "_blank");
-    } else if (tagElem.classList.contains("tag-topic")) {
-      const topic = tagElem.getAttribute("data-topic");
-      tagElem.innerHTML = `<span class="topic">${topic}</span>`;
-      tagElem.href = `${window.location.pathname}#/${
-        user.networkId
-      }/topic/${topic}`;
-      tagElem.setAttribute("target", "_blank");
-    } else {
-      const error = tagElem.getAttribute("data-error");
-      tagElem.innerHTML = `<span class="error">${error}</span>`;
+  async function renderTags(div) {
+    // render tags
+    const tagElems = div.getElementsByClassName("tag");
+    for (let i = 0; i < tagElems.length; i++) {
+      const tagElem = tagElems[i] as HTMLAnchorElement;
+      if (tagElem.classList.contains("tag-mention")) {
+        const mention = tagElem.getAttribute("data-mention");
+        const userInfo = await user.getUserInfo(mention);
+        tagElem.innerHTML = `<span class="mention">${userInfo.name}</span>`;
+        tagElem.href = `${window.location.pathname}#/${
+          user.networkId
+        }/profile/${mention}`;
+        tagElem.setAttribute("target", "_blank");
+      } else if (tagElem.classList.contains("tag-topic")) {
+        const topic = tagElem.getAttribute("data-topic");
+        tagElem.innerHTML = `<span class="topic">${topic}</span>`;
+        tagElem.href = `${window.location.pathname}#/${
+          user.networkId
+        }/topic/${topic}`;
+        tagElem.setAttribute("target", "_blank");
+      } else {
+        const error = tagElem.getAttribute("data-error");
+        tagElem.innerHTML = `<span class="error">${error}</span>`;
+      }
     }
   }
+
+  await renderTags(div);
 
   // get summary
   let plainSummary = "";
   const maxCharacters = 240;
   const imgElements = [].slice.call(div.getElementsByTagName("img"));
-  for (let i = 0, length = imgElements.length; i < length; i++) {
-    imgElements[i].remove();
-  }
   for (let i = 0; i < div.children.length; i++) {
     const elem = div.children[i];
     if (elem.tagName !== "P") continue;
@@ -198,16 +194,15 @@ export async function generateSummaryFromHTML(
     }
   }
 
-  // TODO: get tags
-
-  div.remove();
-  return {
+  const output = {
     title: title,
     summary: summary,
     images: images,
     tags: [],
-    html
+    html: div.innerHTML
   };
+  div.remove();
+  return output;
 }
 
 export function generateFakeStateInfo(): StateInfo {
