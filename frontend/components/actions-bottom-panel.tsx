@@ -10,7 +10,7 @@ interface Props {
   user: User;
 }
 interface State {
-  showEditPanel: boolean
+  showEditPanel: boolean;
 }
 
 export default class ActionsBottomPanel extends React.Component<Props, State> {
@@ -47,12 +47,12 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
       });
   };
 
-  reply = (event) => {
+  reply = event => {
     event.preventDefault();
     event.stopPropagation();
     this.setState({
       showEditPanel: true
-    })
+    });
   };
 
   donate = () => {
@@ -72,7 +72,15 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
     }
 
     if (this.state.showEditPanel) {
-      return <Edit cancel={()=> {this.setState({showEditPanel: false})}} user={this.props.user} feedInfo={this.props.feedInfo} />
+      return (
+        <Edit
+          cancel={() => {
+            this.setState({ showEditPanel: false });
+          }}
+          user={this.props.user}
+          parentFeedInfo={this.props.feedInfo}
+        />
+      );
     }
 
     return (

@@ -17,7 +17,10 @@ import { renderMarkdown } from "../lib/markdown";
 interface Props {
   cancel: () => void;
   user: User;
-  feedInfo ?: FeedInfo;
+  /**
+   * If feedInfo is provided, then it means it's a reply.
+   */
+  parentFeedInfo?: FeedInfo;
 }
 interface State {
   code: string;
@@ -27,7 +30,8 @@ interface State {
   mentions: { name: string; address: string }[];
   hiddenMentions: { [key: string]: boolean }; // key is address
   replies: { name: string; address: string }[];
-  hiddenReplies: { [key: string]: boolean};  // key is address
+  hiddenReplies: { [key: string]: boolean }; // key is address
+  feedback: number; // 0=>do nothing, 1=>upvote, 2=>downvote
 }
 
 export default class Edit extends Component<Props, State> {
@@ -44,7 +48,8 @@ export default class Edit extends Component<Props, State> {
       mentions: [],
       hiddenMentions: {},
       replies: [],
-      hiddenReplies: {}
+      hiddenReplies: {},
+      feedback: 0
     };
   }
 
@@ -56,29 +61,42 @@ export default class Edit extends Component<Props, State> {
   }
 
   async analyzeReplies() {
-    if (!this.props.feedInfo) {
+    if (!this.props.parentFeedInfo) {
       return;
     }
-    const feedInfo = this.props.feedInfo;
+    const feedInfo = this.props.parentFeedInfo;
     let transactionInfo = feedInfo.transactionInfo;
     const replies = [];
-    const exists = {}
+    const exists = {};
 
     while (transactionInfo) {
       const address = transactionInfo.from;
-      const name = ( await this.props.user.getUserInfo(address) ).name;
+      const name = (await this.props.user.getUserInfo(address)).name;
       if (!exists[address]) {
         exists[address] = true;
-        replies.push({name, address});  
+        replies.push({ name, address });
       }
 
       if (transactionInfo.decodedInputData.name === "post") {
         break;
       } else if (transactionInfo.decodedInputData.name === "repost") {
-        const parentTransactionHash = transactionInfo.decodedInputData.params["parentTransactionHash"].value;
-        const parentTransactionBlockNumber = transactionInfo.decodedInputData.params["parentTransactionBlockNumber"].value;
-        const parentTransactionMessageHash = transactionInfo.decodedInputData.params["parentTransactionMessageHash"].value;
-        transactionInfo = await this.props.user.getTransactionInfo('', parentTransactionBlockNumber, parentTransactionMessageHash, parentTransactionHash);  
+        const parentTransactionHash =
+          transactionInfo.decodedInputData.params["parentTransactionHash"]
+            .value;
+        const parentTransactionBlockNumber =
+          transactionInfo.decodedInputData.params[
+            "parentTransactionBlockNumber"
+          ].value;
+        const parentTransactionMessageHash =
+          transactionInfo.decodedInputData.params[
+            "parentTransactionMessageHash"
+          ].value;
+        transactionInfo = await this.props.user.getTransactionInfo(
+          "",
+          parentTransactionBlockNumber,
+          parentTransactionMessageHash,
+          parentTransactionHash
+        );
       } else {
         break;
       }
@@ -86,7 +104,7 @@ export default class Edit extends Component<Props, State> {
 
     this.setState({
       replies
-    })
+    });
   }
 
   private updateCode = (newCode: string) => {
@@ -142,14 +160,28 @@ export default class Edit extends Component<Props, State> {
       }
     }
 
-    console.log("post feed         : ", this.state.code);
+    console.log(
+      `${this.props.parentFeedInfo ? "reply" : "post"} feed         : `,
+      this.state.code
+    );
     console.log("     width replies: ", replies);
     console.log("     with topics  : ", topics);
     console.log("     with mentions: ", mentions);
 
     const tags = Array.from(new Set([...topics, ...mentions, ...replies]));
     try {
-      await user.postFeed(content, tags);
+      if (this.props.parentFeedInfo) {
+        // reply
+        await user.replyFeed(
+          content,
+          tags,
+          this.state.feedback,
+          this.props.parentFeedInfo
+        );
+      } else {
+        // post
+        await user.postFeed(content, tags);
+      }
       window.localStorage["markdown-cache"] = "";
       this.props.cancel();
     } catch (error) {
@@ -182,10 +214,10 @@ export default class Edit extends Component<Props, State> {
     };
   };
 
-  clickEdit = (event)=> {
+  clickEdit = event => {
     event.preventDefault();
     event.stopPropagation();
-  }
+  };
 
   render() {
     const options = {
@@ -194,16 +226,28 @@ export default class Edit extends Component<Props, State> {
       mode: "markdown"
     };
     return (
-      <div onClick={this.clickEdit} className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}>
-        {this.props.feedInfo ? <div>
-          <h2 style={{textAlign: "center"}}>Reply to</h2>
-          <FeedCard user={this.props.user} feedInfo={this.props.feedInfo} hideActionsPanel={true} /></div> : null}
+      <div
+        onClick={this.clickEdit}
+        className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}
+      >
+        {this.props.parentFeedInfo ? (
+          <div>
+            <h2 style={{ textAlign: "center" }}>Reply to</h2>
+            <FeedCard
+              user={this.props.user}
+              feedInfo={this.props.parentFeedInfo}
+              hideActionsPanel={true}
+            />
+          </div>
+        ) : null}
         {this.state.previewIsOn ? (
           <div>
-            <h2 style={{textAlign: "center"}}>Preview</h2>
+            <h2 style={{ textAlign: "center" }}>Preview</h2>
             {/* topics */}
             <div className="topics-and-mentions card">
-              {this.state.topics.length ? <p className="title">Post to topics:</p> : null}
+              {this.state.topics.length ? (
+                <p className="title">Post to topics:</p>
+              ) : null}
               <div className="topics-list">
                 {this.state.topics.map((topic, offset) => (
                   <div
@@ -218,15 +262,15 @@ export default class Edit extends Component<Props, State> {
                   </div>
                 ))}
               </div>
-              {this.state.replies.length ? <p className="title">Reply to the following users:</p> : null}
+              {this.state.replies.length ? (
+                <p className="title">Reply to the following users:</p>
+              ) : null}
               <div className="replies-list">
                 {this.state.replies.map((reply, offset) => (
                   <div
                     className={
                       "reply " +
-                      (this.state.hiddenReplies[reply.address]
-                        ? "hidden"
-                        : "")
+                      (this.state.hiddenReplies[reply.address] ? "hidden" : "")
                     }
                     key={offset}
                     onClick={this.toggleReply(reply.address)}
@@ -235,7 +279,9 @@ export default class Edit extends Component<Props, State> {
                   </div>
                 ))}
               </div>
-              {this.state.mentions.length ? <p className="title">Mention the following users:</p> : null}
+              {this.state.mentions.length ? (
+                <p className="title">Mention the following users:</p>
+              ) : null}
               <div className="mentions-list">
                 {this.state.mentions.map((mention, offset) => (
                   <div
@@ -252,20 +298,54 @@ export default class Edit extends Component<Props, State> {
                   </div>
                 ))}
               </div>
+              {this.props.parentFeedInfo ? (
+                <div>
+                  <p className="title">Feedback:</p>
+                  <div className="feedback-list">
+                    <div
+                      className={
+                        "feedback" +
+                        (this.state.feedback === 0 ? "" : " hidden")
+                      }
+                      onClick={() => this.setState({ feedback: 0 })}
+                    >
+                      do nothing
+                    </div>
+                    <div
+                      className={
+                        "feedback" +
+                        (this.state.feedback === 1 ? "" : " hidden")
+                      }
+                      onClick={() => this.setState({ feedback: 1 })}
+                    >
+                      upvote
+                    </div>
+                    <div
+                      className={
+                        "feedback" +
+                        (this.state.feedback === 2 ? "" : " hidden")
+                      }
+                      onClick={() => this.setState({ feedback: 2 })}
+                    >
+                      downvote
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
             {/* preview */}
             <Preview markdown={this.state.code} user={this.props.user} />
           </div>
         ) : (
           <div>
-          <h2 style={{textAlign: "center"}}>Write below</h2>
-          <div className="editor-wrapper">
-            <CodeMirror
-              value={this.state.code}
-              onChange={this.updateCode}
-              options={options}
-            />
-          </div>
+            <h2 style={{ textAlign: "center" }}>Write below</h2>
+            <div className="editor-wrapper">
+              <CodeMirror
+                value={this.state.code}
+                onChange={this.updateCode}
+                options={options}
+              />
+            </div>
           </div>
         )}
         <div className="button-group">

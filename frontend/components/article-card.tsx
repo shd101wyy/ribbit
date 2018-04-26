@@ -11,7 +11,7 @@ import { User } from "../lib/user";
 interface Props {
   feedInfo: FeedInfo;
   user: User;
-  hideActionsPanel?: boolean
+  hideActionsPanel?: boolean;
 }
 
 interface State {}
@@ -58,9 +58,9 @@ export default class ArticleCard extends Component<Props, State> {
           }}
           dangerouslySetInnerHTML={{ __html: feedInfo.summary.html }}
         />
-        {this.props.hideActionsPanel ? null :
-        <ActionsBottomPanel user={this.props.user} feedInfo={feedInfo} />
-        }
+        {this.props.hideActionsPanel ? null : (
+          <ActionsBottomPanel user={this.props.user} feedInfo={feedInfo} />
+        )}
         <div className="comments" />
       </div>
     );

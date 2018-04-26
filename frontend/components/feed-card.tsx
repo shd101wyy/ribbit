@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 interface Props {
   feedInfo: FeedInfo;
   user: User;
-  hideActionsPanel?: boolean
+  hideActionsPanel?: boolean;
 }
 interface State {}
 
@@ -89,12 +89,12 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
           </div>
-          {
-            this.props.hideActionsPanel ? null :
-          <ActionsBottomPanel
-            feedInfo={this.props.feedInfo}
-            user={this.props.user}
-          /> }
+          {this.props.hideActionsPanel ? null : (
+            <ActionsBottomPanel
+              feedInfo={this.props.feedInfo}
+              user={this.props.user}
+            />
+          )}
         </div>
       );
     } else {
@@ -109,12 +109,12 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
             <ImagesPanel images={summary.images} />
-            {
-            this.props.hideActionsPanel ? null :
-          <ActionsBottomPanel
-            feedInfo={this.props.feedInfo}
-            user={this.props.user}
-          /> }
+            {this.props.hideActionsPanel ? null : (
+              <ActionsBottomPanel
+                feedInfo={this.props.feedInfo}
+                user={this.props.user}
+              />
+            )}
           </div>
         </div>
       );

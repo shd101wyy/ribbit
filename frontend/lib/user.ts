@@ -15,7 +15,7 @@ import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
 import { BigNumber } from "bignumber.js";
 
-import { StateInfo } from "./feed";
+import { StateInfo, FeedInfo } from "./feed";
 
 abiDecoder.addABI(abiArray);
 
@@ -219,6 +219,99 @@ export class User {
     });
   }
 
+  public async replyFeed(
+    message: string,
+    tags = [],
+    mode = 0,
+    parentFeedInfo: FeedInfo
+  ) {
+    // Validate tags
+    // TODO: change to Promise.all
+    for (let i = 0; i < tags.length; i++) {
+      const validatedTag = this.formatTag(tags[i]);
+      if (!validatedTag.length) {
+        throw new Error(
+          "Invalid tag: " +
+            tags[i] +
+            "\nCompressed(" +
+            validatedTag.length / 2 +
+            "bytes): " +
+            validatedTag
+        );
+      } else {
+        tags[i] = validatedTag;
+        // console.log(i + " tag: " + validatedTag);
+      }
+    }
+    tags = Array.from(new Set(tags)); // Remove duplicate.
+
+    const currentTimestamp = Date.now();
+    const compressedMessage = compressString(message);
+    const messageHash =
+      "0x" +
+      sha256(this.accountAddress + currentTimestamp.toString() + message);
+
+    const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
+    const parentTransactionBlockNumber =
+      parentFeedInfo.transactionInfo.blockNumber;
+    let parentTransactionMessageHash = "";
+    if (
+      parentFeedInfo.transactionInfo.decodedInputData.name === "post" ||
+      parentFeedInfo.transactionInfo.decodedInputData.name === "reply"
+    ) {
+      parentTransactionMessageHash =
+        "0x" +
+        new BigNumber(
+          parentFeedInfo.transactionInfo.decodedInputData.params[
+            "messageHash"
+          ].value
+        ).toString(16);
+    } else {
+      throw "Reply error: invalid parentFeedInfo: " +
+        JSON.stringify(parentFeedInfo, null, "  ");
+    }
+
+    const currentReplyInfo = await this.contractInstance.methods
+      .getCurrentTagInfoByTime(parentTransactionHash)
+      .call();
+    const currentReplyBlockNumber = parseInt(currentReplyInfo[0]);
+    const currentReplyHash = new BigNumber(currentReplyInfo[1]).toString(16);
+    const previousReplyTransactionInfo = await this.getTransactionInfo(
+      "",
+      currentReplyBlockNumber,
+      currentReplyHash
+    );
+    const previousReplyTransactionHash = previousReplyTransactionInfo
+      ? previousReplyTransactionInfo.hash
+      : "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+    return await new Promise((resolve, reject) => {
+      this.contractInstance.methods
+        .reply(
+          currentTimestamp, // timestamp
+          parentTransactionHash, // parentTransactionHash
+          parentTransactionBlockNumber, // parentTransactionBlockNumber
+          parentTransactionMessageHash, // parentTransactionMessageHash
+          compressedMessage, // message
+          messageHash, // messageHash
+          previousReplyTransactionHash, // previousReplyTransactionHash
+          tags, // tags
+          mode // mode
+        )
+        .send({ from: this.accountAddress })
+        .on("error", error => {
+          return reject(error);
+        })
+        .on("transactionHash", hash => {
+          console.log("reply feed txHash: ", hash);
+          return resolve(hash);
+        })
+        .on("receipt", receipt => {
+          console.log("reply feed receipt", receipt);
+        });
+    });
+  }
+
   /**
    * upvote a feed
    */
@@ -237,9 +330,9 @@ export class User {
       throw "Not implemented `repost` function" +
         JSON.stringify(decodedInputData, null, "  ");
     }
-    const parentTransactionMessageHash = new BigNumber(
-      decodedInputData.params["messageHash"].value
-    ).toString(16);
+    const parentTransactionMessageHash =
+      "0x" +
+      new BigNumber(decodedInputData.params["messageHash"].value).toString(16);
     // console.log('parentTransactionBlockNumber: ' + parentTransactionBlockNumber)
     // console.log('parentTransactionMessageHash: ', parentTransactionMessageHash)
 
@@ -264,7 +357,7 @@ export class User {
           Date.now(),
           parentTransactionHash,
           parentTransactionBlockNumber,
-          "0x" + parentTransactionMessageHash,
+          parentTransactionMessageHash,
           previousFeedTransactionHash,
           tags
         )

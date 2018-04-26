@@ -24,7 +24,7 @@ export default class Tx extends React.Component<Props, State> {
     super(props);
     this.state = {
       msg: `Loading ${this.props.transactionHash}...`,
-      feedInfo: null,
+      feedInfo: null
     };
   }
 
