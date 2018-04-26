@@ -2,6 +2,7 @@ import * as React from "react";
 import { Component } from "react";
 
 import UserTopPanel from "./user-top-panel";
+import ActionsBottomPanel from "./actions-bottom-panel";
 
 import * as utility from "../lib/utility";
 import { FeedInfo } from "../lib/feed";
@@ -56,6 +57,7 @@ export default class ArticleCard extends Component<Props, State> {
           }}
           dangerouslySetInnerHTML={{ __html: feedInfo.summary.html }}
         />
+        <ActionsBottomPanel user={this.props.user} feedInfo={feedInfo} />
         <div className="comments" />
       </div>
     );

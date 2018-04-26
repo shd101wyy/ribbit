@@ -11,6 +11,7 @@ import "./less/entry.less";
 import Home from "./routes/home";
 import Profile from "./routes/profile";
 import Topic from "./routes/topic";
+import Tx from "./routes/tx";
 import Footer from "./components/footer";
 
 interface Props {}
@@ -110,6 +111,17 @@ class App extends React.Component<Props, State> {
               />
             )}
             exact
+          />
+          <Route
+            path={`${process.env.PUBLIC_URL ||
+              ""}/:networkId/tx/:transactionHash`}
+            render={props => (
+              <Tx
+                networkId={props.match.params["networkId"]}
+                user={this.state.user}
+                transactionHash={props.match.params["transactionHash"]}
+              />
+            )}
           />
         </Switch>
       </Router>

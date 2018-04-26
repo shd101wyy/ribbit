@@ -56,6 +56,10 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
     const repostUserInfo = this.props.feedInfo.repostUserInfo;
     const feedType = this.props.feedInfo.feedType;
 
+    if (!transactionInfo || !transactionInfo.hash) {
+      return null;
+    }
+
     return (
       <div className="actions-bottom-panel">
         <div className="upvote-btn btn" onClick={this.upvote}>

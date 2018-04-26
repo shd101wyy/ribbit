@@ -19,7 +19,7 @@ import { StateInfo } from "./feed";
 
 abiDecoder.addABI(abiArray);
 
-function decodeMethod(input: string) {
+export function decodeMethod(input: string) {
   const decodedInputData = abiDecoder.decodeMethod(input);
   if (!decodedInputData) {
     return null;
@@ -28,7 +28,7 @@ function decodeMethod(input: string) {
   }
 }
 
-function decodeLogs(logs: Log[]) {
+export function decodeLogs(logs: Log[]) {
   const decodedLogData = abiDecoder.decodeLogs(logs);
   if (!decodedLogData) {
     return null;
