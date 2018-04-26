@@ -10,6 +10,7 @@
   font-size: 1rem;
   z-index: 99;
   overflow: auto;
+  cursor: auto;
 
   &.preview-on {
     background-color: #fafafa;
@@ -56,11 +57,13 @@
   }
 
   .topics-list,
+  .replies-list,
   .mentions-list {
     display: flex;
     flex-direction: row;
 
     .topic,
+    .reply,
     .mention {
       padding: 4px 6px;
       background-color: #74a24b;

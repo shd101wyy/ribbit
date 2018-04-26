@@ -6,16 +6,18 @@ import "codemirror/lib/codemirror.css";
 import "codemirror/mode/markdown/markdown";
 
 import Preview from "./preview";
+import FeedCard from "./feed-card";
 
 import history from "../lib/history";
 import { User } from "../lib/user";
 import * as utility from "../lib/utility";
-import { getTopicsAndMentionsFromHTML } from "../lib/feed";
+import { getTopicsAndMentionsFromHTML, FeedInfo } from "../lib/feed";
 import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
   cancel: () => void;
   user: User;
+  feedInfo ?: FeedInfo;
 }
 interface State {
   code: string;
@@ -24,6 +26,8 @@ interface State {
   hiddenTopics: { [key: string]: boolean };
   mentions: { name: string; address: string }[];
   hiddenMentions: { [key: string]: boolean }; // key is address
+  replies: { name: string; address: string }[];
+  hiddenReplies: { [key: string]: boolean};  // key is address
 }
 
 export default class Edit extends Component<Props, State> {
@@ -38,13 +42,51 @@ export default class Edit extends Component<Props, State> {
       topics: [],
       hiddenTopics: {},
       mentions: [],
-      hiddenMentions: {}
+      hiddenMentions: {},
+      replies: [],
+      hiddenReplies: {}
     };
   }
 
   componentDidMount() {
     console.log("@@ MOUNT Edit @@");
     this.checkTopicsAndMentions();
+
+    this.analyzeReplies();
+  }
+
+  async analyzeReplies() {
+    if (!this.props.feedInfo) {
+      return;
+    }
+    const feedInfo = this.props.feedInfo;
+    let transactionInfo = feedInfo.transactionInfo;
+    const replies = [];
+    const exists = {}
+
+    while (transactionInfo) {
+      const address = transactionInfo.from;
+      const name = ( await this.props.user.getUserInfo(address) ).name;
+      if (!exists[address]) {
+        exists[address] = true;
+        replies.push({name, address});  
+      }
+
+      if (transactionInfo.decodedInputData.name === "post") {
+        break;
+      } else if (transactionInfo.decodedInputData.name === "repost") {
+        const parentTransactionHash = transactionInfo.decodedInputData.params["parentTransactionHash"].value;
+        const parentTransactionBlockNumber = transactionInfo.decodedInputData.params["parentTransactionBlockNumber"].value;
+        const parentTransactionMessageHash = transactionInfo.decodedInputData.params["parentTransactionMessageHash"].value;
+        transactionInfo = await this.props.user.getTransactionInfo('', parentTransactionBlockNumber, parentTransactionMessageHash, parentTransactionHash);  
+      } else {
+        break;
+      }
+    }
+
+    this.setState({
+      replies
+    })
   }
 
   private updateCode = (newCode: string) => {
@@ -84,6 +126,14 @@ export default class Edit extends Component<Props, State> {
       }
     }
 
+    // TODO: replies
+    const replies = [];
+    for (const reply of this.state.replies) {
+      if (!this.state.hiddenReplies[reply.address]) {
+        replies.push(reply.address);
+      }
+    }
+
     // TODO: mentions
     const mentions = [];
     for (const mention of this.state.mentions) {
@@ -93,10 +143,11 @@ export default class Edit extends Component<Props, State> {
     }
 
     console.log("post feed         : ", this.state.code);
+    console.log("     width replies: ", replies);
     console.log("     with topics  : ", topics);
     console.log("     with mentions: ", mentions);
 
-    const tags = [...topics, ...mentions];
+    const tags = Array.from(new Set([...topics, ...mentions, ...replies]));
     try {
       await user.postFeed(content, tags);
       window.localStorage["markdown-cache"] = "";
@@ -124,6 +175,18 @@ export default class Edit extends Component<Props, State> {
     };
   };
 
+  private toggleReply = (address: string) => {
+    return () => {
+      this.state.hiddenReplies[address] = !this.state.hiddenReplies[address];
+      this.forceUpdate();
+    };
+  };
+
+  clickEdit = (event)=> {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   render() {
     const options = {
       lineNumbers: false,
@@ -131,12 +194,16 @@ export default class Edit extends Component<Props, State> {
       mode: "markdown"
     };
     return (
-      <div className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}>
+      <div onClick={this.clickEdit} className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}>
+        {this.props.feedInfo ? <div>
+          <h2 style={{textAlign: "center"}}>Reply to</h2>
+          <FeedCard user={this.props.user} feedInfo={this.props.feedInfo} hideActionsPanel={true} /></div> : null}
         {this.state.previewIsOn ? (
           <div>
+            <h2 style={{textAlign: "center"}}>Preview</h2>
             {/* topics */}
             <div className="topics-and-mentions card">
-              <p className="title">Post to topics:</p>
+              {this.state.topics.length ? <p className="title">Post to topics:</p> : null}
               <div className="topics-list">
                 {this.state.topics.map((topic, offset) => (
                   <div
@@ -151,7 +218,24 @@ export default class Edit extends Component<Props, State> {
                   </div>
                 ))}
               </div>
-              <p className="title">Mention the following users:</p>
+              {this.state.replies.length ? <p className="title">Reply to the following users:</p> : null}
+              <div className="replies-list">
+                {this.state.replies.map((reply, offset) => (
+                  <div
+                    className={
+                      "reply " +
+                      (this.state.hiddenReplies[reply.address]
+                        ? "hidden"
+                        : "")
+                    }
+                    key={offset}
+                    onClick={this.toggleReply(reply.address)}
+                  >
+                    {reply.name}
+                  </div>
+                ))}
+              </div>
+              {this.state.mentions.length ? <p className="title">Mention the following users:</p> : null}
               <div className="mentions-list">
                 {this.state.mentions.map((mention, offset) => (
                   <div
@@ -173,12 +257,15 @@ export default class Edit extends Component<Props, State> {
             <Preview markdown={this.state.code} user={this.props.user} />
           </div>
         ) : (
+          <div>
+          <h2 style={{textAlign: "center"}}>Write below</h2>
           <div className="editor-wrapper">
             <CodeMirror
               value={this.state.code}
               onChange={this.updateCode}
               options={options}
             />
+          </div>
           </div>
         )}
         <div className="button-group">

@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 interface Props {
   feedInfo: FeedInfo;
   user: User;
+  hideActionsPanel?: boolean
 }
 interface State {}
 
@@ -45,6 +46,9 @@ export default class FeedCard extends Component<Props, State> {
   }
 
   clickCard = () => {
+    if (!this.props.feedInfo.transactionInfo.hash) {
+      return;
+    }
     window.open(
       `${window.location.pathname}#/${this.props.user.networkId}/tx/${
         this.props.feedInfo.transactionInfo.hash
@@ -85,10 +89,12 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
           </div>
+          {
+            this.props.hideActionsPanel ? null :
           <ActionsBottomPanel
             feedInfo={this.props.feedInfo}
             user={this.props.user}
-          />
+          /> }
         </div>
       );
     } else {
@@ -103,10 +109,12 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
             <ImagesPanel images={summary.images} />
-            <ActionsBottomPanel
-              feedInfo={this.props.feedInfo}
-              user={this.props.user}
-            />
+            {
+            this.props.hideActionsPanel ? null :
+          <ActionsBottomPanel
+            feedInfo={this.props.feedInfo}
+            user={this.props.user}
+          /> }
           </div>
         </div>
       );

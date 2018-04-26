@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import Edit from "../components/edit";
+
 import { FeedInfo } from "../lib/feed";
 import { User } from "../lib/user";
 
@@ -7,11 +9,16 @@ interface Props {
   feedInfo: FeedInfo;
   user: User;
 }
-interface State {}
+interface State {
+  showEditPanel: boolean
+}
 
 export default class ActionsBottomPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      showEditPanel: false
+    };
   }
 
   upvote = event => {
@@ -40,8 +47,12 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
       });
   };
 
-  reply = () => {
-    alert("Not implemented");
+  reply = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.setState({
+      showEditPanel: true
+    })
   };
 
   donate = () => {
@@ -58,6 +69,10 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
 
     if (!transactionInfo || !transactionInfo.hash) {
       return null;
+    }
+
+    if (this.state.showEditPanel) {
+      return <Edit cancel={()=> {this.setState({showEditPanel: false})}} user={this.props.user} feedInfo={this.props.feedInfo} />
     }
 
     return (
