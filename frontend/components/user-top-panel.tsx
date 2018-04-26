@@ -20,15 +20,29 @@ export default class UserTopPanel extends React.Component<Props, State> {
 
     const userPanel = (
       <div className="user-panel">
-        <div
-          className="profile-image"
-          style={{
-            backgroundImage: `url("${userInfo.avatar}")`
-          }}
-        />
-        <div className="name">
-          {userInfo.name ? userInfo.name : "Anonymous"}
-        </div>
+        <Link
+          to={`/${this.props.user.networkId}/profile/${
+            feedInfo.userInfo.address
+          }`}
+          target="_blank"
+        >
+          <div
+            className="profile-image"
+            style={{
+              backgroundImage: `url("${userInfo.avatar}")`
+            }}
+          />
+        </Link>
+        <Link
+          to={`/${this.props.user.networkId}/profile/${
+            feedInfo.userInfo.address
+          }`}
+          target="_blank"
+        >
+          <div className="name">
+            {userInfo.name ? userInfo.name : "Anonymous"}
+          </div>
+        </Link>
         <div className="user-address">
           {userInfo.address.slice(0, 6) + "..."}
         </div>
@@ -47,6 +61,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
             to={`/${this.props.user.networkId}/profile/${
               feedInfo.repostUserInfo.address
             }`}
+            target="_blank"
           >
             {feedInfo.repostUserInfo.name}
           </Link>

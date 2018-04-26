@@ -52,50 +52,6 @@
         max-width: 100%;
       }
     }
-
-    .bottom-button-group {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      margin-top: 14px;
-
-      .btn {
-        margin-right: 28px;
-        font-size: 0.9rem;
-        cursor: pointer;
-
-        &.upvote-btn,
-        &.downvote-btn {
-          padding: 6px 10px;
-          background-color: #dff1cf;
-          color: #74a24b;
-          border-radius: 2px;
-          margin-right: 6px;
-          max-width: 50px;
-
-          &:hover {
-            background-color: darken(#dff1cf, 8%);
-          }
-
-          i {
-            margin: 0;
-          }
-
-          span {
-            margin-left: 4px;
-            font-family: "Helvetica Neue", arial, sans-serif !important;
-          }
-        }
-
-        &.downvote-btn {
-          margin-right: 28px;
-        }
-      }
-
-      i {
-        margin-right: 6px;
-      }
-    }
   }
 
   @media screen and (max-width: 500px) {
@@ -112,5 +68,12 @@
     .images-panel {
       padding: 6px;
     }
+  }
+}
+
+.feed-card {
+  &:hover {
+    cursor: pointer;
+    background-color: #fbfff7;
   }
 }
