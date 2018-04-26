@@ -1,16 +1,17 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.22;
 // https://medium.com/daox/three-methods-to-transfer-funds-in-ethereum-by-means-of-solidity-5719944ed6e9
 
 contract Ribbit {
+    uint public version;
     address public owner;
     address public previousContractAddress; 
+    Ribbit public previousContract;
     /**
      * 0x0 => earnings
-     * 0x1 => likes 
-     * 0x2 => dislikes
-     * 0x3 => reports
-     * 0x4 => replies
-     * 0x5 => reposts
+     * 0x1 => upvotes 
+     * 0x2 => downvotes
+     * 0x3 => replies
+     * 0x4 => reports
      * 
      * transactionHash => field => value
      */
@@ -44,14 +45,16 @@ contract Ribbit {
      *     [1] => hash (sha256 hash) || transactionHash if block.number == 0
      */
     mapping (address => uint[2]) public currentFeedInfoMap;
-    mapping (bytes32 => uint[2]) public currentReplyInfoMap;
-    // mapping (address => uint[2]) public currentMentionInfoMap; // => combined with currentTagInfoByTimeMap;
     mapping (bytes32 => uint[2]) public currentTagInfoByTimeMap;
     mapping (bytes32 => uint[2]) public currentTagInfoByTrendMap;
 
-    constructor(address previousContractAddr) public {
+    constructor(address _previousContractAddress, uint _version) public {
         owner = msg.sender;
-        previousContractAddress = previousContractAddr;
+        version = _version;
+        previousContractAddress = _previousContractAddress;
+        if (_previousContractAddress != address(0)) {
+            previousContract = Ribbit(_previousContractAddress);
+        }
     }
     /*
     // These two functions are not safe
@@ -70,34 +73,66 @@ contract Ribbit {
         } 
     }
     */
-    function getState(bytes32 transactionHash, uint field) external constant returns (uint)  {
-        return state[transactionHash][field];
+    function getState(bytes32 transactionHash, uint field) external view returns (uint)  {
+        uint value = state[transactionHash][field];
+        if (previousContractAddress != address(0)) {
+            value = value + previousContract.getState(transactionHash, field);
+        }
+        return value;
+    }
+    function getUserState(address userAddress, uint field) external view returns (uint) {
+        uint value = userState[userAddress][field];
+        if (previousContractAddress != address(0)) {
+            value = value + previousContract.getUserState(userAddress, field);
+        }
+        return value;
+    }
+    function getTagState(bytes32 tag, uint field) external view returns (uint) {
+        uint value = tagState[tag][field];
+        if (previousContractAddress != address(0)) {
+            value = value + previousContract.getTagState(tag, field);
+        }
+        return value;
     }
     function setMetaDataJSONStringValue(string value) external {
         metaDataJSONStringMap[msg.sender] = value;
     }
-    function getMetaDataJSONStringValue(address addr) external constant returns (string) {
-        return metaDataJSONStringMap[addr];
+    function getMetaDataJSONStringValue(address addr) external view returns (string) {
+        bytes memory testValue = bytes(metaDataJSONStringMap[addr]);
+        if (testValue.length == 0 && previousContractAddress != address(0)) { // read from previousContract
+            return previousContract.getMetaDataJSONStringValue(addr);
+        } else {
+            return metaDataJSONStringMap[addr];
+        }
     }
-    function getCurrentFeedInfo(address authorAddress) external constant returns (uint[2]) {
-        return currentFeedInfoMap[authorAddress];
+    function getCurrentFeedInfo(address authorAddress) external view returns (uint[2]) {
+        if (currentFeedInfoMap[authorAddress][0] == 0 && previousContractAddress != address(0)) { // read from previousContract
+            return previousContract.getCurrentFeedInfo(authorAddress);
+        } else {
+            return currentFeedInfoMap[authorAddress];
+        }
     }
-    function getCurrentTagInfoByTime(bytes32 tag) external constant returns (uint[2]) {
-        return currentTagInfoByTimeMap[tag];
+    function getCurrentTagInfoByTime(bytes32 tag) external view returns (uint[2]) {
+        if (currentTagInfoByTimeMap[tag][0] == 0 && previousContractAddress != address(0)) { // read from previousContract
+            return previousContract.getCurrentTagInfoByTime(tag);
+        } else {
+            return currentTagInfoByTimeMap[tag];
+        }
     }
-    function getCurrentTagInfoByTrend(bytes32 tag) external constant returns (uint[2]) {
-        return currentTagInfoByTrendMap[tag];
-    }
-    function getCurrentReplyInfo(bytes32 parentTransactionHash) external constant returns (uint[2]) {
-        return currentReplyInfoMap[parentTransactionHash];
+    function getCurrentTagInfoByTrend(bytes32 tag) external view returns (uint[2]) {
+        if (currentTagInfoByTrendMap[tag][0] == 0 && previousContractAddress != address(0)) { // read from previousContract
+            return previousContract.getCurrentTagInfoByTrend(tag);
+        } else {
+            return currentTagInfoByTrendMap[tag];
+        }
     }
     
     // Post Feed 
-    event PostEvent(uint[2] previousFeedTransactionInfo);
+    event SavePreviousFeedInfoEvent(uint[2] previousFeedTransactionInfo);
     event SavePreviousTagInfoByTimeEvent(uint[2] previousTagInfoByTime, bytes32 tag);
     event SavePreviousTagInfoByTrendEvent(uint[2] previousTagInfoByTrend, bytes32 tag);
-    function post(uint version, uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
-        emit PostEvent(currentFeedInfoMap[msg.sender]);
+    function post(uint timestamp, string message, uint messageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
+        emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
         uint blockNumber = block.number;
         currentFeedInfoMap[msg.sender][0] = blockNumber;
         currentFeedInfoMap[msg.sender][1] = messageHash;
@@ -118,40 +153,47 @@ contract Ribbit {
         }
     }
 
-    // Repost Feed
-    event RepostEvent(uint[2] previousFeedTransactionInfo);
-    function repost(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
-        emit RepostEvent(currentFeedInfoMap[msg.sender]);
-        // We can see the sender of feedInfo is not from msg.sender
-        // So this is a repost.
+    // Repost Feed => Upvote
+    function upvote(uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, bytes32 previousFeedTransactionHash, bytes32[] tags) external {
+        emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
 
-        // These two lines are wrong entries, it will load other user's posts instead of this repost...
-        // currentFeedInfoMap[msg.sender][0] = parentTransactionBlockNumber;
-        // currentFeedInfoMap[msg.sender][1] = parentTransactionMessageHash;
-        currentFeedInfoMap[msg.sender][0] = block.number;
+        uint blockNumber = block.number;
+        currentFeedInfoMap[msg.sender][0] = blockNumber;
         currentFeedInfoMap[msg.sender][1] = parentTransactionMessageHash;
 
-        state[parentTransactionHash][5] = state[parentTransactionHash][5] + 1; // increase number of reposts.
+        state[parentTransactionHash][1] = state[parentTransactionHash][1] + 1; // increase number of upvotes.
 
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
-            if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
+            if (tag >> 160 == 0) { // it's a user address, notify that user that someone likes his post & reply.
+                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
+                currentTagInfoByTimeMap[tag][0] = blockNumber;
+                currentTagInfoByTimeMap[tag][1] = parentTransactionMessageHash;
+            } else if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash &&  // not the same post.  
+                state[parentTransactionHash][1] >= state[parentTransactionHash][2]   // upvotes >= downvotes.
+            ) {
                 emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
-                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
+                currentTagInfoByTrendMap[tag][0] = blockNumber;
                 currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
             }
         }
+    }
+
+    // Downvote
+    // Downvote will affect trend. See function above
+    function downvote(bytes32 transactionHash) external {
+        state[transactionHash][2] = state[transactionHash][2] + 1;
     }
     
     // Reply Feed
-    event ReplyEvent(uint[2] previousReplyInfo);
-    function reply(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousReplyTransactionHash, bytes32[] tags) external {
-        emit ReplyEvent(currentReplyInfoMap[parentTransactionHash]);
+    // mode =>
+    //    0x0: do nothing
+    //    0x1: upvote
+    //    0x2: downvote
+    function reply(uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousReplyTransactionHash, bytes32[] tags, uint mode) external {
         uint blockNumber = block.number;
-        currentReplyInfoMap[parentTransactionHash][0] = blockNumber;   
-        currentReplyInfoMap[parentTransactionHash][1] = messageHash;
-        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of replies
+        state[parentTransactionHash][3] = state[parentTransactionHash][3] + 1; // increase number of replies
         
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
@@ -160,43 +202,32 @@ contract Ribbit {
                 emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
-            } else if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
+            } else if ( mode == 1 &&
+                        currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash &&  // not the same post.  
+                        state[parentTransactionHash][1] >= state[parentTransactionHash][2]   // upvotes >= downvotes.
+            ){
                 emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
-                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
-                currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
+                currentTagInfoByTrendMap[tag][0] = blockNumber; // parentTransactionBlockNumber; <= this is wrong.
+                currentTagInfoByTrendMap[tag][1] = messageHash; // parentTransactionMessageHash; <= this is wrong
             }
         }
+
+        // here we use parentTransactionHash as tag.
+        // Drawback: there might be collision with the real tag, but we just ignore it.
+        emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[parentTransactionHash], parentTransactionHash);
+        currentTagInfoByTimeMap[parentTransactionHash][0] = blockNumber;
+        currentTagInfoByTimeMap[parentTransactionHash][1] = messageHash;
+
+        emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
+        currentTagInfoByTrendMap[parentTransactionHash][0] = blockNumber;
+        currentTagInfoByTrendMap[parentTransactionHash][1] = messageHash;
     }
 
-    // Repost and Reply
-    event RepostAndReplyEvent(uint[2] previousFeedTransactionInfo, uint[2] previousReplyInfo);
-    function repostAndReply(uint version, uint timestamp, bytes32 parentTransactionHash, uint parentTransactionBlockNumber, uint parentTransactionMessageHash, string message, uint messageHash, bytes32 previousReplyTransactionHash, bytes32[] tags) external {
-        emit RepostAndReplyEvent(currentFeedInfoMap[msg.sender], currentReplyInfoMap[parentTransactionHash]);
-        uint blockNumber = block.number;
-        
-        currentReplyInfoMap[parentTransactionHash][0] = blockNumber;   
-        currentReplyInfoMap[parentTransactionHash][1] = messageHash;
-        state[parentTransactionHash][4] = state[parentTransactionHash][4] + 1; // increase number of replies
+    // Report
+    function report(bytes32 transactionHash) external {
+        state[transactionHash][4] = state[transactionHash][4] + 1;
+    }
     
-        currentFeedInfoMap[msg.sender][0] = blockNumber;
-        currentFeedInfoMap[msg.sender][1] = messageHash;
-        state[parentTransactionHash][5] = state[parentTransactionHash][5] + 1; // increase number of reposts.
-
-        bytes32 tag;
-        for (uint i = 0; i < tags.length; i++) {
-            tag = tags[i];
-            if (tag >> 160 == 0) { // it's a user address
-                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
-                currentTagInfoByTimeMap[tag][0] = blockNumber;
-                currentTagInfoByTimeMap[tag][1] = messageHash;
-            } else if (currentTagInfoByTrendMap[tag][1] != parentTransactionMessageHash) { // not the same post.  
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
-                currentTagInfoByTrendMap[tag][0] = parentTransactionBlockNumber;
-                currentTagInfoByTrendMap[tag][1] = parentTransactionMessageHash;
-            }
-        }
-    }
-
     // Send ether 
     function sendEther(bytes32 transactionHash, address postAutherAddress, uint amount1, address appAuthorAddress, uint amount2) payable external {
         state[transactionHash][0] = state[transactionHash][0] + amount1 + amount2;
@@ -208,28 +239,13 @@ contract Ribbit {
         }
     }
 
-    // Like
-    function like(bytes32 transactionHash) external {
-        state[transactionHash][1] = state[transactionHash][1] + 1;
-    }
-
-    // Dislike
-    function dislike(bytes32 transactionHash) external {
-        state[transactionHash][2] = state[transactionHash][2] + 1;
-    }
-
-    // Report
-    function report(bytes32 transactionHash) external {
-        state[transactionHash][3] = state[transactionHash][3] + 1;
-    }
-
-    // Like tag
-    function likeTag(bytes32 tag) external {
+    // Upvote tag
+    function upvoteTag(bytes32 tag) external {
         tagState[tag][0] = tagState[tag][0] + 1;
     }
 
-    // Dislike tag
-    function dislikeTag(bytes32 tag) external {
+    // Downvote tag
+    function downvoteTag(bytes32 tag) external {
         tagState[tag][1] = tagState[tag][1] + 1;
     }
 
@@ -238,13 +254,13 @@ contract Ribbit {
         tagState[tag][2] = tagState[tag][2] + 1;
     }
 
-    // Like user
-    function likeUser(address userAddress) external {
+    // Upvote user
+    function upvoteUser(address userAddress) external {
         userState[userAddress][0] = userState[userAddress][0] + 1;
     }
 
-    // Dislike user
-    function dislikeUser(address userAddress) external {
+    // Downvote user
+    function downvoteUser(address userAddress) external {
         userState[userAddress][1] = userState[userAddress][1] + 1;
     }
     

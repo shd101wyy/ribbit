@@ -136,6 +136,9 @@ export class User {
       return tag.toLowerCase().replace(/^0x/, "0x000000000000000000000000"); // to make it 32bytes.
     }
 
+    return "0x" + sha256(tag.toLowerCase().replace(/\s/g, ""));
+
+    /*
     const compressedTag = compressString(tag.toLowerCase().replace(/\s/g, ""));
     let hexString = hexEncode(compressedTag);
     if (hexString.length >= 64) {
@@ -148,6 +151,7 @@ export class User {
       }
       return "0x" + hexString;
     }
+    */
   }
 
   /**
@@ -177,9 +181,9 @@ export class User {
 
     const currentTimestamp = Date.now();
     const compressedMessage = compressString(message);
-    const messageHash = sha256(
-      this.accountAddress + currentTimestamp.toString() + message
-    );
+    const messageHash =
+      "0x" +
+      sha256(this.accountAddress + currentTimestamp.toString() + message);
 
     const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
       this.accountAddress
@@ -198,7 +202,7 @@ export class User {
           0, // version
           currentTimestamp, // timestamp
           compressedMessage, // message
-          "0x" + messageHash, // messageHash
+          messageHash, // messageHash
           previousFeedTransactionHash, // previousFeedTransactionHash
           tags // tags
         )
