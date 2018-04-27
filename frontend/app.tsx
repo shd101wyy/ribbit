@@ -40,7 +40,7 @@ class App extends React.Component<Props, State> {
     ribbit
       .initialize()
       .then(() => {
-        console.log("user initialized.",ribbit.accountAddress);
+        console.log("user initialized.", ribbit.accountAddress);
         this.setState(
           {
             injectWeb3: true,

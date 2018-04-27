@@ -84,7 +84,10 @@ export default class FeedCard extends Component<Props, State> {
       // Article
       return (
         <div className="feed-card card" onClick={this.clickCard}>
-          <UserTopPanel ribbit={this.props.ribbit} feedInfo={this.props.feedInfo} />
+          <UserTopPanel
+            ribbit={this.props.ribbit}
+            feedInfo={this.props.feedInfo}
+          />
           <div className="content-panel">
             {summary.images.length ? (
               <div
@@ -113,7 +116,10 @@ export default class FeedCard extends Component<Props, State> {
       // Normal
       return (
         <div className="feed-card card" onClick={this.clickCard}>
-          <UserTopPanel feedInfo={this.props.feedInfo} ribbit={this.props.ribbit} />
+          <UserTopPanel
+            feedInfo={this.props.feedInfo}
+            ribbit={this.props.ribbit}
+          />
           <div className="content-panel">
             <div
               ref={elem => (this.elem = elem)}

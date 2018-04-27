@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import Edit from "../components/edit";
+import DonatePanel from "../components/donate-panel";
 
 import { FeedInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
@@ -11,16 +12,19 @@ interface Props {
 }
 interface State {
   showEditPanel: boolean;
+  showDonatePanel: boolean;
 }
 
 export default class ActionsBottomPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      showEditPanel: false
+      showEditPanel: false,
+      showDonatePanel: false
     };
   }
 
+  /*
   upvote = event => {
     event.preventDefault();
     event.stopPropagation();
@@ -33,6 +37,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
         alert(error);
       });
   };
+  */
 
   downvote = event => {
     event.preventDefault();
@@ -55,8 +60,10 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
     });
   };
 
-  donate = () => {
-    alert("Not implemented");
+  toggleDonatePanel = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.setState({ showDonatePanel: true });
   };
 
   render() {
@@ -85,7 +92,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
 
     return (
       <div className="actions-bottom-panel">
-        <div className="upvote-btn btn" onClick={this.upvote}>
+        <div className="upvote-btn btn" onClick={this.toggleDonatePanel}>
           <i className="fas fa-caret-up">
             {stateInfo.upvotes ? (
               <span className="upvote-num">{stateInfo.upvotes}</span>
@@ -100,10 +107,19 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
           <i className="far fa-comment" />
           <span className="comment-num">{stateInfo.replies || ""}</span>
         </div>
+        {/*
         <div className="donate-btn btn" onClick={this.donate}>
           <i className="fas fa-dollar-sign" />
           <span className="comment-num">{stateInfo.earnings || ""}</span>
         </div>
+        */}
+        {this.state.showDonatePanel ? (
+          <DonatePanel
+            close={() => this.setState({ showDonatePanel: false })}
+            feedInfo={this.props.feedInfo}
+            ribbit={this.props.ribbit}
+          />
+        ) : null}
       </div>
     );
   }

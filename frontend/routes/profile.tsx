@@ -4,7 +4,11 @@
 
 import * as React from "react";
 import { Ribbit, UserInfo } from "../lib/ribbit";
-import { FeedInfo, generateSummaryFromHTML } from "../lib/feed";
+import {
+  FeedInfo,
+  generateSummaryFromHTML,
+  generateFeedInfoFromTransactionInfo
+} from "../lib/feed";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
@@ -61,72 +65,14 @@ export default class profile extends React.Component<Props, State> {
         { num: -1 },
         async (done, offset, transactionInfo) => {
           // console.log("showUserFeeds: ", done, offset, transactionInfo);
-          if (done) {
+          if (done || !transactionInfo) {
             return this.setState({ loading: false });
           }
-          const feedType = transactionInfo.decodedInputData.name;
-
-          let message, summary, userInfo, repostUserInfo;
-          if (feedType === "post") {
-            message = decompressString(
-              transactionInfo.decodedInputData.params["message"].value
-            );
-
-            summary = await generateSummaryFromHTML(
-              renderMarkdown(message),
-              this.props.ribbit
-            );
-
-            userInfo = await this.props.ribbit.getUserInfo(userAddress);
-          } else if (feedType === "upvote") {
-            // Get parent transactionInfo
-            transactionInfo = await this.props.ribbit.getTransactionInfo(
-              "",
-              parseInt(
-                transactionInfo.decodedInputData.params[
-                  "parentTransactionBlockNumber"
-                ].value
-              ),
-              new BigNumber(
-                transactionInfo.decodedInputData.params[
-                  "parentTransactionMessageHash"
-                ].value
-              ).toString(16),
-              transactionInfo.decodedInputData.params["parentTransactionHash"]
-                .value
-            );
-
-            // who reposts the feed
-            repostUserInfo = await this.props.ribbit.getUserInfo(userAddress);
-
-            // author of the original feed
-            userInfo = await this.props.ribbit.getUserInfo(transactionInfo.from);
-
-            message = decompressString(
-              transactionInfo.decodedInputData.params["message"].value
-            );
-
-            summary = await generateSummaryFromHTML(
-              renderMarkdown(message),
-              this.props.ribbit
-            );
-          } else {
-            throw "Invalid feed type: " + feedType;
-          }
-
-          const stateInfo = await this.props.ribbit.getFeedStateInfo(
-            transactionInfo.hash
+          const feedInfo = await generateFeedInfoFromTransactionInfo(
+            this.props.ribbit,
+            transactionInfo
           );
-
           const feeds = this.state.feeds;
-          const feedInfo = {
-            summary,
-            transactionInfo,
-            userInfo,
-            stateInfo,
-            feedType,
-            repostUserInfo
-          };
           console.log("render feed: ", offset, feedInfo);
           feeds.push(feedInfo);
           this.forceUpdate();

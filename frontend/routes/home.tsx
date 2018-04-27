@@ -210,7 +210,11 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} ribbit={this.props.ribbit} />
+            <FeedCard
+              key={index}
+              feedInfo={feedInfo}
+              ribbit={this.props.ribbit}
+            />
           ))}
           <p id="feed-footer">
             {" "}
@@ -228,7 +232,11 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} ribbit={this.props.ribbit} />
+            <FeedCard
+              key={index}
+              feedInfo={feedInfo}
+              ribbit={this.props.ribbit}
+            />
           ))}
           <p id="feed-footer">
             {" "}

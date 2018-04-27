@@ -102,7 +102,10 @@ export default class Tx extends React.Component<Props, State> {
     }
     return (
       <div className="tx-page">
-        <ArticleCard ribbit={this.props.ribbit} feedInfo={this.state.feedInfo} />
+        <ArticleCard
+          ribbit={this.props.ribbit}
+          feedInfo={this.state.feedInfo}
+        />
       </div>
     );
   }

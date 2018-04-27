@@ -237,19 +237,10 @@ export async function generateFeedInfoFromTransactionInfo(
   } else if (feedType === "upvote") {
     const repostUserAddress = transactionInfo.from;
     // Get parent transactionInfo
-    transactionInfo = await ribbit.getTransactionInfo(
-      "",
-      parseInt(
-        transactionInfo.decodedInputData.params["parentTransactionBlockNumber"]
-          .value
-      ),
-      new BigNumber(
-        transactionInfo.decodedInputData.params[
-          "parentTransactionMessageHash"
-        ].value
-      ).toString(16),
-      transactionInfo.decodedInputData.params["parentTransactionHash"].value
-    );
+    transactionInfo = await ribbit.getTransactionInfo({
+      transactionHash:
+        transactionInfo.decodedInputData.params["parentTransactionHash"].value
+    });
 
     // who reposts the feed
     repostUserInfo = await ribbit.getUserInfo(repostUserAddress);

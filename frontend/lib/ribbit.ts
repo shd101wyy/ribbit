@@ -262,11 +262,10 @@ export class Ribbit {
       .call();
     const currentReplyBlockNumber = parseInt(currentReplyInfo[0]);
     const currentReplyHash = new BigNumber(currentReplyInfo[1]).toString(16);
-    const previousReplyTransactionInfo = await this.getTransactionInfo(
-      "",
-      currentReplyBlockNumber,
-      currentReplyHash
-    );
+    const previousReplyTransactionInfo = await this.getTransactionInfo({
+      blockNumber: currentReplyBlockNumber,
+      messageHash: currentReplyHash
+    });
     const previousReplyTransactionHash = previousReplyTransactionInfo
       ? previousReplyTransactionInfo.hash
       : "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -303,7 +302,11 @@ export class Ribbit {
    * upvote a feed
    * TODO: add donation support.
    */
-  public async upvote(parentTransactionHash: string) {
+  public async upvote(
+    parentTransactionHash: string,
+    authorAddress = "",
+    wei = 0
+  ) {
     // 1. Verify parentTransactionHash is valid.
     const parentTransaction = await this.web3.eth.getTransaction(
       parentTransactionHash
@@ -328,7 +331,9 @@ export class Ribbit {
       tags = decodedInputData.params["tags"].value;
     }
 
-    let authorAddress = "0x0000000000000000000000000000000000000000";
+    if (!authorAddress) {
+      authorAddress = "0x0000000000000000000000000000000000000000";
+    }
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
@@ -339,7 +344,7 @@ export class Ribbit {
           tags,
           authorAddress
         )
-        .send({ from: this.accountAddress })
+        .send({ from: this.accountAddress, value: wei })
         .on("error", error => {
           return reject(error);
         })
@@ -383,12 +388,12 @@ export class Ribbit {
    * @param messageHash message hash without `0x` at start.
    * @param transactionHash
    */
-  public async getTransactionInfo(
-    userAddress: string = "",
-    blockNumber: number,
-    messageHash: string,
-    transactionHash?: string
-  ): Promise<TransactionInfo> {
+  public async getTransactionInfo({
+    userAddress = "",
+    blockNumber = 0,
+    messageHash = "",
+    transactionHash = ""
+  }): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("messageHash: ", messageHash);
@@ -422,7 +427,7 @@ export class Ribbit {
             decodedInputData.params["timestamp"].value
           ).toString(16);
         }
-        if (messageHash2 !== messageHash) {
+        if (messageHash && messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
         transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
@@ -435,7 +440,11 @@ export class Ribbit {
     if (transactionHash) {
       try {
         const transaction = await this.web3.eth.getTransaction(transactionHash);
-        if (transaction.blockNumber === blockNumber) {
+        if (
+          (blockNumber && transaction.blockNumber === blockNumber) || // block number is provided
+          !blockNumber
+        ) {
+          // block number is not provided
           const validatedResult = validateTransaction(transaction);
           if (validatedResult) {
             // console.log('transactionHash is valid: ', validatedResult)
@@ -445,6 +454,10 @@ export class Ribbit {
       } catch (error) {
         // transactionHash is wrong, then check blockNumber and messageHash
       }
+    }
+
+    if (!blockNumber) {
+      return null;
     }
 
     const transactionCount = await this.web3.eth.getBlockTransactionCount(
@@ -478,12 +491,11 @@ export class Ribbit {
       .call();
     const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
     const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
-    return await this.getTransactionInfo(
+    return await this.getTransactionInfo({
       userAddress,
-      currentFeedBlockNumber,
-      currentFeedHash,
-      ""
-    );
+      blockNumber: currentFeedBlockNumber,
+      messageHash: currentFeedHash
+    });
   }
 
   /**
@@ -497,11 +509,10 @@ export class Ribbit {
       .call();
     const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
     const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
-    return await this.getTransactionInfo(
-      "",
-      currentFeedBlockNumber,
-      currentFeedHash
-    );
+    return await this.getTransactionInfo({
+      blockNumber: currentFeedBlockNumber,
+      messageHash: currentFeedHash
+    });
   }
 
   /**
@@ -515,12 +526,10 @@ export class Ribbit {
       .call();
     const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
     const currentFeedHash = this.web3.utils.toHex(currentFeedInfo[1]);
-    return await this.getTransactionInfo(
-      "",
-      currentFeedBlockNumber,
-      currentFeedHash,
-      ""
-    );
+    return await this.getTransactionInfo({
+      blockNumber: currentFeedBlockNumber,
+      messageHash: currentFeedHash
+    });
   }
 
   /**
@@ -657,12 +666,12 @@ export class Ribbit {
     let offset = 0;
     while (offset > num) {
       // console.log("@@ offset: " + offset);
-      const transactionInfo = await this.getTransactionInfo(
+      const transactionInfo = await this.getTransactionInfo({
         userAddress,
         blockNumber,
         messageHash,
         transactionHash
-      );
+      });
       if (!transactionInfo) {
         return cb(true); // done.
       } else {
@@ -809,34 +818,5 @@ export class Ribbit {
       reports,
       replies
     };
-  }
-
-  /**
-   * Like a feed
-   * @param transactionHash
-   */
-  public async like(transactionHash: string): Promise<string> {
-    if (!transactionHash) {
-      return;
-    }
-    transactionHash = transactionHash.trim();
-    if (!transactionHash.length) {
-      return;
-    }
-
-    return new Promise<string>((resolve, reject) => {
-      this.contractInstance.methods
-        .like(transactionHash)
-        .send({
-          from: this.accountAddress
-        })
-        .on("error", error => {
-          return reject(error);
-        })
-        .on("transactionHash", hash => {
-          console.log("like: ", hash);
-          return resolve(hash);
-        });
-    });
   }
 }

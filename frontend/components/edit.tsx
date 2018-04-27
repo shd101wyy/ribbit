@@ -83,20 +83,9 @@ export default class Edit extends Component<Props, State> {
         const parentTransactionHash =
           transactionInfo.decodedInputData.params["parentTransactionHash"]
             .value;
-        const parentTransactionBlockNumber =
-          transactionInfo.decodedInputData.params[
-            "parentTransactionBlockNumber"
-          ].value;
-        const parentTransactionMessageHash =
-          transactionInfo.decodedInputData.params[
-            "parentTransactionMessageHash"
-          ].value;
-        transactionInfo = await this.props.ribbit.getTransactionInfo(
-          "",
-          parentTransactionBlockNumber,
-          parentTransactionMessageHash,
-          parentTransactionHash
-        );
+        transactionInfo = await this.props.ribbit.getTransactionInfo({
+          transactionHash: parentTransactionHash
+        });
       } else {
         break;
       }

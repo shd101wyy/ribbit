@@ -120,23 +120,10 @@ export default class ArticleCard extends Component<Props, State> {
     const parentTransactionHash =
       feedInfo.transactionInfo.decodedInputData.params["parentTransactionHash"]
         .value;
-    const parentTransactionBlockNumber = parseInt(
-      feedInfo.transactionInfo.decodedInputData.params[
-        "parentTransactionBlockNumber"
-      ].value
-    );
-    const parentTransactionMessageHash = new BigNumber(
-      feedInfo.transactionInfo.decodedInputData.params[
-        "parentTransactionMessageHash"
-      ].value
-    ).toString(16);
     try {
-      const transactionInfo = await this.props.ribbit.getTransactionInfo(
-        "",
-        parentTransactionBlockNumber,
-        parentTransactionMessageHash,
-        parentTransactionHash
-      );
+      const transactionInfo = await this.props.ribbit.getTransactionInfo({
+        transactionHash: parentTransactionHash
+      });
       const feedInfo = await generateFeedInfoFromTransactionInfo(
         this.props.ribbit,
         transactionInfo
@@ -180,7 +167,10 @@ export default class ArticleCard extends Component<Props, State> {
             dangerouslySetInnerHTML={{ __html: feedInfo.summary.html }}
           />
           {this.props.hideActionsPanel ? null : (
-            <ActionsBottomPanel ribbit={this.props.ribbit} feedInfo={feedInfo} />
+            <ActionsBottomPanel
+              ribbit={this.props.ribbit}
+              feedInfo={feedInfo}
+            />
           )}
         </div>
         <div className="replies">
