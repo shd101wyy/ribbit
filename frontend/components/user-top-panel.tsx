@@ -2,11 +2,11 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
-import { UserInfo, User } from "../lib/user";
+import { UserInfo, Ribbit } from "../lib/ribbit";
 
 interface Props {
   feedInfo: FeedInfo;
-  user: User;
+  ribbit: Ribbit;
 }
 interface State {}
 
@@ -21,7 +21,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
     const userPanel = (
       <div className="user-panel">
         <Link
-          to={`/${this.props.user.networkId}/profile/${
+          to={`/${this.props.ribbit.networkId}/profile/${
             feedInfo.userInfo.address
           }`}
           target="_blank"
@@ -34,7 +34,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
           />
         </Link>
         <Link
-          to={`/${this.props.user.networkId}/profile/${
+          to={`/${this.props.ribbit.networkId}/profile/${
             feedInfo.userInfo.address
           }`}
           target="_blank"
@@ -58,7 +58,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
       feedInfo.feedType === "upvote" ? (
         <div className="top-bar">
           <Link
-            to={`/${this.props.user.networkId}/profile/${
+            to={`/${this.props.ribbit.networkId}/profile/${
               feedInfo.repostUserInfo.address
             }`}
             target="_blank"

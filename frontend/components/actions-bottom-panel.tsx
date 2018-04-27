@@ -3,11 +3,11 @@ import * as React from "react";
 import Edit from "../components/edit";
 
 import { FeedInfo } from "../lib/feed";
-import { User } from "../lib/user";
+import { Ribbit } from "../lib/ribbit";
 
 interface Props {
   feedInfo: FeedInfo;
-  user: User;
+  ribbit: Ribbit;
 }
 interface State {
   showEditPanel: boolean;
@@ -24,7 +24,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
   upvote = event => {
     event.preventDefault();
     event.stopPropagation();
-    this.props.user
+    this.props.ribbit
       .upvote(this.props.feedInfo.transactionInfo.hash)
       .then(hash => {
         // do nothing.
@@ -37,7 +37,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
   downvote = event => {
     event.preventDefault();
     event.stopPropagation();
-    this.props.user
+    this.props.ribbit
       .downvote(this.props.feedInfo.transactionInfo.hash)
       .then(hash => {
         // do nothing
@@ -77,7 +77,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
           cancel={() => {
             this.setState({ showEditPanel: false });
           }}
-          user={this.props.user}
+          ribbit={this.props.ribbit}
           parentFeedInfo={this.props.feedInfo}
         />
       );

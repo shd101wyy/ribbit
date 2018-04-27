@@ -1,5 +1,5 @@
 import * as React from "react";
-import { UserInfo } from "../lib/user";
+import { UserInfo } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 

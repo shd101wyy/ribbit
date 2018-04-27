@@ -2,7 +2,7 @@ import * as React from "react";
 
 import ArticleCard from "../components/article-card";
 
-import { User, UserInfo, decodeMethod } from "../lib/user";
+import { Ribbit, UserInfo, decodeMethod } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
 import { TransactionInfo } from "../lib/transaction";
 import {
@@ -13,7 +13,7 @@ import {
 import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
   transactionHash: string;
 }
@@ -36,7 +36,7 @@ export default class Tx extends React.Component<Props, State> {
     this.analyzeTransaction(
       this.props.transactionHash,
       this.props.networkId,
-      this.props.user
+      this.props.ribbit
     );
   }
 
@@ -48,7 +48,7 @@ export default class Tx extends React.Component<Props, State> {
       this.analyzeTransaction(
         newProps.transactionHash,
         newProps.networkId,
-        newProps.user
+        newProps.ribbit
       );
     }
   }
@@ -56,10 +56,10 @@ export default class Tx extends React.Component<Props, State> {
   async analyzeTransaction(
     transactionHash: string,
     networkId: number,
-    user: User
+    ribbit: Ribbit
   ) {
     try {
-      const transaction = await user.web3.eth.getTransaction(transactionHash);
+      const transaction = await ribbit.web3.eth.getTransaction(transactionHash);
       const decodedInputData = decodeMethod(transaction.input);
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         this.setState({
@@ -71,7 +71,7 @@ export default class Tx extends React.Component<Props, State> {
         }) as TransactionInfo;
         try {
           const feedInfo = await generateFeedInfoFromTransactionInfo(
-            user,
+            ribbit,
             transactionInfo
           );
           if (feedInfo) {
@@ -102,7 +102,7 @@ export default class Tx extends React.Component<Props, State> {
     }
     return (
       <div className="tx-page">
-        <ArticleCard user={this.props.user} feedInfo={this.state.feedInfo} />
+        <ArticleCard ribbit={this.props.ribbit} feedInfo={this.state.feedInfo} />
       </div>
     );
   }

@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import { User, UserInfo } from "../lib/user";
+import { Ribbit, UserInfo } from "../lib/ribbit";
 import { FeedInfo, generateSummaryFromHTML } from "../lib/feed";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
@@ -12,7 +12,7 @@ import ProfileCard from "../components/profile-card";
 import { BigNumber } from "bignumber.js";
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
   guestUserAddress: string;
 }
@@ -43,7 +43,7 @@ export default class profile extends React.Component<Props, State> {
   }
 
   async initializeUser(userAddress: string) {
-    const userInfo = await this.props.user.getUserInfo(userAddress);
+    const userInfo = await this.props.ribbit.getUserInfo(userAddress);
     this.setState(
       {
         userInfo
@@ -56,7 +56,7 @@ export default class profile extends React.Component<Props, State> {
 
   async showUserFeeds(userAddress: string) {
     this.setState({ loading: true }, () => {
-      this.props.user.getFeedsFromUser(
+      this.props.ribbit.getFeedsFromUser(
         userAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
@@ -74,13 +74,13 @@ export default class profile extends React.Component<Props, State> {
 
             summary = await generateSummaryFromHTML(
               renderMarkdown(message),
-              this.props.user
+              this.props.ribbit
             );
 
-            userInfo = await this.props.user.getUserInfo(userAddress);
+            userInfo = await this.props.ribbit.getUserInfo(userAddress);
           } else if (feedType === "upvote") {
             // Get parent transactionInfo
-            transactionInfo = await this.props.user.getTransactionInfo(
+            transactionInfo = await this.props.ribbit.getTransactionInfo(
               "",
               parseInt(
                 transactionInfo.decodedInputData.params[
@@ -97,10 +97,10 @@ export default class profile extends React.Component<Props, State> {
             );
 
             // who reposts the feed
-            repostUserInfo = await this.props.user.getUserInfo(userAddress);
+            repostUserInfo = await this.props.ribbit.getUserInfo(userAddress);
 
             // author of the original feed
-            userInfo = await this.props.user.getUserInfo(transactionInfo.from);
+            userInfo = await this.props.ribbit.getUserInfo(transactionInfo.from);
 
             message = decompressString(
               transactionInfo.decodedInputData.params["message"].value
@@ -108,13 +108,13 @@ export default class profile extends React.Component<Props, State> {
 
             summary = await generateSummaryFromHTML(
               renderMarkdown(message),
-              this.props.user
+              this.props.ribbit
             );
           } else {
             throw "Invalid feed type: " + feedType;
           }
 
-          const stateInfo = await this.props.user.getFeedStateInfo(
+          const stateInfo = await this.props.ribbit.getFeedStateInfo(
             transactionInfo.hash
           );
 
@@ -153,7 +153,7 @@ export default class profile extends React.Component<Props, State> {
               <FeedCard
                 key={index}
                 feedInfo={feedInfo}
-                user={this.props.user}
+                ribbit={this.props.ribbit}
               />
             ))}
             <p id="feed-footer">

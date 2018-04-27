@@ -9,12 +9,12 @@ import ActionsBottomPanel from "./actions-bottom-panel";
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
-import { User } from "../lib/user";
+import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
 
 interface Props {
   feedInfo: FeedInfo;
-  user: User;
+  ribbit: Ribbit;
   hideActionsPanel?: boolean;
 }
 interface State {}
@@ -51,19 +51,19 @@ export default class FeedCard extends Component<Props, State> {
       return;
     }
     /* window.open(
-      `${window.location.pathname}#/${this.props.user.networkId}/tx/${
+      `${window.location.pathname}#/${this.props.ribbit.networkId}/tx/${
         this.props.feedInfo.transactionInfo.hash
       }`,
     );
     */
     console.log(
       "push: ",
-      `/${this.props.user.networkId}/tx/${
+      `/${this.props.ribbit.networkId}/tx/${
         this.props.feedInfo.transactionInfo.hash
       }`
     );
     hashHistory.push(
-      `/${this.props.user.networkId}/tx/${
+      `/${this.props.ribbit.networkId}/tx/${
         this.props.feedInfo.transactionInfo.hash
       }`
     );
@@ -84,7 +84,7 @@ export default class FeedCard extends Component<Props, State> {
       // Article
       return (
         <div className="feed-card card" onClick={this.clickCard}>
-          <UserTopPanel user={this.props.user} feedInfo={this.props.feedInfo} />
+          <UserTopPanel ribbit={this.props.ribbit} feedInfo={this.props.feedInfo} />
           <div className="content-panel">
             {summary.images.length ? (
               <div
@@ -104,7 +104,7 @@ export default class FeedCard extends Component<Props, State> {
           {this.props.hideActionsPanel ? null : (
             <ActionsBottomPanel
               feedInfo={this.props.feedInfo}
-              user={this.props.user}
+              ribbit={this.props.ribbit}
             />
           )}
         </div>
@@ -113,7 +113,7 @@ export default class FeedCard extends Component<Props, State> {
       // Normal
       return (
         <div className="feed-card card" onClick={this.clickCard}>
-          <UserTopPanel feedInfo={this.props.feedInfo} user={this.props.user} />
+          <UserTopPanel feedInfo={this.props.feedInfo} ribbit={this.props.ribbit} />
           <div className="content-panel">
             <div
               ref={elem => (this.elem = elem)}
@@ -124,7 +124,7 @@ export default class FeedCard extends Component<Props, State> {
             {this.props.hideActionsPanel ? null : (
               <ActionsBottomPanel
                 feedInfo={this.props.feedInfo}
-                user={this.props.user}
+                ribbit={this.props.ribbit}
               />
             )}
           </div>

@@ -3,7 +3,7 @@ import {
   TransactionInfo,
   getTransactionCreationTimestamp
 } from "./transaction";
-import { UserInfo, User } from "./user";
+import { UserInfo, Ribbit } from "./ribbit";
 import { renderMarkdown } from "./markdown";
 
 export interface StateInfo {
@@ -44,7 +44,7 @@ export interface Summary {
 
 export async function getTopicsAndMentionsFromHTML(
   html: string,
-  user: User
+  ribbit: Ribbit
 ): Promise<{
   topics: string[];
   mentions: { name: string; address: string }[];
@@ -59,7 +59,7 @@ export async function getTopicsAndMentionsFromHTML(
     const tagElem = tagElems[i] as HTMLAnchorElement;
     if (tagElem.classList.contains("tag-mention")) {
       const mention = tagElem.getAttribute("data-mention");
-      const userInfo = await user.getUserInfo(mention);
+      const userInfo = await ribbit.getUserInfo(mention);
       mentions.push({
         name: userInfo.name,
         address: userInfo.address
@@ -79,7 +79,7 @@ export async function getTopicsAndMentionsFromHTML(
 
 export async function generateSummaryFromHTML(
   html: string,
-  user: User
+  ribbit: Ribbit
 ): Promise<Summary> {
   let title = "",
     summary = "",
@@ -157,17 +157,17 @@ export async function generateSummaryFromHTML(
       const tagElem = tagElems[i] as HTMLAnchorElement;
       if (tagElem.classList.contains("tag-mention")) {
         const mention = tagElem.getAttribute("data-mention");
-        const userInfo = await user.getUserInfo(mention);
+        const userInfo = await ribbit.getUserInfo(mention);
         tagElem.innerHTML = `<span class="mention">${userInfo.name}</span>`;
         tagElem.href = `${window.location.pathname}#/${
-          user.networkId
+          ribbit.networkId
         }/profile/${mention}`;
         tagElem.setAttribute("target", "_blank");
       } else if (tagElem.classList.contains("tag-topic")) {
         const topic = tagElem.getAttribute("data-topic");
         tagElem.innerHTML = `<span class="topic">${topic}</span>`;
         tagElem.href = `${window.location.pathname}#/${
-          user.networkId
+          ribbit.networkId
         }/topic/${topic}`;
         tagElem.setAttribute("target", "_blank");
       } else {
@@ -217,7 +217,7 @@ export function generateFakeStateInfo(): StateInfo {
 }
 
 export async function generateFeedInfoFromTransactionInfo(
-  user: User,
+  ribbit: Ribbit,
   transactionInfo: TransactionInfo
 ): Promise<FeedInfo> {
   if (!transactionInfo) {
@@ -231,13 +231,13 @@ export async function generateFeedInfoFromTransactionInfo(
       transactionInfo.decodedInputData.params["message"].value
     );
 
-    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+    summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
-    userInfo = await user.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfo(transactionInfo.from);
   } else if (feedType === "upvote") {
     const repostUserAddress = transactionInfo.from;
     // Get parent transactionInfo
-    transactionInfo = await user.getTransactionInfo(
+    transactionInfo = await ribbit.getTransactionInfo(
       "",
       parseInt(
         transactionInfo.decodedInputData.params["parentTransactionBlockNumber"]
@@ -252,29 +252,29 @@ export async function generateFeedInfoFromTransactionInfo(
     );
 
     // who reposts the feed
-    repostUserInfo = await user.getUserInfo(repostUserAddress);
+    repostUserInfo = await ribbit.getUserInfo(repostUserAddress);
 
     // author of the original feed
-    userInfo = await user.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfo(transactionInfo.from);
 
     message = decompressString(
       transactionInfo.decodedInputData.params["message"].value
     );
 
-    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+    summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
   } else if (feedType === "reply") {
     message = decompressString(
       transactionInfo.decodedInputData.params["message"].value
     );
 
-    summary = await generateSummaryFromHTML(renderMarkdown(message), user);
+    summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
-    userInfo = await user.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfo(transactionInfo.from);
   } else {
     throw "Invalid feed type: " + feedType;
   }
 
-  const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+  const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
 
   const feedInfo: FeedInfo = {
     summary,

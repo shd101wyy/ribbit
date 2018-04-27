@@ -7,7 +7,7 @@
  */
 
 import * as React from "react";
-import { User, UserInfo } from "../lib/user";
+import { Ribbit, UserInfo } from "../lib/ribbit";
 import {
   FeedInfo,
   generateSummaryFromHTML,
@@ -20,7 +20,7 @@ import ProfileCard from "../components/profile-card";
 import { TransactionInfo } from "../lib/transaction";
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
   topic: string;
 }
@@ -65,9 +65,9 @@ export default class profile extends React.Component<Props, State> {
     const sorting = this.state.sorting;
     this.setState({ loading: true }, () => {
       const fn = (sorting === TopicSorting.ByTrend
-        ? this.props.user.getFeedsFromTagByTrend
-        : this.props.user.getFeedsFromTagByTime
-      ).bind(this.props.user);
+        ? this.props.ribbit.getFeedsFromTagByTrend
+        : this.props.ribbit.getFeedsFromTagByTime
+      ).bind(this.props.ribbit);
       fn(
         topic,
         { num: -1 },
@@ -86,7 +86,7 @@ export default class profile extends React.Component<Props, State> {
 
           try {
             const feedInfo = await generateFeedInfoFromTransactionInfo(
-              this.props.user,
+              this.props.ribbit,
               transactionInfo
             );
             const feeds = this.state.feeds;
@@ -124,7 +124,7 @@ export default class profile extends React.Component<Props, State> {
     /**
      * Prevent from loading user address as topic.
      */
-    if (this.props.user.web3.utils.isAddress(this.props.topic)) {
+    if (this.props.ribbit.web3.utils.isAddress(this.props.topic)) {
       return (
         <div className="topic-page">
           <p id="feed-footer">Invalid topic {this.props.topic}</p>
@@ -174,7 +174,7 @@ export default class profile extends React.Component<Props, State> {
               <FeedCard
                 key={index}
                 feedInfo={feedInfo}
-                user={this.props.user}
+                ribbit={this.props.ribbit}
               />
             ))}
             <p id="feed-footer">

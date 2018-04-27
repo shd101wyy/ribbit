@@ -61,7 +61,7 @@ export interface UserInfo {
   address: string;
 }
 
-export class User {
+export class Ribbit {
   public web3: Web3;
   /**
    * The address of current account.
@@ -257,25 +257,6 @@ export class User {
       sha256(this.accountAddress + currentTimestamp.toString() + message);
 
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
-    const parentTransactionBlockNumber =
-      parentFeedInfo.transactionInfo.blockNumber;
-    let parentTransactionMessageHash = "";
-    if (
-      parentFeedInfo.transactionInfo.decodedInputData.name === "post" ||
-      parentFeedInfo.transactionInfo.decodedInputData.name === "reply"
-    ) {
-      parentTransactionMessageHash =
-        "0x" +
-        new BigNumber(
-          parentFeedInfo.transactionInfo.decodedInputData.params[
-            "messageHash"
-          ].value
-        ).toString(16);
-    } else {
-      throw "Reply error: invalid parentFeedInfo: " +
-        JSON.stringify(parentFeedInfo, null, "  ");
-    }
-
     const currentReplyInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(parentTransactionHash)
       .call();
@@ -290,18 +271,19 @@ export class User {
       ? previousReplyTransactionInfo.hash
       : "0x0000000000000000000000000000000000000000000000000000000000000000";
 
+    let authorAddress = "0x0000000000000000000000000000000000000000";
+
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .reply(
           currentTimestamp, // timestamp
           parentTransactionHash, // parentTransactionHash
-          parentTransactionBlockNumber, // parentTransactionBlockNumber
-          parentTransactionMessageHash, // parentTransactionMessageHash
+          previousReplyTransactionHash, // previousReplyTransactionHash
           compressedMessage, // message
           messageHash, // messageHash
-          previousReplyTransactionHash, // previousReplyTransactionHash
           tags, // tags
-          mode // mode
+          mode, // mode
+          authorAddress
         )
         .send({ from: this.accountAddress })
         .on("error", error => {
@@ -319,29 +301,19 @@ export class User {
 
   /**
    * upvote a feed
+   * TODO: add donation support.
    */
   public async upvote(parentTransactionHash: string) {
-    // 1. Get parentTransactionBlockNumber and parentTransactionMessageHash
+    // 1. Verify parentTransactionHash is valid.
     const parentTransaction = await this.web3.eth.getTransaction(
       parentTransactionHash
     );
-    const parentTransactionBlockNumber = parentTransaction.blockNumber;
     const decodedInputData = decodeMethod(parentTransaction.input);
     if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
       return null;
     }
-    // TODO: now we only support repost original article.
-    if (decodedInputData.name !== "post") {
-      throw "Not implemented `repost` function" +
-        JSON.stringify(decodedInputData, null, "  ");
-    }
-    const parentTransactionMessageHash =
-      "0x" +
-      new BigNumber(decodedInputData.params["messageHash"].value).toString(16);
-    // console.log('parentTransactionBlockNumber: ' + parentTransactionBlockNumber)
-    // console.log('parentTransactionMessageHash: ', parentTransactionMessageHash)
 
-    // 2. Get previousFeedTransactionHash
+    // 2. Get previousFeedTransactionHash.
     const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
       this.accountAddress
     );
@@ -356,15 +328,16 @@ export class User {
       tags = decodedInputData.params["tags"].value;
     }
 
+    let authorAddress = "0x0000000000000000000000000000000000000000";
+
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
         .upvote(
           Date.now(),
           parentTransactionHash,
-          parentTransactionBlockNumber,
-          parentTransactionMessageHash,
           previousFeedTransactionHash,
-          tags
+          tags,
+          authorAddress
         )
         .send({ from: this.accountAddress })
         .on("error", error => {
@@ -444,8 +417,9 @@ export class User {
             decodedInputData.params["messageHash"].value
           ).toString(16);
         } else if (decodedInputData.name === "upvote") {
+          // for upvote, it's special.
           messageHash2 = new BigNumber(
-            decodedInputData.params["parentTransactionMessageHash"].value
+            decodedInputData.params["timestamp"].value
           ).toString(16);
         }
         if (messageHash2 !== messageHash) {

@@ -4,7 +4,7 @@ import { Router, Route, Switch } from "react-router";
 const Web3 = require("web3");
 // import Web3 from "web3";
 import history from "./lib/history";
-import { User } from "./lib/user";
+import { Ribbit } from "./lib/ribbit";
 
 import "./less/entry.less";
 
@@ -17,12 +17,12 @@ import Footer from "./components/footer";
 interface Props {}
 interface State {
   injectWeb3: boolean;
-  user: User;
+  ribbit: Ribbit;
 }
 class App extends React.Component<Props, State> {
   state = {
     injectWeb3: false,
-    user: null
+    ribbit: null
   };
   componentDidMount() {
     let web3 = null;
@@ -33,37 +33,37 @@ class App extends React.Component<Props, State> {
       console.log("metamask installed.");
       web3 = new Web3(window["web3"].currentProvider);
     }
-    const user = new User(web3);
+    const ribbit = new Ribbit(web3);
     window["web3"] = web3; // override metamask web3.
-    window["user"] = user;
+    window["ribbit"] = ribbit;
     console.log("start initializing user.");
-    user
+    ribbit
       .initialize()
       .then(() => {
-        console.log("user initialized.", user.accountAddress);
+        console.log("user initialized.",ribbit.accountAddress);
         this.setState(
           {
             injectWeb3: true,
-            user: user
+            ribbit
           },
           () => {
             if (history.location.pathname === "/") {
-              history.push(`/${user.networkId}/`);
+              history.push(`/${ribbit.networkId}/`);
             }
           }
         );
       })
       .catch(error => {
         alert(error);
-        this.setState({ user: null }, () => {
+        this.setState({ ribbit: null }, () => {
           if (history.location.pathname === "/") {
-            history.push(`/${user.networkId}/`);
+            history.push(`/${ribbit.networkId}/`);
           }
         });
       });
   }
   render() {
-    if (!this.state.user) {
+    if (!this.state.ribbit) {
       return (
         <div className="home">
           <h1 className="title is-1">
@@ -84,7 +84,7 @@ class App extends React.Component<Props, State> {
             render={props => (
               <Home
                 networkId={props.match.params["networkId"]}
-                user={this.state.user}
+                ribbit={this.state.ribbit}
               />
             )}
             exact
@@ -95,7 +95,7 @@ class App extends React.Component<Props, State> {
             render={props => (
               <Profile
                 networkId={props.match.params["networkId"]}
-                user={this.state.user}
+                ribbit={this.state.ribbit}
                 guestUserAddress={props.match.params["userAddress"]}
               />
             )}
@@ -106,7 +106,7 @@ class App extends React.Component<Props, State> {
             render={props => (
               <Topic
                 networkId={props.match.params["networkId"]}
-                user={this.state.user}
+                ribbit={this.state.ribbit}
                 topic={decodeURIComponent(props.match.params["topic"])}
               />
             )}
@@ -118,7 +118,7 @@ class App extends React.Component<Props, State> {
             render={props => (
               <Tx
                 networkId={props.match.params["networkId"]}
-                user={this.state.user}
+                ribbit={this.state.ribbit}
                 transactionHash={props.match.params["transactionHash"]}
               />
             )}

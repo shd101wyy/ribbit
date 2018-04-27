@@ -1,10 +1,10 @@
 import * as React from "react";
-import { User, UserInfo } from "../lib/user";
+import { Ribbit, UserInfo } from "../lib/ribbit";
 import { Link } from "react-router-dom";
 
 interface FollowingProps {
   userAddress: string;
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
 }
 interface FollowingState {
@@ -29,7 +29,7 @@ class Following extends React.Component<FollowingProps, FollowingState> {
   }
 
   private async initializeFollowing(userAddress: string) {
-    const userInfo = await this.props.user.getUserInfo(userAddress);
+    const userInfo = await this.props.ribbit.getUserInfo(userAddress);
     this.setState({
       userInfo
     });
@@ -69,7 +69,7 @@ class Following extends React.Component<FollowingProps, FollowingState> {
 }
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
 }
 interface State {}
@@ -84,8 +84,8 @@ export default class FollowingsCard extends React.Component<Props, State> {
         <p className="title">my followings</p>
         <div className="followings-list">
           <Following
-            userAddress={this.props.user.accountAddress}
-            user={this.props.user}
+            userAddress={this.props.ribbit.accountAddress}
+            ribbit={this.props.ribbit}
             networkId={this.props.networkId}
           />
         </div>

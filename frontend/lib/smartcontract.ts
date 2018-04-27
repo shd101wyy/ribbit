@@ -118,22 +118,6 @@ export const abiArray = [
     constant: false,
     inputs: [
       { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "parentTransactionBlockNumber", type: "uint256" },
-      { name: "parentTransactionMessageHash", type: "uint256" },
-      { name: "previousFeedTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
-    ],
-    name: "upvote",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "timestamp", type: "uint256" },
       { name: "message", type: "string" },
       { name: "messageHash", type: "uint256" },
       { name: "previousFeedTransactionHash", type: "bytes32" },
@@ -152,6 +136,21 @@ export const abiArray = [
     outputs: [{ name: "", type: "address" }],
     payable: false,
     stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      { name: "timestamp", type: "uint256" },
+      { name: "parentTransactionHash", type: "bytes32" },
+      { name: "previousFeedTransactionHash", type: "bytes32" },
+      { name: "tags", type: "bytes32[]" },
+      { name: "authorAddress", type: "address" }
+    ],
+    name: "upvote",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
     type: "function"
   },
   {
@@ -188,21 +187,6 @@ export const abiArray = [
     outputs: [{ name: "", type: "address" }],
     payable: false,
     stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [
-      { name: "transactionHash", type: "bytes32" },
-      { name: "postAutherAddress", type: "address" },
-      { name: "amount1", type: "uint256" },
-      { name: "appAuthorAddress", type: "address" },
-      { name: "amount2", type: "uint256" }
-    ],
-    name: "sendEther",
-    outputs: [],
-    payable: true,
-    stateMutability: "payable",
     type: "function"
   },
   {
@@ -245,6 +229,24 @@ export const abiArray = [
     type: "function"
   },
   {
+    constant: false,
+    inputs: [
+      { name: "timestamp", type: "uint256" },
+      { name: "parentTransactionHash", type: "bytes32" },
+      { name: "previousReplyTransactionHash", type: "bytes32" },
+      { name: "message", type: "string" },
+      { name: "messageHash", type: "uint256" },
+      { name: "tags", type: "bytes32[]" },
+      { name: "mode", type: "uint8" },
+      { name: "authorAddress", type: "address" }
+    ],
+    name: "reply",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
+    type: "function"
+  },
+  {
     constant: true,
     inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
     name: "tagState",
@@ -281,25 +283,6 @@ export const abiArray = [
     type: "function"
   },
   {
-    constant: false,
-    inputs: [
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "parentTransactionBlockNumber", type: "uint256" },
-      { name: "parentTransactionMessageHash", type: "uint256" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "previousReplyTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" },
-      { name: "mode", type: "uint256" }
-    ],
-    name: "reply",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
     constant: true,
     inputs: [{ name: "tag", type: "bytes32" }],
     name: "getCurrentTagInfoByTrend",
@@ -328,13 +311,7 @@ export const abiArray = [
   },
   {
     anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: "previousFeedInfo",
-        type: "uint256[2]"
-      }
-    ],
+    inputs: [{ indexed: false, name: "previousFeedInfo", type: "uint256[2]" }],
     name: "SavePreviousFeedInfoEvent",
     type: "event"
   },
@@ -355,13 +332,19 @@ export const abiArray = [
     ],
     name: "SavePreviousTagInfoByTrendEvent",
     type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [{ indexed: false, name: "value", type: "uint256" }],
+    name: "DonateEvent",
+    type: "event"
   }
 ];
 
 export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
-    return "0xa3689053ca20dd7e6a7480a1bcdf5618fd145aa4";
+    return "0xcb472c954bbc353f9c6c4b58dab5e1aadd73ac51";
   } else if (networkId === 1) {
     // mainnet
     return null;

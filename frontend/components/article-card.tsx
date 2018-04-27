@@ -8,11 +8,11 @@ import FeedCard from "./feed-card";
 
 import * as utility from "../lib/utility";
 import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
-import { User } from "../lib/user";
+import { Ribbit } from "../lib/ribbit";
 
 interface Props {
   feedInfo: FeedInfo;
-  user: User;
+  ribbit: Ribbit;
   hideActionsPanel?: boolean;
 }
 
@@ -75,9 +75,9 @@ export default class ArticleCard extends Component<Props, State> {
         loadingReplies: true
       },
       () => {
-        const user = this.props.user;
+        const ribbit = this.props.ribbit;
         // load comments by time
-        user.getFeedsFromTagByTime(
+        ribbit.getFeedsFromTagByTime(
           feedInfo.transactionInfo.hash,
           { num: -1 },
           async (done, offset, transactionInfo) => {
@@ -87,7 +87,7 @@ export default class ArticleCard extends Component<Props, State> {
             }
             try {
               const feedInfo = await generateFeedInfoFromTransactionInfo(
-                user,
+                ribbit,
                 transactionInfo
               );
               if (feedInfo) {
@@ -131,14 +131,14 @@ export default class ArticleCard extends Component<Props, State> {
       ].value
     ).toString(16);
     try {
-      const transactionInfo = await this.props.user.getTransactionInfo(
+      const transactionInfo = await this.props.ribbit.getTransactionInfo(
         "",
         parentTransactionBlockNumber,
         parentTransactionMessageHash,
         parentTransactionHash
       );
       const feedInfo = await generateFeedInfoFromTransactionInfo(
-        this.props.user,
+        this.props.ribbit,
         transactionInfo
       );
 
@@ -167,11 +167,11 @@ export default class ArticleCard extends Component<Props, State> {
       <div className="article-panel">
         <div className="parent">
           {this.state.parent ? (
-            <FeedCard user={this.props.user} feedInfo={this.state.parent} />
+            <FeedCard ribbit={this.props.ribbit} feedInfo={this.state.parent} />
           ) : null}
         </div>
         <div className="article-card card">
-          <UserTopPanel user={this.props.user} feedInfo={feedInfo} />
+          <UserTopPanel ribbit={this.props.ribbit} feedInfo={feedInfo} />
           <div
             className="content"
             ref={elem => {
@@ -180,7 +180,7 @@ export default class ArticleCard extends Component<Props, State> {
             dangerouslySetInnerHTML={{ __html: feedInfo.summary.html }}
           />
           {this.props.hideActionsPanel ? null : (
-            <ActionsBottomPanel user={this.props.user} feedInfo={feedInfo} />
+            <ActionsBottomPanel ribbit={this.props.ribbit} feedInfo={feedInfo} />
           )}
         </div>
         <div className="replies">
@@ -189,7 +189,7 @@ export default class ArticleCard extends Component<Props, State> {
               <FeedCard
                 key={index}
                 feedInfo={feedInfo}
-                user={this.props.user}
+                ribbit={this.props.ribbit}
               />
             );
           })}

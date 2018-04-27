@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { User, UserInfo } from "../lib/user";
+import { Ribbit, UserInfo } from "../lib/ribbit";
 import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
 
 import { decompressString } from "../lib/utility";
@@ -24,7 +24,7 @@ enum HomePanel {
 }
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
   networkId: number;
 }
 interface State {
@@ -51,31 +51,31 @@ export default class Home extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const user = this.props.user;
-    this.showUserHome(user);
+    const ribbit = this.props.ribbit;
+    this.showUserHome(ribbit);
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (this.props.user !== newProps.user) {
-      this.showUserHome(newProps.user);
+    if (this.props.ribbit !== newProps.ribbit) {
+      this.showUserHome(newProps.ribbit);
     }
   }
 
-  showUserHome(user: User) {
-    if (!user) return;
-    this.showUserFeeds(user);
-    user.getUserInfo(user.accountAddress).then(userInfo => {
+  showUserHome(ribbit: Ribbit) {
+    if (!ribbit) return;
+    this.showUserFeeds(ribbit);
+    ribbit.getUserInfo(ribbit.accountAddress).then(userInfo => {
       this.setState({ userInfo });
     });
   }
 
-  showUserFeeds(user: User) {
-    if (!user) {
+  showUserFeeds(ribbit: Ribbit) {
+    if (!ribbit) {
       return;
     }
     this.setState({ loading: true }, () => {
-      user.getFeedsFromUser(
-        user.accountAddress,
+      ribbit.getFeedsFromUser(
+        ribbit.accountAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
           if (done) {
@@ -92,12 +92,12 @@ export default class Home extends React.Component<Props, State> {
           // console.log(message);
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message),
-            this.props.user
+            this.props.ribbit
           );
 
-          const userInfo = await user.getUserInfo(transactionInfo.from);
+          const userInfo = await ribbit.getUserInfo(transactionInfo.from);
 
-          const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+          const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
 
           const feeds = this.state.feeds;
           feeds.push({
@@ -113,13 +113,13 @@ export default class Home extends React.Component<Props, State> {
     });
   }
 
-  showNotificationFeeds(user: User) {
-    if (!user) {
+  showNotificationFeeds(ribbit: Ribbit) {
+    if (!ribbit) {
       return;
     }
     this.setState({ loading: true }, () => {
-      user.getFeedsFromTagByTime(
-        user.accountAddress,
+      ribbit.getFeedsFromTagByTime(
+        ribbit.accountAddress,
         { num: -1 },
         async (done, offset, transactionInfo) => {
           console.log("showNotificationFeeds: ", done, offset, transactionInfo);
@@ -135,12 +135,12 @@ export default class Home extends React.Component<Props, State> {
           // console.log(message);
           const summary = await generateSummaryFromHTML(
             renderMarkdown(message),
-            this.props.user
+            this.props.ribbit
           );
 
-          const userInfo = await user.getUserInfo(transactionInfo.from);
+          const userInfo = await ribbit.getUserInfo(transactionInfo.from);
 
-          const stateInfo = await user.getFeedStateInfo(transactionInfo.hash);
+          const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
 
           const feeds = this.state.feeds;
           feeds.push({
@@ -170,9 +170,9 @@ export default class Home extends React.Component<Props, State> {
         },
         () => {
           if (panel === HomePanel.FollowingsFeeds) {
-            this.showUserFeeds(this.props.user);
+            this.showUserFeeds(this.props.ribbit);
           } else if (panel === HomePanel.Notifications) {
-            this.showNotificationFeeds(this.props.user);
+            this.showNotificationFeeds(this.props.ribbit);
           }
         }
       );
@@ -186,17 +186,17 @@ export default class Home extends React.Component<Props, State> {
     }
     if (event.which === 13) {
       // enter key
-      if (this.props.user.web3.utils.isAddress(this.state.searchBoxValue)) {
+      if (this.props.ribbit.web3.utils.isAddress(this.state.searchBoxValue)) {
         window.open(
           `${window.location.pathname}#/${
-            this.props.user.networkId
+            this.props.ribbit.networkId
           }/profile/${searchValue}`,
           "_blank"
         );
       } else {
         window.open(
           `${window.location.pathname}#/${
-            this.props.user.networkId
+            this.props.ribbit.networkId
           }/topic/${encodeURIComponent(searchValue)}`,
           "_blank"
         );
@@ -210,7 +210,7 @@ export default class Home extends React.Component<Props, State> {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} user={this.props.user} />
+            <FeedCard key={index} feedInfo={feedInfo} ribbit={this.props.ribbit} />
           ))}
           <p id="feed-footer">
             {" "}
@@ -221,14 +221,14 @@ export default class Home extends React.Component<Props, State> {
     } else if (this.state.panel === HomePanel.Settings) {
       middlePanel = (
         <div className="settings-panel">
-          <ProfileSettingsCard user={this.props.user} />
+          <ProfileSettingsCard ribbit={this.props.ribbit} />
         </div>
       );
     } else if (this.state.panel === HomePanel.Notifications) {
       middlePanel = (
         <div className="cards">
           {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard key={index} feedInfo={feedInfo} user={this.props.user} />
+            <FeedCard key={index} feedInfo={feedInfo} ribbit={this.props.ribbit} />
           ))}
           <p id="feed-footer">
             {" "}
@@ -238,14 +238,14 @@ export default class Home extends React.Component<Props, State> {
       );
     }
 
-    if (this.props.user && this.props.user.accountAddress) {
-      const user = this.props.user;
+    if (this.props.ribbit && this.props.ribbit.accountAddress) {
+      const ribbit = this.props.ribbit;
       return (
         <div className="home">
           <div className="left-panel">
             <ProfileCard userInfo={this.state.userInfo} />
             <FollowingsCard
-              user={this.props.user}
+              ribbit={this.props.ribbit}
               networkId={this.props.networkId}
             />
           </div>
@@ -331,7 +331,7 @@ export default class Home extends React.Component<Props, State> {
             <TopicsCard networkId={this.props.networkId} />
           </div>
           {this.state.showEditPanel ? (
-            <Edit cancel={this.toggleEditPanel} user={this.props.user} />
+            <Edit cancel={this.toggleEditPanel} ribbit={this.props.ribbit} />
           ) : null}
         </div>
       );

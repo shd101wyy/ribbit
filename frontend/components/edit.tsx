@@ -9,14 +9,14 @@ import Preview from "./preview";
 import FeedCard from "./feed-card";
 
 import history from "../lib/history";
-import { User } from "../lib/user";
+import { Ribbit } from "../lib/ribbit";
 import * as utility from "../lib/utility";
 import { getTopicsAndMentionsFromHTML, FeedInfo } from "../lib/feed";
 import { renderMarkdown } from "../lib/markdown";
 
 interface Props {
   cancel: () => void;
-  user: User;
+  ribbit: Ribbit;
   /**
    * If feedInfo is provided, then it means it's a reply.
    */
@@ -71,7 +71,7 @@ export default class Edit extends Component<Props, State> {
 
     while (transactionInfo) {
       const address = transactionInfo.from;
-      const name = (await this.props.user.getUserInfo(address)).name;
+      const name = (await this.props.ribbit.getUserInfo(address)).name;
       if (!exists[address]) {
         exists[address] = true;
         replies.push({ name, address });
@@ -91,7 +91,7 @@ export default class Edit extends Component<Props, State> {
           transactionInfo.decodedInputData.params[
             "parentTransactionMessageHash"
           ].value;
-        transactionInfo = await this.props.user.getTransactionInfo(
+        transactionInfo = await this.props.ribbit.getTransactionInfo(
           "",
           parentTransactionBlockNumber,
           parentTransactionMessageHash,
@@ -118,7 +118,7 @@ export default class Edit extends Component<Props, State> {
     // check topics and mentions
     getTopicsAndMentionsFromHTML(
       renderMarkdown(this.state.code),
-      this.props.user
+      this.props.ribbit
     ).then(({ topics, mentions }) => {
       if (
         JSON.stringify(this.state.topics) !== JSON.stringify(topics) ||
@@ -134,7 +134,7 @@ export default class Edit extends Component<Props, State> {
 
   private postFeed = async () => {
     // TODO: validate feed
-    const user = this.props.user,
+    const ribbit = this.props.ribbit,
       content = this.state.code.trim();
 
     const topics = [];
@@ -172,7 +172,7 @@ export default class Edit extends Component<Props, State> {
     try {
       if (this.props.parentFeedInfo) {
         // reply
-        await user.replyFeed(
+        await ribbit.replyFeed(
           content,
           tags,
           this.state.feedback,
@@ -180,7 +180,7 @@ export default class Edit extends Component<Props, State> {
         );
       } else {
         // post
-        await user.postFeed(content, tags);
+        await ribbit.postFeed(content, tags);
       }
       window.localStorage["markdown-cache"] = "";
       this.props.cancel();
@@ -234,7 +234,7 @@ export default class Edit extends Component<Props, State> {
           <div>
             <h2 style={{ textAlign: "center" }}>Reply to</h2>
             <FeedCard
-              user={this.props.user}
+              ribbit={this.props.ribbit}
               feedInfo={this.props.parentFeedInfo}
               hideActionsPanel={true}
             />
@@ -334,7 +334,7 @@ export default class Edit extends Component<Props, State> {
               ) : null}
             </div>
             {/* preview */}
-            <Preview markdown={this.state.code} user={this.props.user} />
+            <Preview markdown={this.state.code} ribbit={this.props.ribbit} />
           </div>
         ) : (
           <div>

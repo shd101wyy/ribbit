@@ -1,13 +1,13 @@
 import * as React from "react";
 import ProfileCard from "./profile-card";
-import { User, UserInfo } from "../lib/user";
+import { Ribbit, UserInfo } from "../lib/ribbit";
 
 import * as CodeMirror from "react-codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/markdown/markdown";
 
 interface Props {
-  user: User;
+  ribbit: Ribbit;
 }
 interface State {
   name: string;
@@ -30,9 +30,9 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const user = this.props.user;
-    user
-      .getUserInfo(user.accountAddress)
+    const ribbit = this.props.ribbit;
+    ribbit
+      .getUserInfo(ribbit.accountAddress)
       .then(userInfo => {
         this.setState(
           {
@@ -78,9 +78,9 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       cover: this.state.cover,
       avatar: this.state.avatar,
       bio: this.state.bio,
-      address: this.props.user.accountAddress
+      address: this.props.ribbit.accountAddress
     };
-    this.props.user
+    this.props.ribbit
       .setUserMetadata(userInfo)
       .then(hash => {
         alert(
@@ -101,7 +101,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       mode: "markdown"
     };
     const userInfo: UserInfo = {
-      address: this.props.user.accountAddress,
+      address: this.props.ribbit.accountAddress,
       name: this.state.name,
       avatar: this.state.avatar,
       cover: this.state.cover,
