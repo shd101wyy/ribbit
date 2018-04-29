@@ -19,6 +19,13 @@ import * as Identicon from "identicon.js";
 import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
 import { BigNumber } from "bignumber.js";
+import * as IPFS from "ipfs";
+let Buffer = window["Buffer"] || undefined;
+if (typeof Buffer === "undefined") {
+  // For browser compatibility
+  Buffer = require("buffer/").Buffer;
+  window["Buffer"] = Buffer;
+}
 
 import { StateInfo, FeedInfo } from "./feed";
 
@@ -100,6 +107,11 @@ export class Ribbit {
   private version = 0;
 
   /**
+   * IPFS node
+   */
+  public ipfs = null;
+
+  /**
    * Constructor
    * @param web3
    */
@@ -119,6 +131,43 @@ export class Ribbit {
       getContractAddress(this.networkId)
     );
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
+    await this.initializeIPFS();
+  }
+
+  private initializeIPFS() {
+    const ipfsOption = {};
+    this.ipfs = new IPFS(ipfsOption);
+    return new Promise((resolve, reject) => {
+      this.ipfs.on("ready", () => {
+        console.log("IPFS node initialized");
+        return resolve();
+      });
+      this.ipfs.on("error", error => {
+        return reject(error);
+      });
+    });
+  }
+
+  /**
+   * Post content to IPFS node.
+   * @param content
+   */
+  public async ipfsAdd(
+    content: string
+  ): Promise<{
+    hash: string;
+    path: string;
+    size: number;
+  }> {
+    return (await this.ipfs.files.add(Buffer.from(content)))[0];
+  }
+
+  /**
+   * Retrieve content from IPFS node.
+   * @param ipfsHash
+   */
+  public async ipfsCat(ipfsHash: string): Promise<string> {
+    return (await this.ipfs.files.cat(ipfsHash)).toString("utf8");
   }
 
   /**
@@ -194,7 +243,7 @@ export class Ribbit {
    * throw error or return null if failed to post feed
    * @param message the string that you want to post.
    */
-  public async postFeed(message: string, tags = []) {
+  public async postFeed(message: string, tags = [], postAsIPFSHash = false) {
     // Validate tags
     // TODO: change to Promise.all
     for (let i = 0; i < tags.length; i++) {
@@ -216,6 +265,9 @@ export class Ribbit {
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
     const currentTimestamp = Date.now();
+    if (postAsIPFSHash) {
+      message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
+    }
     const compressedMessage = compressString(message);
     const messageHash =
       "0x" +
@@ -259,7 +311,8 @@ export class Ribbit {
     message: string,
     tags = [],
     mode = 0,
-    parentFeedInfo: FeedInfo
+    parentFeedInfo: FeedInfo,
+    postAsIPFSHash = false
   ) {
     // Validate tags
     // TODO: change to Promise.all
@@ -282,6 +335,9 @@ export class Ribbit {
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
     const currentTimestamp = Date.now();
+    if (postAsIPFSHash) {
+      message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
+    }
     const compressedMessage = compressString(message);
     const messageHash =
       "0x" +
@@ -827,7 +883,10 @@ export class Ribbit {
     userInfo.name = userInfo.name || "Frog_" + address.slice(2, 6);
     userInfo.address = address;
 
-    const username = (userInfo.username || await this.getUsernameFromAddress(address) || "unknown");
+    const username =
+      userInfo.username ||
+      (await this.getUsernameFromAddress(address)) ||
+      "unknown";
     userInfo.username = username;
 
     return userInfo;
@@ -892,5 +951,20 @@ export class Ribbit {
       reports,
       replies
     };
+  }
+
+  public async retrieveMessage(message: string): Promise<string> {
+    message = decompressString(message);
+    let match = null;
+    if (
+      message.length ===
+        `ipfs://QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw`.length &&
+      (match = message.match(/^ipfs\:\/\/(.+)$/))
+    ) {
+      const hash = match[1];
+      return await this.ipfsCat(hash);
+    } else {
+      return message;
+    }
   }
 }

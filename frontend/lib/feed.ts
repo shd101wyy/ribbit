@@ -227,7 +227,7 @@ export async function generateFeedInfoFromTransactionInfo(
 
   let message, summary, userInfo, repostUserInfo;
   if (feedType === "post") {
-    message = decompressString(
+    message = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
 
@@ -248,13 +248,13 @@ export async function generateFeedInfoFromTransactionInfo(
     // author of the original feed
     userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
 
-    message = decompressString(
+    message = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
   } else if (feedType === "reply") {
-    message = decompressString(
+    message = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
 

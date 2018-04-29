@@ -85,7 +85,7 @@ export default class Home extends React.Component<Props, State> {
           }
           console.log(transactionInfo.decodedInputData.name);
           if (transactionInfo.decodedInputData.name !== "post") return;
-          const message = decompressString(
+          const message = await ribbit.retrieveMessage(
             transactionInfo.decodedInputData.params["message"].value
           );
 
@@ -130,7 +130,7 @@ export default class Home extends React.Component<Props, State> {
           if (done) {
             return this.setState({ loading: false });
           }
-          const message = decompressString(
+          const message = await ribbit.retrieveMessage(
             transactionInfo.decodedInputData.params["message"].value
           );
 

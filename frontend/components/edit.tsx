@@ -33,6 +33,7 @@ interface State {
   hiddenReplies: { [key: string]: boolean }; // key is address
   feedback: number; // 0=>do nothing, 1=>upvote, 2=>downvote
   postToRibbitTopic: boolean;
+  postAsIPFSHash: boolean;
 }
 
 export default class Edit extends Component<Props, State> {
@@ -51,7 +52,8 @@ export default class Edit extends Component<Props, State> {
       replies: [],
       hiddenReplies: {},
       feedback: 0,
-      postToRibbitTopic: true
+      postToRibbitTopic: true,
+      postAsIPFSHash: false
     };
   }
 
@@ -171,11 +173,12 @@ export default class Edit extends Component<Props, State> {
           content,
           tags,
           this.state.feedback,
-          this.props.parentFeedInfo
+          this.props.parentFeedInfo,
+          this.state.postAsIPFSHash
         );
       } else {
         // post
-        await ribbit.postFeed(content, tags);
+        await ribbit.postFeed(content, tags, this.state.postAsIPFSHash);
       }
       window.localStorage["markdown-cache"] = "";
       this.props.cancel();
@@ -307,6 +310,19 @@ export default class Edit extends Component<Props, State> {
                 >
                   {" "}
                   Post to #ribbit
+                </div>
+                <div
+                  className={
+                    "config" + (this.state.postAsIPFSHash ? "" : " hidden")
+                  }
+                  onClick={() =>
+                    this.setState({
+                      postAsIPFSHash: !this.state.postAsIPFSHash
+                    })
+                  }
+                >
+                  {" "}
+                  Post as IPFS hash
                 </div>
               </div>
               {this.props.parentFeedInfo ? (
