@@ -827,8 +827,8 @@ export class Ribbit {
     userInfo.name = userInfo.name || "Frog_" + address.slice(2, 6);
     userInfo.address = address;
 
-    const userId = (await this.getUsernameFromAddress(address)) || "unknown";
-    userInfo.username = userId;
+    const username = (userInfo.username || await this.getUsernameFromAddress(address) || "unknown");
+    userInfo.username = username;
 
     return userInfo;
   }
