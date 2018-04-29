@@ -30,7 +30,7 @@ export default class ProfileCard extends React.Component<Props, State> {
         />
         <div className="name-group">
           <p className="name">{userInfo.name}</p>
-          <p className="address">@{userInfo.address}</p>
+          <p className="address">@{userInfo.username}</p>
         </div>
         <div className="bio" dangerouslySetInnerHTML={{ __html: bio }} />
       </div>

@@ -3,7 +3,12 @@ import { sha256 } from "js-sha256";
 import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
 import { off } from "codemirror";
-import { compressString, hexEncode, decompressString } from "./utility";
+import {
+  compressString,
+  hexEncode,
+  decompressString,
+  hexDecode
+} from "./utility";
 import {
   TransactionInfo,
   DecodedLogData,
@@ -39,7 +44,11 @@ export function decodeLogs(logs: Log[]) {
 
 export interface UserInfo {
   /**
-   * User name.
+   * User username
+   */
+  username: string;
+  /**
+   * User display name.
    */
   name: string;
   /**
@@ -67,6 +76,10 @@ export class Ribbit {
    * The address of current account.
    */
   public accountAddress: string;
+  /**
+   * User Info of this account.
+   */
+  public userInfo: UserInfo;
   /**
    * Current connected network id
    */
@@ -105,6 +118,7 @@ export class Ribbit {
       abiArray,
       getContractAddress(this.networkId)
     );
+    this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
   }
 
   /**
@@ -130,7 +144,7 @@ export class Ribbit {
    * 2. Check if its size is bigger than bytes32, if so return empty string.
    * @param tag
    */
-  private formatTag(tag: string): string {
+  public formatTag(tag: string): string {
     // check if this is user address
     if (this.web3.utils.isAddress(tag)) {
       return tag.toLowerCase().replace(/^0x/, "0x000000000000000000000000"); // to make it 32bytes.
@@ -157,6 +171,23 @@ export class Ribbit {
       return "0x" + hexString;
     }
     */
+  }
+
+  public formatUsername(username: string) {
+    const compressedUsername = compressString(
+      username.toLowerCase().replace(/[\s\@]/g, "")
+    );
+    let hexString = hexEncode(compressedUsername);
+    if (hexString.length >= 64) {
+      // greate than bytes32
+      throw `Username: ${username} is too long`;
+    } else {
+      while (hexString.length !== 64) {
+        // to make it 32bytes.
+        hexString = "0" + hexString;
+      }
+      return "0x" + hexString;
+    }
   }
 
   /**
@@ -430,7 +461,7 @@ export class Ribbit {
         if (messageHash && messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
-        transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
+        // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         return Object.assign(transaction as object, {
           decodedInputData
         }) as TransactionInfo;
@@ -748,19 +779,43 @@ export class Ribbit {
     }
   }
 
+  public async getUsernameFromAddress(address: string): Promise<string> {
+    const compressedUsername = await this.contractInstance.methods
+      .getUsernameFromAddress(address)
+      .call();
+    // console.log("compressedUsername: ", compressedUsername, hexDecode(compressedUsername));
+    if (
+      compressedUsername ===
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ) {
+      // the @username is not set.
+      return "";
+    } else {
+      return decompressString(
+        hexDecode(compressedUsername.replace(/^0x(00)*/, ""))
+      );
+    }
+  }
+
+  public async getAddressFromUsername(username: string): Promise<string> {
+    return await this.contractInstance.methods
+      .getAddressFromUsername(this.formatUsername(username))
+      .call();
+  }
+
   /**
    * Load user metadata
    * @param address
    */
-  public async getUserInfo(address: string): Promise<UserInfo> {
+  public async getUserInfoFromAddress(address: string): Promise<UserInfo> {
     const userInfo =
-      JSON.parse(
+      (JSON.parse(
         decompressString(
           await this.contractInstance.methods
             .getMetaDataJSONStringValue(address)
             .call()
         )
-      ) || ({} as UserInfo);
+      ) as UserInfo) || ({} as UserInfo);
 
     if (!userInfo.avatar) {
       if (!address) {
@@ -771,15 +826,34 @@ export class Ribbit {
     }
     userInfo.name = userInfo.name || "Frog_" + address.slice(2, 6);
     userInfo.address = address;
+
+    const userId = (await this.getUsernameFromAddress(address)) || "unknown";
+    userInfo.username = userId;
+
     return userInfo;
+  }
+
+  public async getUserInfoFromUsername(username: string): Promise<UserInfo> {
+    const address = await this.getAddressFromUsername(username);
+    return this.getUserInfoFromAddress(address);
   }
 
   public async setUserMetadata(userInfo: UserInfo) {
     let userInfoCopy = Object.assign({}, userInfo);
+    const address = userInfoCopy["address"];
     delete userInfoCopy["address"]; // no need to save address.
+    const username = userInfoCopy["username"];
+    delete userInfoCopy["username"];
+    if (
+      (await this.getAddressFromUsername(username)) !==
+      "0x0000000000000000000000000000000000000000"
+    ) {
+      throw `Username @${username} is already taken.`;
+    }
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .setMetaDataJSONStringValue(
+        .setUsernameAndMetaDataJSONString(
+          this.formatUsername(username),
           compressString(JSON.stringify(userInfoCopy))
         )
         .send({ from: this.accountAddress })

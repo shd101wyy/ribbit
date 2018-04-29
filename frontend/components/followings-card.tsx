@@ -3,7 +3,7 @@ import { Ribbit, UserInfo } from "../lib/ribbit";
 import { Link } from "react-router-dom";
 
 interface FollowingProps {
-  userAddress: string;
+  username: string;
   ribbit: Ribbit;
   networkId: number;
 }
@@ -19,17 +19,17 @@ class Following extends React.Component<FollowingProps, FollowingState> {
   }
 
   componentDidMount() {
-    this.initializeFollowing(this.props.userAddress);
+    this.initializeFollowing(this.props.username);
   }
 
   componentWillUpdate(newProps: FollowingProps) {
-    if (newProps.userAddress !== this.props.userAddress) {
-      this.initializeFollowing(newProps.userAddress);
+    if (newProps.username !== this.props.username) {
+      this.initializeFollowing(newProps.username);
     }
   }
 
-  private async initializeFollowing(userAddress: string) {
-    const userInfo = await this.props.ribbit.getUserInfo(userAddress);
+  private async initializeFollowing(username: string) {
+    const userInfo = await this.props.ribbit.getUserInfoFromUsername(username);
     this.setState({
       userInfo
     });
@@ -40,18 +40,18 @@ class Following extends React.Component<FollowingProps, FollowingState> {
     if (!userInfo) {
       return (
         <Link
-          to={`/${this.props.networkId}/profile/${this.props.userAddress}`}
+          to={`/${this.props.networkId}/profile/${this.props.username}`}
           target="_blank"
         >
           <div className="following">
-            <p className="msg">loading {this.props.userAddress}</p>
+            <p className="msg">loading {this.props.username}</p>
           </div>
         </Link>
       );
     }
     return (
       <Link
-        to={`/${this.props.networkId}/profile/${this.props.userAddress}`}
+        to={`/${this.props.networkId}/profile/${this.props.username}`}
         target="_blank"
       >
         <div className="following">
@@ -84,7 +84,7 @@ export default class FollowingsCard extends React.Component<Props, State> {
         <p className="title">my followings</p>
         <div className="followings-list">
           <Following
-            userAddress={this.props.ribbit.accountAddress}
+            username={this.props.ribbit.userInfo.username}
             ribbit={this.props.ribbit}
             networkId={this.props.networkId}
           />

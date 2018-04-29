@@ -22,7 +22,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
       <div className="user-panel">
         <Link
           to={`/${this.props.ribbit.networkId}/profile/${
-            feedInfo.userInfo.address
+            feedInfo.userInfo.username
           }`}
           target="_blank"
         >
@@ -35,7 +35,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
         </Link>
         <Link
           to={`/${this.props.ribbit.networkId}/profile/${
-            feedInfo.userInfo.address
+            feedInfo.userInfo.username
           }`}
           target="_blank"
         >
@@ -43,9 +43,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
             {userInfo.name ? userInfo.name : "Anonymous"}
           </div>
         </Link>
-        <div className="user-address">
-          {userInfo.address.slice(0, 6) + "..."}
-        </div>
+        <div className="username">{userInfo.username}</div>
         {/* <div className="postfix">c862b4eel</div> */}
         {/* <div className="action">post feed</div> */}
         <div className="create-time">
@@ -59,7 +57,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
         <div className="top-bar">
           <Link
             to={`/${this.props.ribbit.networkId}/profile/${
-              feedInfo.repostUserInfo.address
+              feedInfo.repostUserInfo.username
             }`}
             target="_blank"
           >

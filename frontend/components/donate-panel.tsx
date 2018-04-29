@@ -81,7 +81,7 @@ export default class DonatePanel extends React.Component<Props, State> {
       .catch(error => {
         alert(error);
       });
-      this.props.close();
+    this.props.close();
   };
 
   render() {

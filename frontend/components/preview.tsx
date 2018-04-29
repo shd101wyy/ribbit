@@ -35,7 +35,7 @@ export default class Preview extends Component<Props, State> {
   private renderContent = async () => {
     const html = renderMarkdown(this.props.markdown);
     const summary = await generateSummaryFromHTML(html, this.props.ribbit);
-    const userInfo = await this.props.ribbit.getUserInfo(
+    const userInfo = await this.props.ribbit.getUserInfoFromAddress(
       this.props.ribbit.accountAddress
     );
     const transactionInfo = generateFakeTransactionInfo();

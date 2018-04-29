@@ -1,5 +1,5 @@
 /**
- * /:networkId/profile/:userAddress
+ * /:networkId/profile/:username
  */
 
 import * as React from "react";
@@ -18,7 +18,7 @@ import { BigNumber } from "bignumber.js";
 interface Props {
   ribbit: Ribbit;
   networkId: number;
-  guestUserAddress: string;
+  username: string;
 }
 interface State {
   userInfo: UserInfo;
@@ -37,23 +37,23 @@ export default class profile extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.initializeUser(this.props.guestUserAddress);
+    this.initializeUser(this.props.username);
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (newProps.guestUserAddress !== this.props.guestUserAddress) {
-      this.initializeUser(newProps.guestUserAddress);
+    if (newProps.username !== this.props.username) {
+      this.initializeUser(newProps.username);
     }
   }
 
-  async initializeUser(userAddress: string) {
-    const userInfo = await this.props.ribbit.getUserInfo(userAddress);
+  async initializeUser(username: string) {
+    const userInfo = await this.props.ribbit.getUserInfoFromUsername(username);
     this.setState(
       {
         userInfo
       },
       () => {
-        this.showUserFeeds(userAddress);
+        this.showUserFeeds(userInfo.address);
       }
     );
   }
@@ -86,7 +86,7 @@ export default class profile extends React.Component<Props, State> {
     if (!userInfo) {
       return (
         <div className="profile-page">
-          Loading user {this.props.guestUserAddress} profile...
+          Loading user {this.props.username} profile...
         </div>
       );
     }

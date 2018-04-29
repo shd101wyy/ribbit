@@ -14,6 +14,8 @@ export function hexEncode(h: string): string {
   return result;
 }
 
+window["hexEncode"] = hexEncode;
+
 export function hexDecode(s: string): string {
   var j;
   var hexes = s.match(/.{1,4}/g) || [];
@@ -25,13 +27,19 @@ export function hexDecode(s: string): string {
   return back;
 }
 
+window["hexDecode"] = hexDecode;
+
 export function compressString(s: string): string {
   return LZString.compressToUTF16(s);
 }
 
+window["compressString"] = compressString;
+
 export function decompressString(s: string): string {
   return LZString.decompressFromUTF16(s);
 }
+
+window["decompressString"] = decompressString;
 
 export function formatDate(dateString) {
   if (!dateString) return "";

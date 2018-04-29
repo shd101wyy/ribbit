@@ -8,8 +8,10 @@ import "codemirror/mode/markdown/markdown";
 
 interface Props {
   ribbit: Ribbit;
+  reset?: boolean;
 }
 interface State {
+  username: string;
   name: string;
   avatar: string;
   cover: string;
@@ -22,6 +24,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      username: "",
       name: "",
       avatar: "",
       cover: "",
@@ -31,11 +34,15 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
 
   componentDidMount() {
     const ribbit = this.props.ribbit;
+    if (this.props.reset) {
+      return;
+    }
     ribbit
-      .getUserInfo(ribbit.accountAddress)
+      .getUserInfoFromAddress(ribbit.accountAddress)
       .then(userInfo => {
         this.setState(
           {
+            username: userInfo.username,
             name: userInfo.name,
             avatar: userInfo.avatar.startsWith("data:image")
               ? ""
@@ -60,6 +67,10 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     this.setState({ bio: newCode });
   };
 
+  changeUsername = event => {
+    this.setState({ username: event.target["value"] });
+  };
+
   changeName = event => {
     this.setState({ name: event.target["value"] });
   };
@@ -74,6 +85,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
 
   publishProfile = event => {
     const userInfo = {
+      username: this.state.username,
       name: this.state.name,
       cover: this.state.cover,
       avatar: this.state.avatar,
@@ -101,6 +113,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       mode: "markdown"
     };
     const userInfo: UserInfo = {
+      username: this.state.username,
       address: this.props.ribbit.accountAddress,
       name: this.state.name,
       avatar: this.state.avatar,
@@ -111,6 +124,14 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       <div className="profile-settings-card card">
         <p className="title">Profile settings</p>
         <div className="form">
+          <div className="entry">
+            <p className="entry-title">Username: </p>
+            <input
+              placeholder="@username"
+              value={this.state.username}
+              onChange={this.changeUsername}
+            />
+          </div>
           <div className="entry">
             <p className="entry-title">Display name: </p>
             <input

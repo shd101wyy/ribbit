@@ -59,9 +59,9 @@ export async function getTopicsAndMentionsFromHTML(
     const tagElem = tagElems[i] as HTMLAnchorElement;
     if (tagElem.classList.contains("tag-mention")) {
       const mention = tagElem.getAttribute("data-mention");
-      const userInfo = await ribbit.getUserInfo(mention);
+      const userInfo = await ribbit.getUserInfoFromUsername(mention);
       mentions.push({
-        name: userInfo.name,
+        name: userInfo.username,
         address: userInfo.address
       });
     } else if (tagElem.classList.contains("tag-topic")) {
@@ -157,8 +157,8 @@ export async function generateSummaryFromHTML(
       const tagElem = tagElems[i] as HTMLAnchorElement;
       if (tagElem.classList.contains("tag-mention")) {
         const mention = tagElem.getAttribute("data-mention");
-        const userInfo = await ribbit.getUserInfo(mention);
-        tagElem.innerHTML = `<span class="mention">${userInfo.name}</span>`;
+        const userInfo = await ribbit.getUserInfoFromUsername(mention);
+        tagElem.innerHTML = `<span class="mention">${userInfo.username}</span>`;
         tagElem.href = `${window.location.pathname}#/${
           ribbit.networkId
         }/profile/${mention}`;
@@ -233,7 +233,7 @@ export async function generateFeedInfoFromTransactionInfo(
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
-    userInfo = await ribbit.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
   } else if (feedType === "upvote") {
     const repostUserAddress = transactionInfo.from;
     // Get parent transactionInfo
@@ -243,10 +243,10 @@ export async function generateFeedInfoFromTransactionInfo(
     });
 
     // who reposts the feed
-    repostUserInfo = await ribbit.getUserInfo(repostUserAddress);
+    repostUserInfo = await ribbit.getUserInfoFromAddress(repostUserAddress);
 
     // author of the original feed
-    userInfo = await ribbit.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
 
     message = decompressString(
       transactionInfo.decodedInputData.params["message"].value
@@ -260,7 +260,7 @@ export async function generateFeedInfoFromTransactionInfo(
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
-    userInfo = await ribbit.getUserInfo(transactionInfo.from);
+    userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
   } else {
     throw "Invalid feed type: " + feedType;
   }

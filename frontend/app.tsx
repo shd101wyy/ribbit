@@ -3,12 +3,13 @@ import * as ReactDOM from "react-dom";
 import { Router, Route, Switch } from "react-router";
 const Web3 = require("web3");
 // import Web3 from "web3";
-import history from "./lib/history";
+import hashHistory from "./lib/history";
 import { Ribbit } from "./lib/ribbit";
 
 import "./less/entry.less";
 
 import Home from "./routes/home";
+import Signup from "./routes/signup";
 import Profile from "./routes/profile";
 import Topic from "./routes/topic";
 import Tx from "./routes/tx";
@@ -24,7 +25,12 @@ class App extends React.Component<Props, State> {
     injectWeb3: false,
     ribbit: null
   };
+
   componentDidMount() {
+    this.initializeRibbit();
+  }
+
+  async initializeRibbit() {
     let web3 = null;
     if (typeof window["web3"] === "undefined") {
       console.log("metamask not installed.");
@@ -37,31 +43,36 @@ class App extends React.Component<Props, State> {
     window["web3"] = web3; // override metamask web3.
     window["ribbit"] = ribbit;
     console.log("start initializing user.");
-    ribbit
-      .initialize()
-      .then(() => {
-        console.log("user initialized.", ribbit.accountAddress);
-        this.setState(
-          {
-            injectWeb3: true,
-            ribbit
-          },
-          () => {
-            if (history.location.pathname === "/") {
-              history.push(`/${ribbit.networkId}/`);
-            }
+    try {
+      await ribbit.initialize();
+      console.log("user initialized.", ribbit.accountAddress);
+      this.setState(
+        {
+          injectWeb3: true,
+          ribbit
+        },
+        async () => {
+          const username = await ribbit.getUsernameFromAddress(
+            ribbit.accountAddress
+          );
+          if (!username) {
+            // goto signup page
+            hashHistory.replace(`/${ribbit.networkId}/signup/`);
+          } else if (hashHistory.location.pathname === "/") {
+            hashHistory.replace(`/${ribbit.networkId}/`);
           }
-        );
-      })
-      .catch(error => {
-        alert(error);
-        this.setState({ ribbit: null }, () => {
-          if (history.location.pathname === "/") {
-            history.push(`/${ribbit.networkId}/`);
-          }
-        });
+        }
+      );
+    } catch (error) {
+      alert(error);
+      this.setState({ ribbit: null }, () => {
+        if (hashHistory.location.pathname === "/") {
+          hashHistory.replace(`/${ribbit.networkId}/`);
+        }
       });
+    }
   }
+
   render() {
     if (!this.state.ribbit) {
       return (
@@ -77,8 +88,18 @@ class App extends React.Component<Props, State> {
       );
     }
     return (
-      <Router history={history}>
+      <Router history={hashHistory}>
         <Switch>
+          <Route
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/signup`}
+            render={props => (
+              <Signup
+                networkId={props.match.params["networkId"]}
+                ribbit={this.state.ribbit}
+              />
+            )}
+            exact
+          />
           <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/`}
             render={props => (
@@ -91,12 +112,12 @@ class App extends React.Component<Props, State> {
           />
           <Route
             path={`${process.env.PUBLIC_URL ||
-              ""}/:networkId/profile/:userAddress`}
+              ""}/:networkId/profile/:username`}
             render={props => (
               <Profile
                 networkId={props.match.params["networkId"]}
                 ribbit={this.state.ribbit}
-                guestUserAddress={props.match.params["userAddress"]}
+                username={props.match.params["username"]}
               />
             )}
             exact

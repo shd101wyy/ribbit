@@ -64,7 +64,7 @@ export default class Home extends React.Component<Props, State> {
   showUserHome(ribbit: Ribbit) {
     if (!ribbit) return;
     this.showUserFeeds(ribbit);
-    ribbit.getUserInfo(ribbit.accountAddress).then(userInfo => {
+    ribbit.getUserInfoFromAddress(ribbit.accountAddress).then(userInfo => {
       this.setState({ userInfo });
     });
   }
@@ -95,7 +95,9 @@ export default class Home extends React.Component<Props, State> {
             this.props.ribbit
           );
 
-          const userInfo = await ribbit.getUserInfo(transactionInfo.from);
+          const userInfo = await ribbit.getUserInfoFromAddress(
+            transactionInfo.from
+          );
 
           const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
 
@@ -138,7 +140,9 @@ export default class Home extends React.Component<Props, State> {
             this.props.ribbit
           );
 
-          const userInfo = await ribbit.getUserInfo(transactionInfo.from);
+          const userInfo = await ribbit.getUserInfoFromAddress(
+            transactionInfo.from
+          );
 
           const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
 

@@ -1,11 +1,6 @@
 /**
  * /:networkId/topic/:topic
  */
-
-/**
- * /:networkId/profile/:userAddress
- */
-
 import * as React from "react";
 import { Ribbit, UserInfo } from "../lib/ribbit";
 import {

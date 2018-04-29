@@ -1,6 +1,18 @@
 // Smart contract information
 export const abiArray = [
   {
+    constant: false,
+    inputs: [
+      { name: "username", type: "bytes32" },
+      { name: "value", type: "string" }
+    ],
+    name: "setUsernameAndMetaDataJSONString",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
     constant: true,
     inputs: [{ name: "addr", type: "address" }],
     name: "getMetaDataJSONStringValue",
@@ -34,6 +46,15 @@ export const abiArray = [
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [{ name: "", type: "address" }],
+    name: "addressToUsernameMap",
+    outputs: [{ name: "", type: "bytes32" }],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -155,6 +176,15 @@ export const abiArray = [
   },
   {
     constant: true,
+    inputs: [{ name: "", type: "bytes32" }],
+    name: "usernameToAddressMap",
+    outputs: [{ name: "", type: "address" }],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
     inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
     name: "currentTagInfoByTimeMap",
     outputs: [{ name: "", type: "uint256" }],
@@ -266,6 +296,15 @@ export const abiArray = [
   },
   {
     constant: true,
+    inputs: [{ name: "addr", type: "address" }],
+    name: "getUsernameFromAddress",
+    outputs: [{ name: "", type: "bytes32" }],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
     inputs: [{ name: "tag", type: "bytes32" }],
     name: "getCurrentTagInfoByTime",
     outputs: [{ name: "", type: "uint256[2]" }],
@@ -298,6 +337,15 @@ export const abiArray = [
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [{ name: "username", type: "bytes32" }],
+    name: "getAddressFromUsername",
+    outputs: [{ name: "", type: "address" }],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
@@ -344,7 +392,7 @@ export const abiArray = [
 export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
-    return "0xcb472c954bbc353f9c6c4b58dab5e1aadd73ac51";
+    return "0xf800d9d9d2514c119ff663bdb33d7d2bad3cbbdd";
   } else if (networkId === 1) {
     // mainnet
     return null;

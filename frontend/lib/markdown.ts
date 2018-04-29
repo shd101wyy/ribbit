@@ -55,7 +55,7 @@ md.renderer.rules.tag = (tokens, idx) => {
   const tagMode = tokens[idx] ? tokens[idx].tagMode : null;
   if (!content || !tagMode) {
     return `<a class="tag tag-error" data-error="Invalid tag">lloading...</a>`;
-  } else if (tagMode === "mention" && content.length === 42) {
+  } else if (tagMode === "mention") {
     return `<a class="tag tag-mention" data-mention="${content}">loading...</a>`;
   } else if (tagMode === "topic" /* && !content.match(/\s/) */) {
     // for topic, space is not allowed.

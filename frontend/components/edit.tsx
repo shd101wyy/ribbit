@@ -71,7 +71,8 @@ export default class Edit extends Component<Props, State> {
 
     while (transactionInfo) {
       const address = transactionInfo.from;
-      const name = (await this.props.ribbit.getUserInfo(address)).name;
+      const name = (await this.props.ribbit.getUserInfoFromAddress(address))
+        .name;
       if (!exists[address]) {
         exists[address] = true;
         replies.push({ name, address });
