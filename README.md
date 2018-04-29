@@ -1,5 +1,21 @@
 # ribbit
 
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+* [ribbit](#ribbit)
+  _ [Usage](#usage)
+  _ [Make a post](#make-a-post)
+  _ [Post to topic](#post-to-topic)
+  _ [Mention a user](#mention-a-user)
+  _ [Developer section](#developer-section)
+  _ [Development](#development)
+  _ [Deployment](#deployment)
+  _ [References](#references)
+
+<!-- /code_chunk_output -->
+
 > I hope we didn't unleash a beast.
 
 A decentralized social media web application based on Ethereum platform.  
@@ -13,7 +29,52 @@ github: http://shd101wyy.github.io/ribbit/
 2.  Switch to `Ropsten Testnet`. Get coints from faucet by clicking `Buy` button (don't worry, it's all fake money).
 3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit.
 
-## Development
+## Make a post
+
+Post in ribbit are writtein in Markdown.
+There are two types of posts now:
+
+* Normal post
+
+for example:
+
+```markdown
+This is a normal post written in [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
+```
+
+* Article post
+
+for example:
+
+```markdown
+![](article/cover/image.png)
+
+# Article title
+
+my content goes here
+```
+
+### Post to topic
+
+You can make a post to a topic by writing `#{topic}`.  
+For example:
+
+```markdown
+Hello #{world} will post this to `world` topic
+```
+
+### Mention a user
+
+You can mention a person in your post by writing `@{username}`.  
+For example:
+
+```markdown
+Hi @{ribbit} will notify the user `ribbit` this about post.
+```
+
+## Developer section
+
+### Development
 
 ```bash
 npm install
@@ -22,7 +83,7 @@ npm run frontend:dev     # start building and watching.
 npm run server:start     # start a static http server at address http://127.0.0.1:12345.
 ```
 
-## Deployment
+### Deployment
 
 ```bash
 npm run frontend:build
