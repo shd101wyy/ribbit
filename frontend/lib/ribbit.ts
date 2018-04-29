@@ -843,7 +843,7 @@ export class Ribbit {
     const address = userInfoCopy["address"];
     delete userInfoCopy["address"]; // no need to save address.
     const username = userInfoCopy["username"];
-    delete userInfoCopy["username"];
+    // delete userInfoCopy["username"]; // no need to delete this, because user might want @Ribbit instead of @ribbit.
     if (
       (await this.getAddressFromUsername(username)) !==
       "0x0000000000000000000000000000000000000000"
