@@ -51,7 +51,7 @@ export default class profile extends React.Component<Props, State> {
     this.setState(
       {
         userInfo,
-        feeds: [],
+        feeds: []
       },
       () => {
         this.showUserFeeds(userInfo.address);

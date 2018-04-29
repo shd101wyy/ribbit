@@ -61,6 +61,7 @@ class Following extends React.Component<FollowingProps, FollowingState> {
           />
           <div className="name-group">
             <p className="name">{userInfo.name}</p>
+            <p className="username">{userInfo.username}</p>
           </div>
         </div>
       </Link>
