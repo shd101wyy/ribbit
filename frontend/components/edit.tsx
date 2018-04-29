@@ -32,6 +32,7 @@ interface State {
   replies: { name: string; address: string }[];
   hiddenReplies: { [key: string]: boolean }; // key is address
   feedback: number; // 0=>do nothing, 1=>upvote, 2=>downvote
+  postToRibbitTopic: boolean;
 }
 
 export default class Edit extends Component<Props, State> {
@@ -49,7 +50,8 @@ export default class Edit extends Component<Props, State> {
       hiddenMentions: {},
       replies: [],
       hiddenReplies: {},
-      feedback: 0
+      feedback: 0,
+      postToRibbitTopic: true
     };
   }
 
@@ -132,6 +134,9 @@ export default class Edit extends Component<Props, State> {
       if (!this.state.hiddenTopics[topic]) {
         topics.push(topic);
       }
+    }
+    if (this.state.postToRibbitTopic) {
+      topics.push("ribbit");
     }
 
     // TODO: replies
@@ -287,6 +292,22 @@ export default class Edit extends Component<Props, State> {
                     {mention.name}
                   </div>
                 ))}
+              </div>
+              <p className="title">Configuration:</p>
+              <div className="config-list">
+                <div
+                  className={
+                    "config" + (this.state.postToRibbitTopic ? "" : " hidden")
+                  }
+                  onClick={() =>
+                    this.setState({
+                      postToRibbitTopic: !this.state.postToRibbitTopic
+                    })
+                  }
+                >
+                  {" "}
+                  Post to #ribbit
+                </div>
               </div>
               {this.props.parentFeedInfo ? (
                 <div>
