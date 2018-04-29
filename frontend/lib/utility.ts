@@ -1,6 +1,8 @@
 import * as Autolinker from "autolinker";
 import * as validator from "validator";
 import * as LZString from "lz-string";
+import { Ribbit } from "./ribbit";
+import hashHistory from "./history";
 
 export function hexEncode(h: string): string {
   var hex, i;
@@ -83,5 +85,14 @@ export function formatDate(dateString) {
       " " +
       date.getFullYear()
     );
+  }
+}
+
+// check whether a user is registered or not.
+// if not, jump to the signup page.
+export async function checkUserRegistration(ribbit: Ribbit) {
+  const username = await ribbit.getUsernameFromAddress(ribbit.accountAddress);
+  if (!username || !username.length) {
+    hashHistory.replace(`/${ribbit.networkId}/signup`);
   }
 }

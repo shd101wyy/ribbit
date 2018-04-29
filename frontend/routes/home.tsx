@@ -3,7 +3,7 @@ import * as React from "react";
 import { Ribbit, UserInfo } from "../lib/ribbit";
 import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
 
-import { decompressString } from "../lib/utility";
+import { decompressString, checkUserRegistration } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 
 import Footer from "../components/footer";
@@ -52,11 +52,13 @@ export default class Home extends React.Component<Props, State> {
 
   componentDidMount() {
     const ribbit = this.props.ribbit;
+    checkUserRegistration(ribbit);
     this.showUserHome(ribbit);
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (this.props.ribbit !== newProps.ribbit) {
+      checkUserRegistration(newProps.ribbit);
       this.showUserHome(newProps.ribbit);
     }
   }

@@ -52,13 +52,7 @@ class App extends React.Component<Props, State> {
           ribbit
         },
         async () => {
-          const username = await ribbit.getUsernameFromAddress(
-            ribbit.accountAddress
-          );
-          if (!username) {
-            // goto signup page
-            hashHistory.replace(`/${ribbit.networkId}/signup/`);
-          } else if (hashHistory.location.pathname === "/") {
+          if (hashHistory.location.pathname === "/") {
             hashHistory.replace(`/${ribbit.networkId}/`);
           }
         }
