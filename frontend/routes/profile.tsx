@@ -50,7 +50,8 @@ export default class profile extends React.Component<Props, State> {
     const userInfo = await this.props.ribbit.getUserInfoFromUsername(username);
     this.setState(
       {
-        userInfo
+        userInfo,
+        feeds: [],
       },
       () => {
         this.showUserFeeds(userInfo.address);
@@ -86,7 +87,7 @@ export default class profile extends React.Component<Props, State> {
     if (!userInfo) {
       return (
         <div className="profile-page">
-          Loading user {this.props.username} profile...
+          {/* Loading user {this.props.username} profile... */}
         </div>
       );
     }
