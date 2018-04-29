@@ -6,6 +6,9 @@ contract Ribbit {
     address public owner;
     address public previousContractAddress; 
     Ribbit public previousContract;
+    mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
+    mapping (address => bytes32) public addressToUsernameMap;
+
     /** 
      * 0x0 => earnings in (wei)
      * 0x1 => upvotes 
@@ -56,23 +59,32 @@ contract Ribbit {
             previousContract = Ribbit(_previousContractAddress);
         }
     }
-    /*
-    // These two functions are not safe
-    function updateState(bytes32 transactionHash, uint field, uint value) external {
-        state[transactionHash][field] = state[transactionHash][field] + value;
-    }
-    function multipleState(bytes32 transactionHash, uint[] fieldsAndValues) external {
-        for (uint i = 0; i < fieldsAndValues.length; i += 2) {
-            state[transactionHash][fieldsAndValues[i]] = state[transactionHash][fieldsAndValues[i]] + fieldsAndValues[i+1];
+
+    function getUsernameFromAddress(address addr) external view returns (bytes32) {
+        bytes32 username = addressToUsernameMap[addr];
+        if (username == 0 && previousContractAddress != address(0)) {
+            return previousContract.getUsernameFromAddress(addr);
+        } else {
+            return username;
         }
     }
-    function increaseStateFieldsByOne(bytes32 transactionHash, uint[] fields) external {
-        for (uint i = 0; i < fields.length; i++) {
-            uint field = fields[i];
-            state[transactionHash][field] = state[transactionHash][field] + 1;
-        } 
+
+    function getAddressFromUsername(bytes32 username) public view returns (address) {
+        address addr = usernameToAddressMap[username];
+        if (addr == address(0) && previousContractAddress != address(0)) {
+            return previousContract.getAddressFromUsername(username);
+        } else {
+            return addr;
+        }
     }
-    */
+
+    function setUsernameAndMetaDataJSONString(bytes32 username, string value) external {
+        require(getAddressFromUsername(username) == address(0)); // <= make sure the username is not taken.
+        usernameToAddressMap[username] = msg.sender;
+        addressToUsernameMap[msg.sender] = username;
+        metaDataJSONStringMap[msg.sender] = value;
+    }
+    
     function getState(bytes32 transactionHash, uint field) external view returns (uint)  {
         uint value = state[transactionHash][field];
         if (previousContractAddress != address(0)) {
