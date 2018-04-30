@@ -6,6 +6,8 @@ contract Ribbit {
     address public owner;
     address public previousContractAddress; 
     Ribbit public previousContract;
+    uint public donationBar; // in wei
+    uint public upvoteBar;
     mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
     mapping (address => bytes32) public addressToUsernameMap;
 
@@ -138,6 +140,16 @@ contract Ribbit {
             return currentTagInfoByTrendMap[tag];
         }
     }
+
+    function setDonationBar(uint _donationBar) external {
+        require(msg.sender == owner);
+        donationBar = _donationBar;
+    }
+
+    function setUpvoteBar(uint _upvoteBar) external {
+        require(msg.sender == owner);
+        upvoteBar = _upvoteBar;
+    }
     
     // Post Feed 
     event SavePreviousFeedInfoEvent(uint[2] previousFeedInfo);
@@ -170,7 +182,7 @@ contract Ribbit {
     function upvote(uint timestamp, bytes32 parentTransactionHash, bytes32 previousFeedTransactionHash, bytes32[] tags, address authorAddress) external payable {
         bool isDonation = (authorAddress != address(0)); 
         if (isDonation) {
-            require(msg.value > 0);
+            require(msg.value > donationBar);
             // donate:
             // 0.9 to author
             // 0.1 to developer
@@ -196,7 +208,7 @@ contract Ribbit {
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = timestamp;
             } else if ( isDonation ||                                                        // for donation, we pop that to trend directly
-                        state[parentTransactionHash][1] >= state[parentTransactionHash][2]   // upvotes >= downvotes.
+                        state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar   // upvotes >= downvotes.
             ) {
                 emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = blockNumber;
@@ -219,7 +231,7 @@ contract Ribbit {
     //  0x3: donate
     function reply(uint timestamp, bytes32 parentTransactionHash, bytes32 previousReplyTransactionHash, string message, uint messageHash, bytes32[] tags, uint8 mode, address authorAddress) external payable {
         if (authorAddress != address(0)) {
-            require(msg.value > 0);
+            require(msg.value > donationBar);
             // donate:
             // 0.9 to author
             // 0.1 to developer
@@ -250,7 +262,7 @@ contract Ribbit {
                 currentTagInfoByTimeMap[tag][0] = blockNumber;
                 currentTagInfoByTimeMap[tag][1] = messageHash;
             } else if (mode == 3 ||  // is donation.
-                      (mode != 2 && state[parentTransactionHash][1] >= state[parentTransactionHash][2])   // not downvote, and upvotes >= downvotes.
+                      (mode != 2 && state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar)   // not downvote, and upvotes >= downvotes.
             ){
                 emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag][0] = blockNumber;
