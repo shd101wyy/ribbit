@@ -24,6 +24,8 @@ interface State {
   loading: boolean;
   sorting: TopicSorting;
   cover: string;
+  following: boolean;
+  mouseOver: boolean;
 }
 
 enum TopicSorting {
@@ -38,7 +40,9 @@ export default class profile extends React.Component<Props, State> {
       feeds: [],
       loading: false,
       sorting: TopicSorting.ByTrend,
-      cover: null
+      cover: null,
+      following: true,
+      mouseOver: false
     };
   }
 
@@ -53,6 +57,14 @@ export default class profile extends React.Component<Props, State> {
   }
 
   async initializeTopic(topic: string) {
+    // check following or not
+    const followingTopics = this.props.ribbit.settings.followingTopics;
+    const following = !!followingTopics.filter(x => x.topic === topic).length;
+    this.setState({
+      following
+    });
+
+    // show feeds
     this.showTopicFeeds(topic);
   }
 
@@ -115,6 +127,32 @@ export default class profile extends React.Component<Props, State> {
     };
   };
 
+  followTopic = () => {
+    this.props.ribbit
+      .followTopic(this.props.topic)
+      .then(() => {
+        this.setState({
+          following: true
+        });
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
+  unfollowTopic = () => {
+    this.props.ribbit
+      .unfollowTopic(this.props.topic)
+      .then(() => {
+        this.setState({
+          following: false
+        });
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
   render() {
     /**
      * Prevent from loading user address as topic.
@@ -139,6 +177,30 @@ export default class profile extends React.Component<Props, State> {
               }}
             />
             <p className="title">#{this.props.topic}</p>
+            {this.state.following ? (
+              this.state.mouseOver ? (
+                <div
+                  className="follow-btn"
+                  onMouseEnter={() => this.setState({ mouseOver: true })}
+                  onMouseLeave={() => this.setState({ mouseOver: false })}
+                  onClick={this.unfollowTopic}
+                >
+                  Unfollow
+                </div>
+              ) : (
+                <div
+                  className="follow-btn"
+                  onMouseEnter={() => this.setState({ mouseOver: true })}
+                  onMouseLeave={() => this.setState({ mouseOver: false })}
+                >
+                  Following
+                </div>
+              )
+            ) : (
+              <div className="follow-btn" onClick={this.followTopic}>
+                Follow
+              </div>
+            )}
             <div className="btn-group">
               <div
                 className={
