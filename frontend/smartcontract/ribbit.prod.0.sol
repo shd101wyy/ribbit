@@ -8,6 +8,7 @@ contract Ribbit {
     Ribbit public previousContract;
     uint public donationBar; // in wei
     uint public upvoteBar;
+    uint public developerIncomePercent; // 10% by default
     mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
     mapping (address => bytes32) public addressToUsernameMap;
 
@@ -53,13 +54,15 @@ contract Ribbit {
     mapping (bytes32 => uint[2]) public currentTagInfoByTimeMap;
     mapping (bytes32 => uint[2]) public currentTagInfoByTrendMap;
 
-    constructor(address _previousContractAddress, uint _version) public {
+    constructor(address _previousContractAddress, uint _version, uint _developerIncomePercent) public {
         owner = msg.sender;
         version = _version;
         previousContractAddress = _previousContractAddress;
         if (_previousContractAddress != address(0)) {
             previousContract = Ribbit(_previousContractAddress);
         }
+
+        developerIncomePercent = _developerIncomePercent;
     }
 
     function getUsernameFromAddress(address addr) external view returns (bytes32) {
@@ -150,6 +153,11 @@ contract Ribbit {
         require(msg.sender == owner);
         upvoteBar = _upvoteBar;
     }
+
+    function setDeveloperIncomePercent(uint _percent) external {
+        require(msg.sender == owner);
+        developerIncomePercent = _percent;
+    }
     
     // Post Feed 
     event SavePreviousFeedInfoEvent(uint[2] previousFeedInfo);
@@ -188,9 +196,9 @@ contract Ribbit {
             // 0.1 to developer
             state[parentTransactionHash][0] = state[parentTransactionHash][0] + msg.value;
             emit DonateEvent(msg.value);
-            uint unit = msg.value / 10;
-            authorAddress.transfer(unit * 9);
-            owner.transfer(unit);
+            uint unit = msg.value / 100;
+            authorAddress.transfer(unit * (100 - developerIncomePercent));
+            owner.transfer(unit * developerIncomePercent);
         }
 
         emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
@@ -237,9 +245,9 @@ contract Ribbit {
             // 0.1 to developer
             state[parentTransactionHash][0] = state[parentTransactionHash][0] + msg.value;
             emit DonateEvent(msg.value);
-            uint unit = msg.value / 10;
-            authorAddress.transfer(unit * 9);
-            owner.transfer(unit);
+            uint unit = msg.value / 100;
+            authorAddress.transfer(unit * (100 - developerIncomePercent));
+            owner.transfer(unit * developerIncomePercent);
         }
 
         uint blockNumber = block.number;
