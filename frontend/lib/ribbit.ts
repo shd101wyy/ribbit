@@ -204,7 +204,7 @@ export class Ribbit {
       return tag.toLowerCase();
     }
 
-    return "0x" + sha256(tag.toLowerCase().replace(/\s/g, ""));
+    return "0x" + sha256(tag.toLowerCase().replace(/[\s\@\#]/g, ""));
 
     /*
     const compressedTag = compressString(tag.toLowerCase().replace(/\s/g, ""));
@@ -224,7 +224,7 @@ export class Ribbit {
 
   public formatUsername(username: string) {
     const compressedUsername = compressString(
-      username.toLowerCase().replace(/[\s\@]/g, "")
+      username.toLowerCase().replace(/[\s\@\#]/g, "")
     );
     let hexString = hexEncode(compressedUsername);
     if (hexString.length >= 64) {

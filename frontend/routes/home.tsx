@@ -185,24 +185,37 @@ export default class Home extends React.Component<Props, State> {
     };
   };
 
-  searchBoxKeydown = event => {
+  searchBoxKeydown = async event => {
     const searchValue = this.state.searchBoxValue.trim();
     if (!searchValue.length) {
       return;
     }
+    const ribbit = this.props.ribbit;
     if (event.which === 13) {
       // enter key
-      if (this.props.ribbit.web3.utils.isAddress(this.state.searchBoxValue)) {
+      if (ribbit.web3.utils.isAddress(searchValue)) { // search for user
+        const username = await ribbit.getUsernameFromAddress(searchValue);
+        if (username && username.length) {
+          window.open(
+            `${window.location.pathname}#/${
+              ribbit.networkId
+            }/profile/${username}`,
+            "_blank"
+          );
+        } else {
+          alert(`User with address ${searchValue} doesn't exist.`);
+        }
+      } else if (searchValue.startsWith('@')) { // search for user
         window.open(
           `${window.location.pathname}#/${
-            this.props.ribbit.networkId
-          }/profile/${searchValue}`,
+            ribbit.networkId
+          }/profile/${searchValue.slice(1)}`,
           "_blank"
         );
-      } else {
+      } else { // search for topic
         window.open(
           `${window.location.pathname}#/${
-            this.props.ribbit.networkId
+            ribbit.networkId
           }/topic/${encodeURIComponent(searchValue)}`,
           "_blank"
         );
