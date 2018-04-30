@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
+import { Ribbit } from "../lib/ribbit";
+
 interface TopicProps {
   name: string;
   networkId: number;
@@ -27,7 +29,7 @@ class Topic extends React.Component<TopicProps, TopicState> {
 }
 
 interface Props {
-  networkId: number;
+  ribbit: Ribbit;
 }
 interface State {}
 export default class TopicsCard extends React.Component<Props, State> {
@@ -36,11 +38,20 @@ export default class TopicsCard extends React.Component<Props, State> {
   }
 
   render() {
+    const ribbit = this.props.ribbit;
     return (
       <div className="topics-card card">
         <p className="title">my favorite topics</p>
         <div className="topics-list">
-          <Topic name="ribbit" networkId={this.props.networkId} />
+          {ribbit.settings.followingTopics.map((followingTopic, offset) => {
+            return (
+              <Topic
+                name={followingTopic.topic}
+                networkId={ribbit.networkId}
+                key={offset}
+              />
+            );
+          })}
         </div>
       </div>
     );

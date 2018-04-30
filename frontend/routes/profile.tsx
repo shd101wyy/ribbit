@@ -94,7 +94,10 @@ export default class profile extends React.Component<Props, State> {
     return (
       <div className="profile-page">
         <div className="container">
-          <ProfileCard userInfo={this.state.userInfo} />
+          <ProfileCard
+            userInfo={this.state.userInfo}
+            ribbit={this.props.ribbit}
+          />
           <div className="cards">
             {this.state.feeds.map((feedInfo, index) => (
               <FeedCard

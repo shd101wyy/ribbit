@@ -71,7 +71,6 @@ class Following extends React.Component<FollowingProps, FollowingState> {
 
 interface Props {
   ribbit: Ribbit;
-  networkId: number;
 }
 interface State {}
 export default class FollowingsCard extends React.Component<Props, State> {
@@ -80,15 +79,23 @@ export default class FollowingsCard extends React.Component<Props, State> {
   }
 
   render() {
+    const ribbit = this.props.ribbit;
     return (
       <div className="followings-card card">
         <p className="title">my followings</p>
         <div className="followings-list">
-          <Following
-            username={this.props.ribbit.userInfo.username}
-            ribbit={this.props.ribbit}
-            networkId={this.props.networkId}
-          />
+          {ribbit.settings.followingUsernames.map(
+            (followingUsername, offset) => {
+              return (
+                <Following
+                  username={followingUsername.username}
+                  ribbit={ribbit}
+                  networkId={ribbit.networkId}
+                  key={offset}
+                />
+              );
+            }
+          )}
         </div>
       </div>
     );

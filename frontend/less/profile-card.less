@@ -22,18 +22,41 @@
   .name-group {
     padding: 0 24px 6px 114px;
     margin-top: -8px;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
 
     p.name {
       font-weight: 800;
-      margin-bottom: 6px;
     }
 
-    p.address {
-      margin-top: 0;
+    p.username {
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: #8590a6;
+      margin-left: 6px;
+    }
+  }
+
+  .button-group {
+    position: absolute;
+    right: 8px;
+    top: 264px;
+
+    .follow-btn {
+      padding: 6px 12px;
+      background-color: #dff1cf;
+      color: #74a24b;
+      border-radius: 2px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: 80px;
+      text-align: center;
+
+      &:hover {
+        background-color: #cae8af;
+      }
     }
   }
 

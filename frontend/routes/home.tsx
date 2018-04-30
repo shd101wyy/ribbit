@@ -193,7 +193,8 @@ export default class Home extends React.Component<Props, State> {
     const ribbit = this.props.ribbit;
     if (event.which === 13) {
       // enter key
-      if (ribbit.web3.utils.isAddress(searchValue)) { // search for user
+      if (ribbit.web3.utils.isAddress(searchValue)) {
+        // search for user
         const username = await ribbit.getUsernameFromAddress(searchValue);
         if (username && username.length) {
           window.open(
@@ -205,14 +206,16 @@ export default class Home extends React.Component<Props, State> {
         } else {
           alert(`User with address ${searchValue} doesn't exist.`);
         }
-      } else if (searchValue.startsWith('@')) { // search for user
+      } else if (searchValue.startsWith("@")) {
+        // search for user
         window.open(
           `${window.location.pathname}#/${
             ribbit.networkId
           }/profile/${searchValue.slice(1)}`,
           "_blank"
         );
-      } else { // search for topic
+      } else {
+        // search for topic
         window.open(
           `${window.location.pathname}#/${
             ribbit.networkId
@@ -270,11 +273,11 @@ export default class Home extends React.Component<Props, State> {
       return (
         <div className="home">
           <div className="left-panel">
-            <ProfileCard userInfo={this.state.userInfo} />
-            <FollowingsCard
+            <ProfileCard
+              userInfo={this.state.userInfo}
               ribbit={this.props.ribbit}
-              networkId={this.props.networkId}
             />
+            <FollowingsCard ribbit={this.props.ribbit} />
           </div>
           <div className="middle-panel">
             <div className="top-bar card">
@@ -355,7 +358,7 @@ export default class Home extends React.Component<Props, State> {
               </a>
             </div>
             {/* <AnnouncementCard /> */}
-            <TopicsCard networkId={this.props.networkId} />
+            <TopicsCard ribbit={this.props.ribbit} />
           </div>
           {this.state.showEditPanel ? (
             <Edit cancel={this.toggleEditPanel} ribbit={this.props.ribbit} />

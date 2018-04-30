@@ -28,6 +28,7 @@ if (typeof Buffer === "undefined") {
 }
 
 import { StateInfo, FeedInfo } from "./feed";
+import { Settings } from "./settings";
 
 abiDecoder.addABI(abiArray);
 
@@ -112,6 +113,11 @@ export class Ribbit {
   public ipfs = null;
 
   /**
+   * offline settings
+   */
+  settings: Settings;
+
+  /**
    * Constructor
    * @param web3
    */
@@ -132,6 +138,7 @@ export class Ribbit {
     );
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
     await this.initializeIPFS();
+    await this.initializeSettings();
   }
 
   private initializeIPFS() {
@@ -966,5 +973,120 @@ export class Ribbit {
     } else {
       return message;
     }
+  }
+
+  public async setSettings(newSettings: Settings) {
+    this.settings = newSettings;
+    console.log("setSettings: ", newSettings);
+    const hash = (await this.ipfsAdd(JSON.stringify(this.settings))).hash;
+    if (typeof window.localStorage !== "undefined") {
+      window.localStorage.setItem(`/settings/${this.accountAddress}`, hash);
+    }
+  }
+
+  public async initializeSettings() {
+    if (typeof window.localStorage !== "undefined") {
+      const hash = window.localStorage.getItem(
+        `/settings/${this.accountAddress}`
+      );
+      if (hash) {
+        const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
+        this.settings = settings;
+        return settings;
+      } else {
+        return this.initializeDefaultSettings();
+      }
+    } else {
+      return this.initializeDefaultSettings();
+    }
+  }
+
+  public initializeDefaultSettings(): Settings {
+    const followingTopics = [
+      {
+        topic: "ribbit",
+        timestamp: Date.now()
+      }
+    ];
+    const followingUsernames = [
+      {
+        username: this.userInfo.username,
+        timestamp: Date.now()
+      }
+    ];
+    if (this.userInfo.username !== "ribbit") {
+      followingUsernames.push({
+        username: "ribbit",
+        timestamp: Date.now()
+      });
+    }
+
+    this.settings = {
+      postAsIPFSHash: false,
+      postToRibbitTopic: true,
+      followingUsernames,
+      followingTopics
+    };
+    return this.settings;
+  }
+
+  public async followUser(username: string) {
+    const followingUsernames = this.settings.followingUsernames;
+    let found: boolean = false;
+    for (const followingUsername of followingUsernames) {
+      if (followingUsername.username == username) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      followingUsernames.push({
+        username: username,
+        timestamp: Date.now()
+      });
+      return await this.setSettings(this.settings);
+    }
+  }
+
+  public async unfollowUser(username: string) {
+    const followingUsernames = this.settings.followingUsernames;
+    const newFollowingUsernames = [];
+    for (const followingUsername of followingUsernames) {
+      if (followingUsername.username !== username) {
+        newFollowingUsernames.push(followingUsername);
+      }
+    }
+    this.settings.followingUsernames = newFollowingUsernames;
+    return await this.setSettings(this.settings);
+  }
+
+  public async followTopic(topic: string) {
+    const followingTopics = this.settings.followingTopics;
+    let found: boolean = false;
+    for (const followingTopic of followingTopics) {
+      if (followingTopic.topic == topic) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      followingTopics.push({
+        topic: topic,
+        timestamp: Date.now()
+      });
+      return await this.setSettings(this.settings);
+    }
+  }
+
+  public async unfollowTopic(topic: string) {
+    const followingTopics = this.settings.followingTopics;
+    const newFollowingTopics = [];
+    for (const followingTopic of followingTopics) {
+      if (followingTopic.topic !== topic) {
+        newFollowingTopics.push(followingTopic);
+      }
+    }
+    this.settings.followingTopics = newFollowingTopics;
+    return await this.setSettings(this.settings);
   }
 }

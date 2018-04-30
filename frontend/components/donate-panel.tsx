@@ -104,7 +104,7 @@ export default class DonatePanel extends React.Component<Props, State> {
             <input
               className="donate-input"
               type="text"
-              placeholder="donate 0 ether"
+              placeholder="donate 0.0000 ether"
               value={this.state.etherInput}
               onChange={this.changeEther}
             />
