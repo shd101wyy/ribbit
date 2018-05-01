@@ -1,7 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -54,14 +53,5 @@ module.exports = {
         to: path.resolve(__dirname, "./dist/")
       }
     ])
-  ],
-  optimization: {
-    minimizer: [
-      new UglifyJsPlugin({
-        uglifyOptions: {
-          mangle: false, // <= This is necessary, otherwise IPFS will has error to connect.
-        }
-      })
-    ]
-  }
+  ]
 };
