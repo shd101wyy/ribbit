@@ -89,7 +89,7 @@ npm run server:start     # start a static http server at address http://127.0.
 npm run frontend:build
 ```
 
-then copy `./dist/index.html` and `./dist/app.bundle.js` to your server.
+then copy `./dist` to your server.
 
 ## References
 

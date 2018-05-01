@@ -1,5 +1,4 @@
-import * as MarkdownIt from "../deps/markdown-it";
-
+const MarkdownIt = window["markdownit"];
 const md = new MarkdownIt({
   html: true,
   linkify: true,

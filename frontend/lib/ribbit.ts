@@ -19,16 +19,15 @@ import * as Identicon from "identicon.js";
 import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
 import { BigNumber } from "bignumber.js";
-import * as IPFS from "ipfs";
 let Buffer = window["Buffer"] || undefined;
 if (typeof Buffer === "undefined") {
   // For browser compatibility
   Buffer = require("buffer/").Buffer;
   window["Buffer"] = Buffer;
 }
-
 import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
+const IPFS = window["Ipfs"];
 
 abiDecoder.addABI(abiArray);
 
