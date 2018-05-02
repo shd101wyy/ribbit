@@ -12,6 +12,10 @@ contract Ribbit {
     mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
     mapping (address => bytes32) public addressToUsernameMap;
 
+    uint public accountsNum; // number of accounts
+    mapping (address => uint) public addressToAccountNoMap;
+    mapping (uint => address) accountNoToAddressMap;
+
     /** 
      * 0x0 => earnings in (wei)
      * 0x1 => upvotes 
@@ -65,7 +69,7 @@ contract Ribbit {
         developerIncomePercent = _developerIncomePercent;
     }
 
-    function getUsernameFromAddress(address addr) external view returns (bytes32) {
+    function getUsernameFromAddress(address addr) public view returns (bytes32) {
         bytes32 username = addressToUsernameMap[addr];
         if (username == 0 && previousContractAddress != address(0)) {
             return previousContract.getUsernameFromAddress(addr);
@@ -83,8 +87,31 @@ contract Ribbit {
         }
     }
 
+    function getAccountNoFromAddress(address addr) public view returns (uint) {
+        uint n = addressToAccountNoMap[addr];
+        if (n == 0 && previousContractAddress != address(0)) {
+            return previousContract.getAccountNoFromAddress(addr);
+        } else {
+            return n;
+        }
+    }
+
+    function getAddressFromAccountNo(uint n) public view returns (address) {
+        address addr = accountNoToAddressMap[n];
+        if (addr == address(0) && previousContractAddress != address(0)) {
+            return previousContract.getAddressFromAccountNo(n);
+        } else {
+            return addr;
+        }
+    }
+
     function setUsernameAndMetaDataJSONString(bytes32 username, string value) external {
         require(getAddressFromUsername(username) == address(0)); // <= make sure the username is not taken.
+        if (getUsernameFromAddress(msg.sender) == 0x0) { // This is a new account
+            accountsNum += 1; 
+            addressToAccountNoMap[msg.sender] = accountsNum;
+            accountNoToAddressMap[accountsNum] = msg.sender;
+        }
         usernameToAddressMap[username] = msg.sender;
         addressToUsernameMap[msg.sender] = username;
         metaDataJSONStringMap[msg.sender] = value;
