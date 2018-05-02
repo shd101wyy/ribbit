@@ -52,7 +52,7 @@ export default class Edit extends Component<Props, State> {
       replies: [],
       hiddenReplies: {},
       feedback: 0,
-      postToRibbitTopic: true,
+      postToRibbitTopic: false,
       postAsIPFSHash: false
     };
   }

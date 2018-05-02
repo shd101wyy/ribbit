@@ -439,18 +439,20 @@ export class Ribbit {
    * then compare the data with blockNumber.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
    * @param userAddress sender of this transaction. If `userAddress` is not provided, then it means you are querying other's transactionInfo.
+   * @param tag tag of this transaction. Use it to validate transaction if tag is provided.
    * @param blockNumber block number
    * @param transactionHash
    */
   public async getTransactionInfo({
     userAddress = "",
+    tag = "",
     blockNumber = 0,
     transactionHash = ""
   }): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("transactionHash: ", transactionHash);
-    const validateTransaction = (transaction: Transaction) => {
+    const validateTransaction = async (transaction: Transaction) => {
       // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
       // This code is wrong for `repost` event, userAddress !== transaction.from.
       if (
@@ -465,28 +467,30 @@ export class Ribbit {
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
-        /*
-        let messageHash2 = null;
-        if (
-          decodedInputData.name === "post" ||
-          decodedInputData.name === "reply"
-        ) {
-          messageHash2 = new BigNumber(
-            decodedInputData.params["messageHash"].value
-          ).toString(16);
-        } else if (decodedInputData.name === "upvote") {
-          // for upvote, it's special.
-          messageHash2 = new BigNumber(
-            decodedInputData.params["timestamp"].value
-          ).toString(16);
+        const receipt = await this.web3.eth.getTransactionReceipt(
+          transaction.hash
+        );
+        const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null
+        if (!logs.length) {
+          return null;
         }
-        if (messageHash && messageHash2 !== messageHash) {
-          return null; // hashes don't match
+        const decodedLogs = decodeLogs(logs);
+        if (tag) {
+          const eventLog = decodedLogs.filter(
+            x =>
+              (x.name === "SavePreviousTagInfoByTimeEvent" ||
+                x.name === "SavePreviousTagInfoByTrendEvent") &&
+              x.events["tag"].value === tag
+          )[0];
+          if (!eventLog) {
+            // tag not found.
+            return null;
+          }
         }
-        */
         // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         return Object.assign(transaction as object, {
-          decodedInputData
+          decodedInputData,
+          decodedLogs
         }) as TransactionInfo;
       }
     };
@@ -499,7 +503,7 @@ export class Ribbit {
           !blockNumber
         ) {
           // block number is not provided
-          const validatedResult = validateTransaction(transaction);
+          const validatedResult = await validateTransaction(transaction);
           if (validatedResult) {
             // console.log('transactionHash is valid: ', validatedResult)
             return validatedResult;
@@ -524,7 +528,7 @@ export class Ribbit {
         blockNumber,
         i
       );
-      const validatedResult = validateTransaction(transaction);
+      const validatedResult = await validateTransaction(transaction);
       if (validatedResult) {
         // console.log("transactionHash is invalid: ", validatedResult);
         return validatedResult;
@@ -590,8 +594,7 @@ export class Ribbit {
     userAddress: string,
     {
       num = -1, // how many feeds to read?
-      blockNumber = 0,
-      transactionHash = null
+      blockNumber = 0
     },
     cb: (
       done: boolean,
@@ -604,13 +607,11 @@ export class Ribbit {
         .getCurrentFeedInfo(userAddress)
         .call();
       blockNumber = parseInt(currentFeedInfo);
-      transactionHash = null;
     }
     return await this.getFeeds({
       userAddress,
       blockNumber,
       num,
-      transactionHash,
       cb
     });
   }
@@ -640,7 +641,6 @@ export class Ribbit {
       tag,
       blockNumber,
       num,
-      transactionHash,
       cb
     });
   }
@@ -668,7 +668,6 @@ export class Ribbit {
       tag,
       blockNumber,
       num,
-      transactionHash,
       cb
     });
   }
@@ -682,7 +681,6 @@ export class Ribbit {
     tag = "",
     blockNumber = 0,
     num = -1,
-    transactionHash = "",
     cb = (
       done: boolean,
       offset?: number,
@@ -693,7 +691,6 @@ export class Ribbit {
     tag?: string;
     blockNumber: number;
     num: number;
-    transactionHash: string;
     cb: (
       done: boolean,
       offset?: number,
@@ -705,41 +702,14 @@ export class Ribbit {
       // console.log("@@ offset: " + offset);
       const transactionInfo = await this.getTransactionInfo({
         userAddress,
-        blockNumber,
-        transactionHash
+        tag,
+        blockNumber
       });
       if (!transactionInfo) {
         return cb(true); // done.
       } else {
         cb(false, offset, transactionInfo);
-        if (transactionInfo.decodedInputData.name === "post") {
-          transactionHash =
-            transactionInfo.decodedInputData.params[
-              "previousFeedTransactionHash"
-            ].value;
-        } else if (transactionInfo.decodedInputData.name === "upvote") {
-          transactionHash =
-            transactionInfo.decodedInputData.params[
-              "previousFeedTransactionHash"
-            ].value;
-        } else if (transactionInfo.decodedInputData.name === "reply") {
-          transactionHash =
-            transactionInfo.decodedInputData.params[
-              "previousReplyTransactionHash"
-            ].value;
-        } else {
-          // wrong event
-          console.log("getFeeds wrong transactionInfo: ", transactionInfo);
-          return cb(true);
-        }
-        const receipt = await this.web3.eth.getTransactionReceipt(
-          transactionInfo.hash
-        );
-        const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null.
-        if (!logs.length) {
-          return cb(true);
-        }
-        const decodedLogs = decodeLogs(logs);
+        const decodedLogs = transactionInfo.decodedLogs;
         let eventLog: DecodedLogData = null;
         if (!tag) {
           // PostEvent or RepostEvent.
@@ -762,9 +732,9 @@ export class Ribbit {
             eventLog.name === "SavePreviousTagInfoByTrendEvent" ||
             eventLog.name === "SavePreviousTagInfoByTimeEvent"
           ) {
-            blockNumber = parseInt(eventLog.events["previousTagInfo"].value);
+            blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
-            blockNumber = parseInt(eventLog.events["previousFeedInfo"].value);
+            blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
           } else {
             throw "Error: Invalid eventLog" +
               JSON.stringify(eventLog, null, "  ");

@@ -18,6 +18,7 @@ export interface DecodedLogData {
 
 export interface TransactionInfo extends Transaction {
   decodedInputData: DecodedInputData;
+  decodedLogs: DecodedLogData[];
 }
 
 export function transformDecodedInputData(decodedInputData: {
@@ -85,7 +86,8 @@ export function generateFakeTransactionInfo(): TransactionInfo {
           type: "uint"
         }
       }
-    }
+    },
+    decodedLogs: []
   };
 }
 
