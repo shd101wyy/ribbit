@@ -77,16 +77,18 @@ Hi @{ribbit} will notify the user `ribbit` this about post.
 ### Development
 
 ```bash
-npm install
-npm run frontend:dev     # start building and watching.
+$ npm run frontend:prepare # install necessary node modules for development
+                         # on Windows, you might need to run the following in advance:
+                         #   $ npm install --global --production windows-build-tools
+$ npm run frontend:dev     # start building and watching.
                          # then open a new terminal and run =>
-npm run server:start     # start a static http server at address http://127.0.0.1:12345.
+$ npm run server:start     # start a static http server at address http://127.0.0.1:12345.
 ```
 
 ### Deployment
 
 ```bash
-npm run frontend:build
+$ npm run frontend:build
 ```
 
 then copy `./dist` to your server.
