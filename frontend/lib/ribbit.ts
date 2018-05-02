@@ -19,6 +19,10 @@ import * as Identicon from "identicon.js";
 import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
 import { BigNumber } from "bignumber.js";
+import PouchDB from "pouchdb";
+import PouchDBFind from "pouchdb-find";
+PouchDB.plugin(PouchDBFind);
+
 let Buffer = window["Buffer"] || undefined;
 if (typeof Buffer === "undefined") {
   // For browser compatibility
@@ -70,7 +74,6 @@ export interface UserInfo {
    * User bio.
    */
   bio: string;
-
   /**
    * user address
    */
@@ -78,6 +81,13 @@ export interface UserInfo {
 }
 
 export class Ribbit {
+  /**
+   * Pouchdb instance.
+   */
+  public transactionInfoDB: PouchDB.Database<TransactionInfo>;
+  /**
+   * Ethereum web3 instance.
+   */
   public web3: Web3;
   /**
    * The address of current account.
@@ -128,6 +138,13 @@ export class Ribbit {
    * This function should be called immediately after creating User.
    */
   public async initialize() {
+    this.transactionInfoDB = new PouchDB<TransactionInfo>(
+      "ribbit/transactionInfo"
+    );
+    await this.transactionInfoDB["createIndex"]({
+      index: { fields: ["creation", "blockNumber", "from", "tags", "hash"] }
+    });
+
     this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
@@ -448,10 +465,55 @@ export class Ribbit {
     tag = "",
     blockNumber = 0,
     transactionHash = ""
+    // timestamp => timestamp in transaction should be greater than this.
   }): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("transactionHash: ", transactionHash);
+
+    // Check database
+    if (transactionHash) {
+      const res = await this.transactionInfoDB["find"]({
+        selector: {
+          hash: transactionHash
+        }
+      });
+      if (res && res.docs && res.docs.length) {
+        console.log("Load from database for transactionHash");
+        return res.docs[0] as TransactionInfo;
+      } else {
+        console.log("Not found in db");
+      }
+    } else if (userAddress && blockNumber) {
+      const res = await this.transactionInfoDB["find"]({
+        selector: {
+          from: userAddress,
+          blockNumber: blockNumber
+        }
+      });
+      if (res && res.docs && res.docs.length) {
+        console.log("Load from database for user");
+        return res.docs[0] as TransactionInfo;
+      } else {
+        console.log("Not found in db");
+      }
+    } else if (tag && blockNumber) {
+      const res = await this.transactionInfoDB["find"]({
+        selector: {
+          blockNumber: blockNumber,
+          tags: {
+            $in: [tag]
+          }
+        }
+      });
+      if (res && res.docs && res.docs.length) {
+        console.log("Load from database for tag");
+        return res.docs[0] as TransactionInfo;
+      } else {
+        console.log("Not found in db");
+      }
+    }
+
     const validateTransaction = async (transaction: Transaction) => {
       // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
       // This code is wrong for `repost` event, userAddress !== transaction.from.
@@ -475,23 +537,35 @@ export class Ribbit {
           return null;
         }
         const decodedLogs = decodeLogs(logs);
-        if (tag) {
-          const eventLog = decodedLogs.filter(
-            x =>
-              (x.name === "SavePreviousTagInfoByTimeEvent" ||
-                x.name === "SavePreviousTagInfoByTrendEvent") &&
-              x.events["tag"].value === tag
-          )[0];
-          if (!eventLog) {
-            // tag not found.
-            return null;
+        const tags = [];
+        decodedLogs.forEach(decodedLog => {
+          if (
+            decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
+            decodedLog.name === "SavePreviousTagInfoByTrendEvent"
+          ) {
+            tags.push(decodedLog.events["tag"].value);
           }
+        });
+        if (tag && tags.indexOf(tag) < 0) {
+          return null;
         }
         // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
-        return Object.assign(transaction as object, {
-          decodedInputData,
-          decodedLogs
-        }) as TransactionInfo;
+        const transactionInfo: TransactionInfo = Object.assign(
+          transaction as object,
+          {
+            decodedInputData,
+            decodedLogs,
+            creation: parseInt(decodedInputData.params["timestamp"].value),
+            _id: transaction.hash,
+            tags
+          }
+        ) as TransactionInfo;
+        try {
+          await this.transactionInfoDB.get(transaction.hash);
+        } catch (error) {
+          await this.transactionInfoDB.put(transactionInfo);
+        }
+        return transactionInfo;
       }
     };
 

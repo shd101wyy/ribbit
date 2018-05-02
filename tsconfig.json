@@ -8,7 +8,8 @@
     "rootDir": ".",
     "declaration": false,
     "jsx": "preserve",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["frontend/**/*"],
   "exclude": ["node_modules"]

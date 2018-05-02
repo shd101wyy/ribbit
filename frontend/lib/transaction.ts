@@ -19,6 +19,9 @@ export interface DecodedLogData {
 export interface TransactionInfo extends Transaction {
   decodedInputData: DecodedInputData;
   decodedLogs: DecodedLogData[];
+  creation: number;
+  _id: string;
+  tags: string[]; // formated tags
 }
 
 export function transformDecodedInputData(decodedInputData: {
@@ -67,6 +70,7 @@ export function transformDecodedLogData(
 
 export function generateFakeTransactionInfo(): TransactionInfo {
   return {
+    _id: "", // same as hash
     hash: "",
     nonce: 0,
     blockHash: "",
@@ -87,7 +91,9 @@ export function generateFakeTransactionInfo(): TransactionInfo {
         }
       }
     },
-    decodedLogs: []
+    decodedLogs: [],
+    creation: 0,
+    tags: []
   };
 }
 

@@ -83,7 +83,7 @@ export default class Home extends React.Component<Props, State> {
           if (done) {
             return this.setState({ loading: false });
           }
-          console.log(transactionInfo.decodedInputData.name);
+          console.log(transactionInfo);
           if (transactionInfo.decodedInputData.name !== "post") return;
           const message = await ribbit.retrieveMessage(
             transactionInfo.decodedInputData.params["message"].value
