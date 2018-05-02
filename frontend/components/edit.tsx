@@ -219,7 +219,8 @@ export default class Edit extends Component<Props, State> {
 
   render() {
     const options = {
-      lineNumbers: false,
+      lineNumbers: true,
+      lineWrapping: true,
       autoFocus: true,
       mode: "markdown"
     };

@@ -465,6 +465,8 @@ export class Ribbit {
     tag = "",
     blockNumber = 0,
     transactionHash = ""
+    // TODO: there might be multiple ribbit transaction in one block,
+    //       we need to sort them by timestamp.
     // timestamp => timestamp in transaction should be greater than this.
   }): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
@@ -1068,5 +1070,9 @@ export class Ribbit {
     }
     this.settings.followingTopics = newFollowingTopics;
     return await this.setSettings(this.settings);
+  }
+
+  public async destroyDB() {
+    await this.transactionInfoDB.destroy();
   }
 }

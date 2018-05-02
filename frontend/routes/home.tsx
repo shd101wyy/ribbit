@@ -285,7 +285,7 @@ export default class Home extends React.Component<Props, State> {
                 <input
                   className="search-box"
                   placeholder={
-                    "Enter user address here or the topic that you are interested to start searching"
+                    "Enter @username here or the topic that you are interested to start searching"
                   }
                   value={this.state.searchBoxValue}
                   onChange={event => {
