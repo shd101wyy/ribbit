@@ -14,7 +14,7 @@ contract Ribbit {
 
     uint public accountsNum; // number of accounts
     mapping (address => uint) public addressToAccountNoMap;
-    mapping (uint => address) accountNoToAddressMap;
+    mapping (uint => address) public accountNoToAddressMap;
 
     /** 
      * 0x0 => earnings in (wei)
@@ -87,6 +87,14 @@ contract Ribbit {
         }
     }
 
+    function getAccountsNum() public view returns (uint) {
+        if (accountsNum == 0 && previousContractAddress != address(0)) {
+            return previousContract.getAccountsNum();
+        } else {
+            return accountsNum;
+        }
+    }
+
     function getAccountNoFromAddress(address addr) public view returns (uint) {
         uint n = addressToAccountNoMap[addr];
         if (n == 0 && previousContractAddress != address(0)) {
@@ -108,7 +116,7 @@ contract Ribbit {
     function setUsernameAndMetaDataJSONString(bytes32 username, string value) external {
         require(getAddressFromUsername(username) == address(0)); // <= make sure the username is not taken.
         if (getUsernameFromAddress(msg.sender) == 0x0) { // This is a new account
-            accountsNum += 1; 
+            accountsNum = getAccountsNum() + 1; 
             addressToAccountNoMap[msg.sender] = accountsNum;
             accountNoToAddressMap[accountsNum] = msg.sender;
         }
