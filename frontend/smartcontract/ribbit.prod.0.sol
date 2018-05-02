@@ -56,6 +56,7 @@ contract Ribbit {
     mapping (bytes32 => uint) public currentTagInfoByTimeMap;
     mapping (bytes32 => uint) public currentTagInfoByTrendMap;
 
+    // 0, 0, 10
     constructor(address _previousContractAddress, uint _version, uint _developerIncomePercent) public {
         owner = msg.sender;
         version = _version;
@@ -82,7 +83,7 @@ contract Ribbit {
         accountsNum = getAccountsNum() + 1; 
         addressToAccountNoMap[to] = accountsNum;
         accountNoToAddressMap[accountsNum] = to;
-        
+
         currentFeedInfoMap[to] = uint(from); // here we save the address inherited account.
     }
 

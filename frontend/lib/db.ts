@@ -7,7 +7,6 @@ export interface dbFeed {
   transactionHash: string;
   blockNumber: number;
   message: string;
-  messageHash: string;
   parentTransactionHash?: string;
   previousTransactionHash?: string;
 }

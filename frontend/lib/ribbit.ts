@@ -275,17 +275,6 @@ export class Ribbit {
       message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
     }
     const compressedMessage = compressString(message);
-    const messageHash =
-      "0x" +
-      sha256(this.accountAddress + currentTimestamp.toString() + message);
-
-    const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
-      this.accountAddress
-    );
-    const previousFeedTransactionHash = previousFeedTransactionInfo
-      ? previousFeedTransactionInfo.hash
-      : "0x0000000000000000000000000000000000000000000000000000000000000000";
-    // => 0x40091f65172c76c5daa276c66cbd1f175fda12d9bd20b842007feed78757a089
 
     console.log("post    :");
     console.log("    tags: ", tags);
@@ -295,8 +284,6 @@ export class Ribbit {
         .post(
           currentTimestamp, // timestamp
           compressedMessage, // message
-          messageHash, // messageHash
-          previousFeedTransactionHash, // previousFeedTransactionHash
           tags // tags
         )
         .send({ from: this.accountAddress })
@@ -345,23 +332,12 @@ export class Ribbit {
       message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
     }
     const compressedMessage = compressString(message);
-    const messageHash =
-      "0x" +
-      sha256(this.accountAddress + currentTimestamp.toString() + message);
 
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
     const currentReplyInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(parentTransactionHash)
       .call();
-    const currentReplyBlockNumber = parseInt(currentReplyInfo[0]);
-    const currentReplyHash = new BigNumber(currentReplyInfo[1]).toString(16);
-    const previousReplyTransactionInfo = await this.getTransactionInfo({
-      blockNumber: currentReplyBlockNumber,
-      messageHash: currentReplyHash
-    });
-    const previousReplyTransactionHash = previousReplyTransactionInfo
-      ? previousReplyTransactionInfo.hash
-      : "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const currentReplyBlockNumber = parseInt(currentReplyInfo);
 
     let authorAddress = "0x0000000000000000000000000000000000000000";
 
@@ -370,9 +346,7 @@ export class Ribbit {
         .reply(
           currentTimestamp, // timestamp
           parentTransactionHash, // parentTransactionHash
-          previousReplyTransactionHash, // previousReplyTransactionHash
           compressedMessage, // message
-          messageHash, // messageHash
           tags, // tags
           mode, // mode
           authorAddress
@@ -409,13 +383,7 @@ export class Ribbit {
       return null;
     }
 
-    // 2. Get previousFeedTransactionHash.
-    const previousFeedTransactionInfo = await this.getNewestFeedTransactionFromUser(
-      this.accountAddress
-    );
-    const previousFeedTransactionHash = previousFeedTransactionInfo.hash;
-
-    // 3. Analyze tags
+    // 2. Analyze tags
     //    If the parentTransaction is the original `post` method, then add its tags.
     // TODO: Need discussion of the tags.
     //       https://github.com/shd101wyy/ribbit/issues/4
@@ -430,13 +398,7 @@ export class Ribbit {
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .upvote(
-          Date.now(),
-          parentTransactionHash,
-          previousFeedTransactionHash,
-          tags,
-          authorAddress
-        )
+        .upvote(Date.now(), parentTransactionHash, tags, authorAddress)
         .send({ from: this.accountAddress, value: wei })
         .on("error", error => {
           return reject(error);
@@ -474,22 +436,19 @@ export class Ribbit {
 
   /**
    * If transactionHash is provided, then get transactionInfo based on that trasactionHash,
-   * then compare the data with blockNumber and messageHash.
+   * then compare the data with blockNumber.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
    * @param userAddress sender of this transaction. If `userAddress` is not provided, then it means you are querying other's transactionInfo.
    * @param blockNumber block number
-   * @param messageHash message hash without `0x` at start.
    * @param transactionHash
    */
   public async getTransactionInfo({
     userAddress = "",
     blockNumber = 0,
-    messageHash = "",
     transactionHash = ""
   }): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
-    // console.log("messageHash: ", messageHash);
     // console.log("transactionHash: ", transactionHash);
     const validateTransaction = (transaction: Transaction) => {
       // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
@@ -506,6 +465,7 @@ export class Ribbit {
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         return null;
       } else {
+        /*
         let messageHash2 = null;
         if (
           decodedInputData.name === "post" ||
@@ -523,6 +483,7 @@ export class Ribbit {
         if (messageHash && messageHash2 !== messageHash) {
           return null; // hashes don't match
         }
+        */
         // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         return Object.assign(transaction as object, {
           decodedInputData
@@ -582,12 +543,10 @@ export class Ribbit {
     let currentFeedInfo = await this.contractInstance.methods
       .getCurrentFeedInfo(userAddress)
       .call();
-    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
-    const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
+    const currentFeedBlockNumber = parseInt(currentFeedInfo);
     return await this.getTransactionInfo({
       userAddress,
-      blockNumber: currentFeedBlockNumber,
-      messageHash: currentFeedHash
+      blockNumber: currentFeedBlockNumber
     });
   }
 
@@ -600,11 +559,9 @@ export class Ribbit {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTime(tag)
       .call();
-    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
-    const currentFeedHash = new BigNumber(currentFeedInfo[1]).toString(16);
+    const currentFeedBlockNumber = parseInt(currentFeedInfo);
     return await this.getTransactionInfo({
-      blockNumber: currentFeedBlockNumber,
-      messageHash: currentFeedHash
+      blockNumber: currentFeedBlockNumber
     });
   }
 
@@ -617,11 +574,9 @@ export class Ribbit {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTrend(tag)
       .call();
-    const currentFeedBlockNumber = parseInt(currentFeedInfo[0]);
-    const currentFeedHash = this.web3.utils.toHex(currentFeedInfo[1]);
+    const currentFeedBlockNumber = parseInt(currentFeedInfo);
     return await this.getTransactionInfo({
-      blockNumber: currentFeedBlockNumber,
-      messageHash: currentFeedHash
+      blockNumber: currentFeedBlockNumber
     });
   }
 
@@ -636,7 +591,6 @@ export class Ribbit {
     {
       num = -1, // how many feeds to read?
       blockNumber = 0,
-      messageHash = "",
       transactionHash = null
     },
     cb: (
@@ -649,14 +603,12 @@ export class Ribbit {
       const currentFeedInfo = await this.contractInstance.methods
         .getCurrentFeedInfo(userAddress)
         .call();
-      blockNumber = parseInt(currentFeedInfo[0]);
-      messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
+      blockNumber = parseInt(currentFeedInfo);
       transactionHash = null;
     }
     return await this.getFeeds({
       userAddress,
       blockNumber,
-      messageHash,
       num,
       transactionHash,
       cb
@@ -668,7 +620,6 @@ export class Ribbit {
     {
       num = -1, // how many feeds to read?
       blockNumber = 0,
-      messageHash = "",
       transactionHash = null
     },
     cb: (
@@ -682,14 +633,12 @@ export class Ribbit {
       .getCurrentTagInfoByTime(tag)
       .call();
     if (!blockNumber) {
-      blockNumber = parseInt(currentFeedInfo[0]);
-      messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
+      blockNumber = parseInt(currentFeedInfo);
     }
     return await this.getFeeds({
       userAddress: "",
       tag,
       blockNumber,
-      messageHash,
       num,
       transactionHash,
       cb
@@ -701,7 +650,6 @@ export class Ribbit {
     {
       num = -1, // how many feeds to read?
       blockNumber = 0,
-      messageHash = "",
       transactionHash = null
     },
     cb: (
@@ -714,13 +662,11 @@ export class Ribbit {
     const currentFeedInfo = await this.contractInstance.methods
       .getCurrentTagInfoByTrend(tag)
       .call();
-    blockNumber = parseInt(currentFeedInfo[0]);
-    messageHash = new BigNumber(currentFeedInfo[1]).toString(16);
+    blockNumber = parseInt(currentFeedInfo);
     return await this.getFeeds({
       userAddress: "",
       tag,
       blockNumber,
-      messageHash,
       num,
       transactionHash,
       cb
@@ -735,7 +681,6 @@ export class Ribbit {
     userAddress = "",
     tag = "",
     blockNumber = 0,
-    messageHash = "",
     num = -1,
     transactionHash = "",
     cb = (
@@ -747,7 +692,6 @@ export class Ribbit {
     userAddress?: string;
     tag?: string;
     blockNumber: number;
-    messageHash: string;
     num: number;
     transactionHash: string;
     cb: (
@@ -762,7 +706,6 @@ export class Ribbit {
       const transactionInfo = await this.getTransactionInfo({
         userAddress,
         blockNumber,
-        messageHash,
         transactionHash
       });
       if (!transactionInfo) {
@@ -819,17 +762,9 @@ export class Ribbit {
             eventLog.name === "SavePreviousTagInfoByTrendEvent" ||
             eventLog.name === "SavePreviousTagInfoByTimeEvent"
           ) {
-            blockNumber = parseInt(eventLog.events["previousTagInfo"].value[0]);
-            messageHash = new BigNumber(
-              eventLog.events["previousTagInfo"].value[1]
-            ).toString(16);
+            blockNumber = parseInt(eventLog.events["previousTagInfo"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
-            blockNumber = parseInt(
-              eventLog.events["previousFeedInfo"].value[0]
-            );
-            messageHash = new BigNumber(
-              eventLog.events["previousFeedInfo"].value[1]
-            ).toString(16);
+            blockNumber = parseInt(eventLog.events["previousFeedInfo"].value);
           } else {
             throw "Error: Invalid eventLog" +
               JSON.stringify(eventLog, null, "  ");
@@ -874,7 +809,7 @@ export class Ribbit {
       (JSON.parse(
         decompressString(
           await this.contractInstance.methods
-            .getMetaDataJSONStringValue(address)
+            .getMetadataJSONStringValue(address)
             .call()
         )
       ) as UserInfo) || ({} as UserInfo);
@@ -917,7 +852,7 @@ export class Ribbit {
     }
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .setUsernameAndMetaDataJSONString(
+        .setUsernameAndMetadataJSONString(
           this.formatUsername(username),
           compressString(JSON.stringify(userInfoCopy))
         )
@@ -1013,12 +948,14 @@ export class Ribbit {
         timestamp: Date.now()
       }
     ];
+    /*
     if (this.userInfo.username !== "ribbit") {
       followingUsernames.push({
         username: "ribbit",
         timestamp: Date.now()
       });
     }
+    */
 
     this.settings = {
       postAsIPFSHash: false,

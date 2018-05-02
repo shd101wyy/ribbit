@@ -72,6 +72,15 @@ For example:
 Hi @{ribbit} will notify the user `ribbit` this about post.
 ```
 
+### Import (TODO)
+
+```markdown
+@import "https://..."
+@import "ipfs://..."
+@import "ribbit://profile/..."
+@import "ribbit://tx/..."
+```
+
 ## Developer section
 
 ### Development

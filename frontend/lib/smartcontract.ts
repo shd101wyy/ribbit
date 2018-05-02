@@ -1,38 +1,32 @@
 // Smart contract information
 export const abiArray = [
   {
+    constant: true,
+    inputs: [
+      {
+        name: "authorAddress",
+        type: "address"
+      }
+    ],
+    name: "getCurrentFeedInfo",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
     constant: false,
     inputs: [
-      { name: "username", type: "bytes32" },
-      { name: "value", type: "string" }
+      {
+        name: "userAddress",
+        type: "address"
+      }
     ],
-    name: "setUsernameAndMetaDataJSONString",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "addr", type: "address" }],
-    name: "getMetaDataJSONStringValue",
-    outputs: [{ name: "", type: "string" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "authorAddress", type: "address" }],
-    name: "getCurrentFeedInfo",
-    outputs: [{ name: "", type: "uint256[2]" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: false,
-    inputs: [{ name: "userAddress", type: "address" }],
     name: "downvoteUser",
     outputs: [],
     payable: false,
@@ -40,8 +34,65 @@ export const abiArray = [
     type: "function"
   },
   {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "bytes32"
+      }
+    ],
+    name: "currentTagInfoByTimeMap",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
     constant: false,
-    inputs: [{ name: "transactionHash", type: "bytes32" }],
+    inputs: [
+      {
+        name: "_upvoteBar",
+        type: "uint256"
+      }
+    ],
+    name: "setUpvoteBar",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    name: "addressToAccountNoMap",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "transactionHash",
+        type: "bytes32"
+      }
+    ],
     name: "report",
     outputs: [],
     payable: false,
@@ -50,9 +101,19 @@ export const abiArray = [
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "address" }],
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     name: "addressToUsernameMap",
-    outputs: [{ name: "", type: "bytes32" }],
+    outputs: [
+      {
+        name: "",
+        type: "bytes32"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -60,20 +121,22 @@ export const abiArray = [
   {
     constant: true,
     inputs: [
-      { name: "transactionHash", type: "bytes32" },
-      { name: "field", type: "uint256" }
+      {
+        name: "transactionHash",
+        type: "bytes32"
+      },
+      {
+        name: "field",
+        type: "uint256"
+      }
     ],
     name: "getState",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
-    name: "state",
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -81,18 +144,90 @@ export const abiArray = [
   {
     constant: true,
     inputs: [
-      { name: "tag", type: "bytes32" },
-      { name: "field", type: "uint256" }
+      {
+        name: "addr",
+        type: "address"
+      }
+    ],
+    name: "getAccountNoFromAddress",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "bytes32"
+      },
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    name: "state",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      },
+      {
+        name: "field",
+        type: "uint256"
+      }
     ],
     name: "getTagState",
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "userAddress", type: "address" }],
+    inputs: [
+      {
+        name: "value",
+        type: "string"
+      }
+    ],
+    name: "setMetadataJSONStringValue",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "userAddress",
+        type: "address"
+      }
+    ],
     name: "reportUser",
     outputs: [],
     payable: false,
@@ -100,49 +235,20 @@ export const abiArray = [
     type: "function"
   },
   {
-    constant: true,
-    inputs: [{ name: "", type: "address" }],
-    name: "metaDataJSONStringMap",
-    outputs: [{ name: "", type: "string" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "version",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
-    name: "currentTagInfoByTrendMap",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
-    name: "currentFeedInfoMap",
-    outputs: [{ name: "", type: "uint256" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
     constant: false,
     inputs: [
-      { name: "timestamp", type: "uint256" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "previousFeedTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" }
+      {
+        name: "timestamp",
+        type: "uint256"
+      },
+      {
+        name: "message",
+        type: "string"
+      },
+      {
+        name: "tags",
+        type: "bytes32[]"
+      }
     ],
     name: "post",
     outputs: [],
@@ -152,9 +258,33 @@ export const abiArray = [
   },
   {
     constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    name: "metadataJSONStringMap",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
     inputs: [],
-    name: "previousContract",
-    outputs: [{ name: "", type: "address" }],
+    name: "version",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -162,11 +292,96 @@ export const abiArray = [
   {
     constant: false,
     inputs: [
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "previousFeedTransactionHash", type: "bytes32" },
-      { name: "tags", type: "bytes32[]" },
-      { name: "authorAddress", type: "address" }
+      {
+        name: "_donationBar",
+        type: "uint256"
+      }
+    ],
+    name: "setDonationBar",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "username",
+        type: "bytes32"
+      },
+      {
+        name: "value",
+        type: "string"
+      }
+    ],
+    name: "setUsernameAndMetadataJSONString",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "developerIncomePercent",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "getAccountsNum",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "upvoteBar",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "timestamp",
+        type: "uint256"
+      },
+      {
+        name: "parentTransactionHash",
+        type: "bytes32"
+      },
+      {
+        name: "tags",
+        type: "bytes32[]"
+      },
+      {
+        name: "authorAddress",
+        type: "address"
+      }
     ],
     name: "upvote",
     outputs: [],
@@ -176,18 +391,33 @@ export const abiArray = [
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "bytes32" }],
-    name: "usernameToAddressMap",
-    outputs: [{ name: "", type: "address" }],
+    inputs: [],
+    name: "previousContract",
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
-    name: "currentTagInfoByTimeMap",
-    outputs: [{ name: "", type: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32"
+      }
+    ],
+    name: "usernameToAddressMap",
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -196,14 +426,24 @@ export const abiArray = [
     constant: true,
     inputs: [],
     name: "owner",
-    outputs: [{ name: "", type: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "tag", type: "bytes32" }],
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      }
+    ],
     name: "upvoteTag",
     outputs: [],
     payable: false,
@@ -214,14 +454,76 @@ export const abiArray = [
     constant: true,
     inputs: [],
     name: "previousContractAddress",
-    outputs: [{ name: "", type: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "tag", type: "bytes32" }],
+    inputs: [
+      {
+        name: "timestamp",
+        type: "uint256"
+      },
+      {
+        name: "parentTransactionHash",
+        type: "bytes32"
+      },
+      {
+        name: "message",
+        type: "string"
+      },
+      {
+        name: "tags",
+        type: "bytes32[]"
+      },
+      {
+        name: "mode",
+        type: "uint8"
+      },
+      {
+        name: "authorAddress",
+        type: "address"
+      }
+    ],
+    name: "reply",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "from",
+        type: "address"
+      },
+      {
+        name: "to",
+        type: "address"
+      }
+    ],
+    name: "transferAccount",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      }
+    ],
     name: "downvoteTag",
     outputs: [],
     payable: false,
@@ -231,27 +533,85 @@ export const abiArray = [
   {
     constant: true,
     inputs: [
-      { name: "userAddress", type: "address" },
-      { name: "field", type: "uint256" }
+      {
+        name: "userAddress",
+        type: "address"
+      },
+      {
+        name: "field",
+        type: "uint256"
+      }
     ],
     name: "getUserState",
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "address" }, { name: "", type: "uint256" }],
+    inputs: [],
+    name: "accountsNum",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: "donationBar",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      },
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     name: "userState",
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "tag", type: "bytes32" }],
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      }
+    ],
     name: "reportTag",
     outputs: [],
     payable: false,
@@ -259,35 +619,55 @@ export const abiArray = [
     type: "function"
   },
   {
-    constant: false,
+    constant: true,
     inputs: [
-      { name: "timestamp", type: "uint256" },
-      { name: "parentTransactionHash", type: "bytes32" },
-      { name: "previousReplyTransactionHash", type: "bytes32" },
-      { name: "message", type: "string" },
-      { name: "messageHash", type: "uint256" },
-      { name: "tags", type: "bytes32[]" },
-      { name: "mode", type: "uint8" },
-      { name: "authorAddress", type: "address" }
+      {
+        name: "addr",
+        type: "address"
+      }
     ],
-    name: "reply",
-    outputs: [],
-    payable: true,
-    stateMutability: "payable",
+    name: "getMetadataJSONStringValue",
+    outputs: [
+      {
+        name: "",
+        type: "string"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
     type: "function"
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "bytes32" }, { name: "", type: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "bytes32"
+      },
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     name: "tagState",
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "userAddress", type: "address" }],
+    inputs: [
+      {
+        name: "userAddress",
+        type: "address"
+      }
+    ],
     name: "upvoteUser",
     outputs: [],
     payable: false,
@@ -296,43 +676,159 @@ export const abiArray = [
   },
   {
     constant: true,
-    inputs: [{ name: "addr", type: "address" }],
-    name: "getUsernameFromAddress",
-    outputs: [{ name: "", type: "bytes32" }],
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    name: "currentFeedInfoMap",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: true,
-    inputs: [{ name: "tag", type: "bytes32" }],
+    inputs: [
+      {
+        name: "addr",
+        type: "address"
+      }
+    ],
+    name: "getUsernameFromAddress",
+    outputs: [
+      {
+        name: "",
+        type: "bytes32"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      }
+    ],
     name: "getCurrentTagInfoByTime",
-    outputs: [{ name: "", type: "uint256[2]" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    name: "accountNoToAddressMap",
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "n",
+        type: "uint256"
+      }
+    ],
+    name: "getAddressFromAccountNo",
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "",
+        type: "bytes32"
+      }
+    ],
+    name: "currentTagInfoByTrendMap",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "tag",
+        type: "bytes32"
+      }
+    ],
+    name: "getCurrentTagInfoByTrend",
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [{ name: "value", type: "string" }],
-    name: "setMetaDataJSONStringValue",
+    inputs: [
+      {
+        name: "addr",
+        type: "address"
+      }
+    ],
+    name: "transferOwnership",
     outputs: [],
     payable: false,
     stateMutability: "nonpayable",
     type: "function"
   },
   {
-    constant: true,
-    inputs: [{ name: "tag", type: "bytes32" }],
-    name: "getCurrentTagInfoByTrend",
-    outputs: [{ name: "", type: "uint256[2]" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
     constant: false,
-    inputs: [{ name: "transactionHash", type: "bytes32" }],
+    inputs: [
+      {
+        name: "transactionHash",
+        type: "bytes32"
+      }
+    ],
     name: "downvote",
     outputs: [],
     payable: false,
@@ -341,17 +837,51 @@ export const abiArray = [
   },
   {
     constant: true,
-    inputs: [{ name: "username", type: "bytes32" }],
+    inputs: [
+      {
+        name: "username",
+        type: "bytes32"
+      }
+    ],
     name: "getAddressFromUsername",
-    outputs: [{ name: "", type: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
+    constant: false,
     inputs: [
-      { name: "_previousContractAddress", type: "address" },
-      { name: "_version", type: "uint256" }
+      {
+        name: "_percent",
+        type: "uint256"
+      }
+    ],
+    name: "setDeveloperIncomePercent",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        name: "_previousContractAddress",
+        type: "address"
+      },
+      {
+        name: "_version",
+        type: "uint256"
+      },
+      {
+        name: "_developerIncomePercent",
+        type: "uint256"
+      }
     ],
     payable: false,
     stateMutability: "nonpayable",
@@ -359,15 +889,29 @@ export const abiArray = [
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, name: "previousFeedInfo", type: "uint256[2]" }],
+    inputs: [
+      {
+        indexed: false,
+        name: "previousFeedInfoBN",
+        type: "uint256"
+      }
+    ],
     name: "SavePreviousFeedInfoEvent",
     type: "event"
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "previousTagInfo", type: "uint256[2]" },
-      { indexed: false, name: "tag", type: "bytes32" }
+      {
+        indexed: false,
+        name: "previousTagInfoBN",
+        type: "uint256"
+      },
+      {
+        indexed: false,
+        name: "tag",
+        type: "bytes32"
+      }
     ],
     name: "SavePreviousTagInfoByTimeEvent",
     type: "event"
@@ -375,15 +919,29 @@ export const abiArray = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, name: "previousTagInfo", type: "uint256[2]" },
-      { indexed: false, name: "tag", type: "bytes32" }
+      {
+        indexed: false,
+        name: "previousTagInfoBN",
+        type: "uint256"
+      },
+      {
+        indexed: false,
+        name: "tag",
+        type: "bytes32"
+      }
     ],
     name: "SavePreviousTagInfoByTrendEvent",
     type: "event"
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, name: "value", type: "uint256" }],
+    inputs: [
+      {
+        indexed: false,
+        name: "value",
+        type: "uint256"
+      }
+    ],
     name: "DonateEvent",
     type: "event"
   }
@@ -392,7 +950,7 @@ export const abiArray = [
 export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
-    return "0xf800d9d9d2514c119ff663bdb33d7d2bad3cbbdd";
+    return "0x14b80f4c8a8d0c6e52e033616f3e5d8c4b5bc5be";
   } else if (networkId === 1) {
     // mainnet
     return null;
