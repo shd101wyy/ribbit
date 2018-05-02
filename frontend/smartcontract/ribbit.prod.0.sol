@@ -69,6 +69,11 @@ contract Ribbit {
         developerIncomePercent = _developerIncomePercent;
     }
 
+    function transferOwnership(address addr) external {
+        require(msg.sender == owner);
+        owner = addr;
+    }
+
     function getUsernameFromAddress(address addr) public view returns (bytes32) {
         bytes32 username = addressToUsernameMap[addr];
         if (username == 0 && previousContractAddress != address(0)) {

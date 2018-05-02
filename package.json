@@ -53,6 +53,7 @@
     "webpack-cli": "^2.0.14"
   },
   "scripts": {
+    "frontend:prepare": "npm i --no-optional",
     "frontend:dev": "./node_modules/.bin/webpack --config webpack.config.js  --mode development --watch",
     "frontend:build": "./node_modules/.bin/webpack --config webpack.config.js  --mode production",
     "server:start": "http-server ./dist -p 12345",
