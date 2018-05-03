@@ -320,7 +320,7 @@ export class Ribbit {
   public async replyFeed(
     message: string,
     tags = [],
-    mode = 0,
+    repostToTimeline = false,
     parentFeedInfo: FeedInfo,
     postAsIPFSHash = false
   ) {
@@ -351,22 +351,16 @@ export class Ribbit {
     const compressedMessage = compressString(message);
 
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
-    const currentReplyInfo = await this.contractInstance.methods
-      .getCurrentTagInfoByTime(parentTransactionHash)
-      .call();
-    const currentReplyBlockNumber = parseInt(currentReplyInfo);
-
     let authorAddress = "0x0000000000000000000000000000000000000000";
 
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .reply(
           currentTimestamp, // timestamp
-          parentTransactionHash, // parentTransactionHash
           compressedMessage, // message
           tags, // tags
-          mode, // mode
-          authorAddress
+          parentTransactionHash, // parentTransactionHash
+          repostToTimeline // repostToTimeline
         )
         .send({ from: this.accountAddress })
         .on("error", error => {

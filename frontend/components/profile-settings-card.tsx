@@ -170,7 +170,11 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
           Publish profile to blockchain
         </div>
         <p className="title">Profile preview</p>
-        <ProfileCard userInfo={userInfo} ribbit={this.props.ribbit} />
+        <ProfileCard
+          userInfo={userInfo}
+          ribbit={this.props.ribbit}
+          hideFollowingBtn={true}
+        />
       </div>
     );
   }

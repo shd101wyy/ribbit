@@ -6,6 +6,7 @@ import { renderMarkdown } from "../lib/markdown";
 interface Props {
   userInfo: UserInfo;
   ribbit: Ribbit;
+  hideFollowingBtn?: boolean;
 }
 interface State {
   following: boolean;
@@ -94,8 +95,9 @@ export default class ProfileCard extends React.Component<Props, State> {
           <p className="name">{userInfo.name}</p>
           <p className="username">@{userInfo.username}</p>
         </div>
-        {this.props.ribbit.userInfo.username ===
-        this.props.userInfo.username ? null : (
+        {this.props.hideFollowingBtn ||
+        this.props.ribbit.userInfo.username ===
+          this.props.userInfo.username ? null : (
           <div className="button-group">
             {this.state.following ? (
               this.state.mouseOver ? (

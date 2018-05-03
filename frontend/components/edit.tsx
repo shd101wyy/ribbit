@@ -31,9 +31,9 @@ interface State {
   hiddenMentions: { [key: string]: boolean }; // key is address
   replies: { name: string; address: string }[];
   hiddenReplies: { [key: string]: boolean }; // key is address
-  feedback: number; // 0=>do nothing, 1=>upvote, 2=>downvote
   postToRibbitTopic: boolean;
   postAsIPFSHash: boolean;
+  repostToTimeline: boolean;
 }
 
 export default class Edit extends Component<Props, State> {
@@ -51,9 +51,9 @@ export default class Edit extends Component<Props, State> {
       hiddenMentions: {},
       replies: [],
       hiddenReplies: {},
-      feedback: 0,
       postToRibbitTopic: false,
-      postAsIPFSHash: false
+      postAsIPFSHash: false,
+      repostToTimeline: false
     };
   }
 
@@ -172,7 +172,7 @@ export default class Edit extends Component<Props, State> {
         await ribbit.replyFeed(
           content,
           tags,
-          this.state.feedback,
+          this.state.repostToTimeline,
           this.props.parentFeedInfo,
           this.state.postAsIPFSHash
         );
@@ -299,6 +299,21 @@ export default class Edit extends Component<Props, State> {
               </div>
               <p className="title">Configuration:</p>
               <div className="config-list">
+                {this.props.parentFeedInfo ? (
+                  <div
+                    className={
+                      "config" + (this.state.repostToTimeline ? "" : " hidden")
+                    }
+                    onClick={() =>
+                      this.setState({
+                        repostToTimeline: !this.state.repostToTimeline
+                      })
+                    }
+                  >
+                    {" "}
+                    Repost to timeline
+                  </div>
+                ) : null}
                 <div
                   className={
                     "config" + (this.state.postToRibbitTopic ? "" : " hidden")
@@ -326,40 +341,6 @@ export default class Edit extends Component<Props, State> {
                   Post as IPFS hash
                 </div>
               </div>
-              {this.props.parentFeedInfo ? (
-                <div>
-                  <p className="title">Feedback:</p>
-                  <div className="feedback-list">
-                    <div
-                      className={
-                        "feedback" +
-                        (this.state.feedback === 0 ? "" : " hidden")
-                      }
-                      onClick={() => this.setState({ feedback: 0 })}
-                    >
-                      do nothing
-                    </div>
-                    <div
-                      className={
-                        "feedback" +
-                        (this.state.feedback === 1 ? "" : " hidden")
-                      }
-                      onClick={() => this.setState({ feedback: 1 })}
-                    >
-                      upvote
-                    </div>
-                    <div
-                      className={
-                        "feedback" +
-                        (this.state.feedback === 2 ? "" : " hidden")
-                      }
-                      onClick={() => this.setState({ feedback: 2 })}
-                    >
-                      downvote
-                    </div>
-                  </div>
-                </div>
-              ) : null}
             </div>
             {/* preview */}
             <Preview markdown={this.state.code} ribbit={this.props.ribbit} />

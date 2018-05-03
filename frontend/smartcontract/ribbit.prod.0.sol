@@ -8,7 +8,8 @@ contract Ribbit {
     Ribbit public previousContract;
     uint public donationBar; // in wei
     uint public upvoteBar;
-    uint public developerIncomePercent; // 10% by default
+    uint public developerIncomePercent;                        // 10% by default
+    uint public reportDownvoteEqNum;                           // 1 report = 1 downvote by default
     mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
     mapping (address => bytes32) public addressToUsernameMap;
 
@@ -211,6 +212,11 @@ contract Ribbit {
         require(msg.sender == owner);
         developerIncomePercent = _percent;
     }
+
+    function setReportDownvoteEqNum(uint _reportDownvoteEqNum) external {
+        require(msg.sender == owner);
+        reportDownvoteEqNum = _reportDownvoteEqNum;
+    }
     
     // Post Feed 
     event SavePreviousFeedInfoEvent(uint previousFeedInfoBN);
@@ -360,7 +366,8 @@ contract Ribbit {
 
     // Report
     function report(bytes32 transactionHash) external {
-        state[transactionHash][4] = state[transactionHash][4] + 1;
+        state[transactionHash][4] = state[transactionHash][4] + 1;                     // report
+        state[transactionHash][2] = state[transactionHash][2] + reportDownvoteEqNum;   // downvote
     }
 
     // Upvote tag
