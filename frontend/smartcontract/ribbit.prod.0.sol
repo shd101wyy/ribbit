@@ -282,6 +282,7 @@ contract Ribbit {
     //  0x1: upvote
     //  0x2: downvote
     //  0x3: donate
+    /*
     function reply(uint timestamp, bytes32 parentTransactionHash, string message, bytes32[] tags, uint8 mode, address authorAddress) external payable {
         if (authorAddress != address(0)) {
             require(msg.value > donationBar);
@@ -314,6 +315,35 @@ contract Ribbit {
             } else if (mode == 3 ||  // is donation.
                       (mode != 2 && state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar)   // not downvote, and upvotes >= downvotes.
             ){
+                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+                currentTagInfoByTrendMap[tag] = block.number;
+            }
+        }
+
+        // here we use parentTransactionHash as tag.
+        // Drawback: there might be collision with the real tag, but we just ignore it.
+        emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[parentTransactionHash], parentTransactionHash);
+        currentTagInfoByTimeMap[parentTransactionHash] = block.number;
+
+        emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
+        currentTagInfoByTrendMap[parentTransactionHash] = block.number;
+    }
+    */
+    function reply(uint timestamp, string message, bytes32[] tags, bytes32 parentTransactionHash, bool repost) external {
+        if (repost) {
+            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            currentFeedInfoMap[msg.sender] = block.number;
+        }
+
+        state[parentTransactionHash][3] = state[parentTransactionHash][3] + 1; // increase number of replies
+        bytes32 tag;
+        uint i;
+        for (i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
+            currentTagInfoByTimeMap[tag] = block.number;
+            
+            if (tag >> 160 != 0x0) { // this tag is not a user address.
                 emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag] = block.number;
             }
