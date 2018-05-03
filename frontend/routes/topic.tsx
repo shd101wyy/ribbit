@@ -61,7 +61,8 @@ export default class profile extends React.Component<Props, State> {
     const followingTopics = this.props.ribbit.settings.followingTopics;
     const following = !!followingTopics.filter(x => x.topic === topic).length;
     this.setState({
-      following
+      following,
+      feeds: []
     });
 
     // show feeds
