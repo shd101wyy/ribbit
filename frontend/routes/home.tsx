@@ -70,6 +70,7 @@ export default class Home extends React.Component<Props, State> {
   componentDidMount() {
     const ribbit = this.props.ribbit;
     checkUserRegistration(ribbit);
+    this.updateUserInfo(ribbit);
     this.showUserHome(ribbit);
     this.bindWindowScrollEvent();
   }
@@ -77,55 +78,57 @@ export default class Home extends React.Component<Props, State> {
   componentWillReceiveProps(newProps: Props) {
     if (this.props.ribbit !== newProps.ribbit) {
       checkUserRegistration(newProps.ribbit);
+      this.updateUserInfo(newProps.ribbit);
       this.showUserHome(newProps.ribbit);
       this.bindWindowScrollEvent();
     }
   }
 
-  showUserHome(ribbit: Ribbit) {
+  updateUserInfo(ribbit: Ribbit) {
     if (!ribbit) return;
     ribbit.getUserInfoFromAddress(ribbit.accountAddress).then(userInfo => {
-      this.setState(
-        {
-          userInfo
-        },
-        async () => {
-          // initialize homeFeedsEntries:
-          const homeFeedsEntries: HomeFeedsEntry[] = [];
-          // TODO: change followingUsernames to followingUsers and store their addresses instead of usernames.
-          for (let i = 0; i < ribbit.settings.followingUsernames.length; i++) {
-            const username = ribbit.settings.followingUsernames[i].username;
-            const userAddress = await ribbit.getAddressFromUsername(username);
-            if (userAddress) {
-              const blockNumber = parseInt(
-                await ribbit.contractInstance.methods
-                  .getCurrentFeedInfo(userAddress)
-                  .call()
-              );
-              homeFeedsEntries.push({
-                blockNumber,
-                creation: Infinity,
-                userAddress
-              });
-            }
-          }
-          this.setState(
-            {
-              homeFeedsEntries,
-              doneLoadingAll: false
-            },
-            () => {
-              this.showHomeFeeds();
-            }
-          );
-        }
-      );
+      this.setState({
+        userInfo
+      });
     });
+  }
+
+  async showUserHome(ribbit: Ribbit) {
+    if (!ribbit) return;
+    // initialize homeFeedsEntries:
+    const homeFeedsEntries: HomeFeedsEntry[] = [];
+    // TODO: change followingUsernames to followingUsers and store their addresses instead of usernames.
+    for (let i = 0; i < ribbit.settings.followingUsernames.length; i++) {
+      const username = ribbit.settings.followingUsernames[i].username;
+      const userAddress = await ribbit.getAddressFromUsername(username);
+      if (userAddress) {
+        const blockNumber = parseInt(
+          await ribbit.contractInstance.methods
+            .getCurrentFeedInfo(userAddress)
+            .call()
+        );
+        homeFeedsEntries.push({
+          blockNumber,
+          creation: Infinity,
+          userAddress
+        });
+      }
+    }
+    this.setState(
+      {
+        homeFeedsEntries,
+        loading: false,
+        doneLoadingAll: false,
+        feeds: []
+      },
+      () => {
+        this.showHomeFeeds();
+      }
+    );
   }
 
   showHomeFeeds() {
     const homeFeedsEntries = this.state.homeFeedsEntries;
-    // console.log("showHomeFeeds", homeFeedsEntries)
     if (!homeFeedsEntries.length) {
       return this.setState({
         loading: false,
@@ -133,6 +136,7 @@ export default class Home extends React.Component<Props, State> {
       });
     }
     if (this.state.loading) {
+      // console.log(`it's loading...`)
       return;
     }
     this.setState(
@@ -156,7 +160,7 @@ export default class Home extends React.Component<Props, State> {
             maxOffset = offset;
           }
         });
-
+        // console.log("showHomeFeeds", maxBlockNumber, maxCreation, maxUserAddress)
         const transactionInfo = await this.props.ribbit.getTransactionInfo({
           userAddress: maxUserAddress,
           blockNumber: maxBlockNumber
@@ -229,30 +233,14 @@ export default class Home extends React.Component<Props, State> {
         ".middle-panel"
       ) as HTMLDivElement;
 
-      if (middlePanel.offsetHeight < scrollTop + 1.4 * offsetHeight) {
-        console.log("scroll loading");
+      if (
+        middlePanel &&
+        middlePanel.offsetHeight < scrollTop + 1.4 * offsetHeight
+      ) {
         this.showHomeFeeds();
       }
-      console.log("scroll", document.body.offsetTop);
     }
   };
-
-  showUserFeeds(ribbit: Ribbit) {
-    if (!ribbit) {
-      return;
-    }
-    this.setState({ loading: true }, () => {
-      ribbit.getFeedsFromUser(
-        ribbit.accountAddress,
-        { num: -1 },
-        async (done, offset, transactionInfo) => {
-          if (done) {
-            return this.setState({ loading: false });
-          }
-        }
-      );
-    });
-  }
 
   showNotificationFeeds(ribbit: Ribbit) {
     if (!ribbit) {
@@ -313,7 +301,7 @@ export default class Home extends React.Component<Props, State> {
         },
         () => {
           if (panel === HomePanel.FollowingsFeeds) {
-            this.showUserFeeds(this.props.ribbit);
+            this.showUserHome(this.props.ribbit);
           } else if (panel === HomePanel.Notifications) {
             this.showNotificationFeeds(this.props.ribbit);
           }
