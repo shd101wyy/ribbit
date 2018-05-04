@@ -58,7 +58,11 @@ class App extends React.Component<Props, State> {
         }
       );
     } catch (error) {
-      alert(error);
+      new window["Noty"]({
+        type: "error",
+        text: `Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked.`,
+        timeout: 10000
+      }).show();
       this.setState({ ribbit: null }, () => {
         if (hashHistory.location.pathname === "/") {
           hashHistory.replace(`/${ribbit.networkId}/`);

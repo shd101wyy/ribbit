@@ -95,11 +95,11 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     this.props.ribbit
       .setUserMetadata(userInfo)
       .then(hash => {
-        alert(
-          "Published profile to blockchain with transaction hash: " +
-            hash +
-            "\nPlease wait until the transaction finishes."
-        );
+        new window["Noty"]({
+          type: "info",
+          text: `Profile is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          timeout: 10000
+        }).show();
       })
       .catch(error => {
         alert(error);

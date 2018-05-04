@@ -2,6 +2,7 @@ import * as React from "react";
 import { UserInfo, Ribbit } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
+import { generateSummaryFromHTML } from "../lib/feed";
 
 interface Props {
   userInfo: UserInfo;
@@ -11,6 +12,7 @@ interface Props {
 interface State {
   following: boolean;
   mouseOver: boolean;
+  bio: string;
 }
 export default class ProfileCard extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -18,7 +20,8 @@ export default class ProfileCard extends React.Component<Props, State> {
 
     this.state = {
       following: false,
-      mouseOver: false
+      mouseOver: false,
+      bio: "loading..."
     };
   }
 
@@ -29,7 +32,8 @@ export default class ProfileCard extends React.Component<Props, State> {
   componentWillReceiveProps(newProps: Props) {
     if (
       !this.props.userInfo ||
-      newProps.userInfo.username !== this.props.userInfo.username
+      newProps.userInfo.username !== this.props.userInfo.username ||
+      newProps.userInfo.bio !== this.props.userInfo.bio
     ) {
       return this.initState(newProps.userInfo);
     }
@@ -43,8 +47,23 @@ export default class ProfileCard extends React.Component<Props, State> {
     const followingUsernames = this.props.ribbit.settings.followingUsernames;
     const following = !!followingUsernames.filter(x => x.username === username)
       .length;
+    this.setState(
+      {
+        following
+      },
+      () => {
+        this.initBio();
+      }
+    );
+  }
+
+  async initBio() {
+    const summary = await generateSummaryFromHTML(
+      renderMarkdown(this.props.userInfo.bio),
+      this.props.ribbit
+    );
     this.setState({
-      following
+      bio: summary.html
     });
   }
 
@@ -78,7 +97,6 @@ export default class ProfileCard extends React.Component<Props, State> {
     const userInfo = this.props.userInfo;
     const ribbit = this.props.ribbit;
     if (!userInfo) return null;
-    const bio = renderMarkdown(userInfo.bio || "ribbit, ribbit, ribbit...");
     return (
       <div className="profile-card card">
         <div
@@ -125,7 +143,10 @@ export default class ProfileCard extends React.Component<Props, State> {
             )}
           </div>
         )}
-        <div className="bio" dangerouslySetInnerHTML={{ __html: bio }} />
+        <div
+          className="bio"
+          dangerouslySetInnerHTML={{ __html: this.state.bio }}
+        />
       </div>
     );
   }

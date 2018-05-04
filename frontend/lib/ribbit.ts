@@ -885,28 +885,50 @@ export class Ribbit {
     const username = userInfoCopy["username"];
     // delete userInfoCopy["username"]; // no need to delete this, because user might want @Ribbit instead of @ribbit.
     if (
-      (await this.getAddressFromUsername(username)) !==
-      "0x0000000000000000000000000000000000000000"
+      this.formatUsername(this.userInfo.username) ===
+      this.formatUsername(userInfo.username)
     ) {
-      throw `Username @${username} is already taken.`;
+      return new Promise((resolve, reject) => {
+        this.contractInstance.methods
+          .setMetadataJSONStringValue(
+            compressString(JSON.stringify(userInfoCopy))
+          )
+          .send({ from: this.accountAddress })
+          .on("error", error => {
+            return reject(error);
+          })
+          .on("transactionHash", hash => {
+            return resolve(hash);
+          })
+          .on("receipt", receipt => {
+            console.log("finish setUserMetadata: ", receipt);
+          });
+      });
+    } else {
+      if (
+        (await this.getAddressFromUsername(username)) !==
+        "0x0000000000000000000000000000000000000000"
+      ) {
+        throw `Username @${username} is already taken.`;
+      }
+      return new Promise((resolve, reject) => {
+        this.contractInstance.methods
+          .setUsernameAndMetadataJSONString(
+            this.formatUsername(username),
+            compressString(JSON.stringify(userInfoCopy))
+          )
+          .send({ from: this.accountAddress })
+          .on("error", error => {
+            return reject(error);
+          })
+          .on("transactionHash", hash => {
+            return resolve(hash);
+          })
+          .on("receipt", receipt => {
+            console.log("finish setUserMetadata: ", receipt);
+          });
+      });
     }
-    return new Promise((resolve, reject) => {
-      this.contractInstance.methods
-        .setUsernameAndMetadataJSONString(
-          this.formatUsername(username),
-          compressString(JSON.stringify(userInfoCopy))
-        )
-        .send({ from: this.accountAddress })
-        .on("error", error => {
-          return reject(error);
-        })
-        .on("transactionHash", hash => {
-          return resolve(hash);
-        })
-        .on("receipt", receipt => {
-          console.log("finish setUserMetadata: ", receipt);
-        });
-    });
   }
 
   public async getFeedStateInfo(transactionHash: string): Promise<StateInfo> {
