@@ -46,6 +46,11 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
       .downvote(this.props.feedInfo.transactionInfo.hash)
       .then(hash => {
         // do nothing
+        new window["Noty"]({
+          type: "info",
+          text: `Your downvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          timeout: 10000
+        }).show();
       })
       .catch(error => {
         alert(error);
@@ -85,7 +90,7 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
             this.setState({ showEditPanel: false });
           }}
           ribbit={this.props.ribbit}
-          parentFeedInfo={this.props.feedInfo}
+          parentFeedInfo={this.props.feedInfo} // <= TODO: for reply, this parentFeedInfo is wrong.
         />
       );
     }

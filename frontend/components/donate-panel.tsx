@@ -77,6 +77,11 @@ export default class DonatePanel extends React.Component<Props, State> {
       .upvote(this.props.feedInfo.transactionInfo.hash, authorAddress, wei)
       .then(hash => {
         // do nothing.
+        new window["Noty"]({
+          type: "info",
+          text: `Thank you for your support to the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          timeout: 10000
+        }).show();
       })
       .catch(error => {
         alert(error);

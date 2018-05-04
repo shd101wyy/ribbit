@@ -182,6 +182,12 @@ export default class Edit extends Component<Props, State> {
       }
       window.localStorage["markdown-cache"] = "";
       this.props.cancel();
+
+      new window["Noty"]({
+        type: "info",
+        text: `Your post is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        timeout: 10000
+      }).show();
     } catch (error) {
       alert(error);
     }
