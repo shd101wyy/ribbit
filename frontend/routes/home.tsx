@@ -1,7 +1,12 @@
 import * as React from "react";
 
 import { Ribbit, UserInfo } from "../lib/ribbit";
-import { FeedInfo, Summary, generateSummaryFromHTML } from "../lib/feed";
+import {
+  FeedInfo,
+  Summary,
+  generateSummaryFromHTML,
+  generateFeedInfoFromTransactionInfo
+} from "../lib/feed";
 
 import { decompressString, checkUserRegistration } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
@@ -23,6 +28,12 @@ enum HomePanel {
   Notifications
 }
 
+interface HomeFeedsEntry {
+  blockNumber: number;
+  creation: number;
+  userAddress: string;
+}
+
 interface Props {
   ribbit: Ribbit;
   networkId: number;
@@ -30,20 +41,26 @@ interface Props {
 interface State {
   showEditPanel: boolean;
   msg: string;
+  homeFeedsEntries: HomeFeedsEntry[]; // starting block numbers
   feeds: FeedInfo[];
   loading: boolean;
+  doneLoadingAll: boolean;
   userInfo: UserInfo;
   panel: HomePanel;
   searchBoxValue: string;
 }
 export default class Home extends React.Component<Props, State> {
+  private lastFeedCard: HTMLDivElement;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       showEditPanel: false,
       msg: "",
+      homeFeedsEntries: [],
       feeds: [],
       loading: false,
+      doneLoadingAll: false,
       userInfo: null,
       panel: HomePanel.FollowingsFeeds,
       searchBoxValue: ""
@@ -54,22 +71,171 @@ export default class Home extends React.Component<Props, State> {
     const ribbit = this.props.ribbit;
     checkUserRegistration(ribbit);
     this.showUserHome(ribbit);
+    this.bindWindowScrollEvent();
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (this.props.ribbit !== newProps.ribbit) {
       checkUserRegistration(newProps.ribbit);
       this.showUserHome(newProps.ribbit);
+      this.bindWindowScrollEvent();
     }
   }
 
   showUserHome(ribbit: Ribbit) {
     if (!ribbit) return;
-    this.showUserFeeds(ribbit);
     ribbit.getUserInfoFromAddress(ribbit.accountAddress).then(userInfo => {
-      this.setState({ userInfo });
+      this.setState(
+        {
+          userInfo
+        },
+        async () => {
+          // initialize homeFeedsEntries:
+          const homeFeedsEntries: HomeFeedsEntry[] = [];
+          // TODO: change followingUsernames to followingUsers and store their addresses instead of usernames.
+          for (let i = 0; i < ribbit.settings.followingUsernames.length; i++) {
+            const username = ribbit.settings.followingUsernames[i].username;
+            const userAddress = await ribbit.getAddressFromUsername(username);
+            if (userAddress) {
+              const blockNumber = parseInt(
+                await ribbit.contractInstance.methods
+                  .getCurrentFeedInfo(userAddress)
+                  .call()
+              );
+              homeFeedsEntries.push({
+                blockNumber,
+                creation: Infinity,
+                userAddress
+              });
+            }
+          }
+          this.setState(
+            {
+              homeFeedsEntries,
+              doneLoadingAll: false
+            },
+            () => {
+              this.showHomeFeeds();
+            }
+          );
+        }
+      );
     });
   }
+
+  showHomeFeeds() {
+    const homeFeedsEntries = this.state.homeFeedsEntries;
+    // console.log("showHomeFeeds", homeFeedsEntries)
+    if (!homeFeedsEntries.length) {
+      return this.setState({
+        loading: false,
+        doneLoadingAll: true
+      });
+    }
+    if (this.state.loading) {
+      return;
+    }
+    this.setState(
+      {
+        loading: true
+      },
+      async () => {
+        let maxBlockNumber = homeFeedsEntries[0].blockNumber;
+        let maxCreation = homeFeedsEntries[0].creation;
+        let maxUserAddress = homeFeedsEntries[0].userAddress;
+        let maxOffset = 0;
+        homeFeedsEntries.forEach((homeFeedsEntry, offset) => {
+          if (
+            homeFeedsEntry.blockNumber > maxBlockNumber ||
+            (homeFeedsEntry.blockNumber === maxBlockNumber &&
+              homeFeedsEntry.creation > maxCreation)
+          ) {
+            maxBlockNumber = homeFeedsEntry.blockNumber;
+            maxCreation = homeFeedsEntry.creation;
+            maxUserAddress = homeFeedsEntry.userAddress;
+            maxOffset = offset;
+          }
+        });
+
+        const transactionInfo = await this.props.ribbit.getTransactionInfo({
+          userAddress: maxUserAddress,
+          blockNumber: maxBlockNumber
+        });
+
+        if (!transactionInfo) {
+          homeFeedsEntries.splice(maxOffset, 1); // finish loading all feeds from user.
+          return this.setState(
+            {
+              loading: false
+            },
+            () => {
+              this.scroll();
+            }
+          );
+        } else {
+          // TODO: reply
+          const eventLog = transactionInfo.decodedLogs.filter(
+            x => x.name === "SavePreviousFeedInfoEvent"
+          )[0];
+          if (!eventLog) {
+            console.log("@@@ TODO: Support reply in home feeds.");
+          }
+          let blockNumber = parseInt(
+            eventLog.events["previousFeedInfoBN"].value
+          );
+          const homeFeedsEntry = homeFeedsEntries[maxOffset];
+          homeFeedsEntry.blockNumber = blockNumber;
+          homeFeedsEntry.creation = transactionInfo.creation;
+
+          const feedInfo = await generateFeedInfoFromTransactionInfo(
+            this.props.ribbit,
+            transactionInfo
+          );
+          const feeds = this.state.feeds;
+          feeds.push(feedInfo);
+          this.setState(
+            {
+              feeds,
+              homeFeedsEntries
+            },
+            () => {
+              this.setState(
+                {
+                  loading: false
+                },
+                () => {
+                  // this.showHomeFeeds();
+                  this.scroll();
+                }
+              );
+            }
+          );
+        }
+      }
+    );
+  }
+
+  bindWindowScrollEvent() {
+    window.onscroll = this.scroll;
+  }
+
+  scroll = () => {
+    if (this.state.doneLoadingAll) {
+      return;
+    } else {
+      const scrollTop = document.body.scrollTop;
+      const offsetHeight = document.body.offsetHeight;
+      const middlePanel = document.querySelector(
+        ".middle-panel"
+      ) as HTMLDivElement;
+
+      if (middlePanel.offsetHeight < scrollTop + 1.4 * offsetHeight) {
+        console.log("scroll loading");
+        this.showHomeFeeds();
+      }
+      console.log("scroll", document.body.offsetTop);
+    }
+  };
 
   showUserFeeds(ribbit: Ribbit) {
     if (!ribbit) {
@@ -83,35 +249,6 @@ export default class Home extends React.Component<Props, State> {
           if (done) {
             return this.setState({ loading: false });
           }
-          console.log(transactionInfo);
-          if (transactionInfo.decodedInputData.name !== "post") return;
-          const message = await ribbit.retrieveMessage(
-            transactionInfo.decodedInputData.params["message"].value
-          );
-
-          const feedType = transactionInfo.decodedInputData.name;
-
-          // console.log(message);
-          const summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.ribbit
-          );
-
-          const userInfo = await ribbit.getUserInfoFromAddress(
-            transactionInfo.from
-          );
-
-          const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
-
-          const feeds = this.state.feeds;
-          feeds.push({
-            summary,
-            transactionInfo,
-            userInfo,
-            stateInfo,
-            feedType
-          });
-          this.forceUpdate();
         }
       );
     });

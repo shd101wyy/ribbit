@@ -58,7 +58,7 @@ export default class Edit extends Component<Props, State> {
   }
 
   componentDidMount() {
-    console.log("@@ MOUNT Edit @@");
+    console.log("@@ MOUNT Edit @@", this.props.parentFeedInfo);
     utility.checkUserRegistration(this.props.ribbit);
     this.checkTopicsAndMentions();
     this.analyzeReplies();

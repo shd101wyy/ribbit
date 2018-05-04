@@ -79,7 +79,7 @@ export default class DonatePanel extends React.Component<Props, State> {
         // do nothing.
         new window["Noty"]({
           type: "info",
-          text: `Thank you for your support to the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          text: `Thank you for supporting the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
           timeout: 10000
         }).show();
       })

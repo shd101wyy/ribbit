@@ -746,7 +746,7 @@ export class Ribbit {
    * Generic way of gettings feeds.
    * @param param0
    */
-  private async getFeeds({
+  public async getFeeds({
     userAddress = "",
     tag = "",
     blockNumber = 0,
@@ -768,7 +768,7 @@ export class Ribbit {
     ) => void;
   }) {
     let offset = 0;
-    while (offset > num) {
+    while (num < 0 || offset < num) {
       // console.log("@@ offset: " + offset);
       const transactionInfo = await this.getTransactionInfo({
         userAddress,
@@ -834,6 +834,10 @@ export class Ribbit {
     }
   }
 
+  /**
+   *
+   * @param username unformatted username
+   */
   public async getAddressFromUsername(username: string): Promise<string> {
     return await this.contractInstance.methods
       .getAddressFromUsername(this.formatUsername(username))
