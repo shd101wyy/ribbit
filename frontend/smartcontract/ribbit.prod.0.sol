@@ -383,6 +383,7 @@ contract Ribbit {
     // Report tag
     function reportTag(bytes32 tag) external {
         tagState[tag][2] = tagState[tag][2] + 1;
+        tagState[tag][1] = tagState[tag][1] + reportDownvoteEqNum;
     }
 
     // Upvote user
@@ -398,5 +399,6 @@ contract Ribbit {
     // Report user
     function reportUser(address userAddress) external {
         userState[userAddress][2] = userState[userAddress][2] + 1;
+        userState[userAddress][1] = userState[userAddress][1] + reportDownvoteEqNum;
     }    
 }

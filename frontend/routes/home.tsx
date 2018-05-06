@@ -19,6 +19,7 @@ import AnnouncementCard from "../components/announcement-card";
 import TopicsCard from "../components/topics-card";
 import FollowingsCard from "../components/followings-card";
 import ProfileSettingsCard from "../components/profile-settings-card";
+import Header from "../components/header";
 import { userInfo } from "os";
 
 enum HomePanel {
@@ -397,6 +398,7 @@ export default class Home extends React.Component<Props, State> {
       const ribbit = this.props.ribbit;
       return (
         <div className="home">
+          <Header ribbit={this.props.ribbit} />
           <div className="left-panel">
             <ProfileCard
               userInfo={this.state.userInfo}

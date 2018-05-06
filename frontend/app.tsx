@@ -14,6 +14,7 @@ import Profile from "./routes/profile";
 import Topic from "./routes/topic";
 import Tx from "./routes/tx";
 import Footer from "./components/footer";
+import Header from "./components/header";
 
 interface Props {}
 interface State {
