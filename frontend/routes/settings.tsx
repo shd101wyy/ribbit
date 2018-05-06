@@ -17,7 +17,7 @@ export default class Settings extends React.Component<Props, State> {
   render() {
     return (
       <div className="settings-page">
-        <Header ribbit={this.props.ribbit} page={Page.NotificationsPage} />
+        <Header ribbit={this.props.ribbit} page={Page.SettingsPage} />
         <ProfileSettingsCard ribbit={this.props.ribbit} />
       </div>
     );

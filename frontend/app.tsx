@@ -14,6 +14,8 @@ import Profile from "./routes/profile";
 import Topic from "./routes/topic";
 import Tx from "./routes/tx";
 import Settings from "./routes/settings";
+import Notifications from "./routes/notifications";
+import Topics from "./routes/topics";
 import Footer from "./components/footer";
 import Header from "./components/header";
 
@@ -111,8 +113,18 @@ class App extends React.Component<Props, State> {
             exact
           />
           <Route
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/topics`}
+            render={props => <Topics ribbit={this.state.ribbit} />}
+            exact
+          />
+          <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/settings`}
             render={props => <Settings ribbit={this.state.ribbit} />}
+            exact
+          />
+          <Route
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/notifications`}
+            render={props => <Notifications ribbit={this.state.ribbit} />}
             exact
           />
           <Route

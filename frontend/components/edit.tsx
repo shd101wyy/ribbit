@@ -62,6 +62,11 @@ export default class Edit extends Component<Props, State> {
     utility.checkUserRegistration(this.props.ribbit);
     this.checkTopicsAndMentions();
     this.analyzeReplies();
+    document.body.style.overflow = "hidden";
+  }
+
+  componentWillUnmount() {
+    document.body.style.overflow = "auto";
   }
 
   async analyzeReplies() {

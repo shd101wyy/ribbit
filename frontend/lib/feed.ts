@@ -194,6 +194,7 @@ export async function generateSummaryFromHTML(
       break;
     }
   }
+  summary = summary.replace(/\<img.+?\>/g, ""); // remove image tag.
 
   const output = {
     title: title,

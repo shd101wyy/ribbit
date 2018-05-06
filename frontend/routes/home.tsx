@@ -247,98 +247,12 @@ export default class Home extends React.Component<Props, State> {
     }
   };
 
-  showNotificationFeeds(ribbit: Ribbit) {
-    if (!ribbit) {
-      return;
-    }
-    this.setState({ loading: true }, () => {
-      ribbit.getFeedsFromTagByTime(
-        ribbit.accountAddress,
-        { num: -1 },
-        async (done, offset, transactionInfo) => {
-          console.log("showNotificationFeeds: ", done, offset, transactionInfo);
-          if (done) {
-            return this.setState({ loading: false });
-          }
-          const message = await ribbit.retrieveMessage(
-            transactionInfo.decodedInputData.params["message"].value
-          );
-
-          const feedType = transactionInfo.decodedInputData.name;
-
-          // console.log(message);
-          const summary = await generateSummaryFromHTML(
-            renderMarkdown(message),
-            this.props.ribbit
-          );
-
-          const userInfo = await ribbit.getUserInfoFromAddress(
-            transactionInfo.from
-          );
-
-          const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
-
-          const feeds = this.state.feeds;
-          feeds.push({
-            summary,
-            transactionInfo,
-            userInfo,
-            stateInfo,
-            feedType
-          });
-          this.forceUpdate();
-        }
-      );
-    });
-  }
-
   toggleEditPanel = () => {
     const { showEditPanel } = this.state;
     this.setState({ showEditPanel: !showEditPanel });
   };
 
   render() {
-    let middlePanel = null;
-    if (this.state.panel === HomePanel.FollowingsFeeds) {
-      middlePanel = (
-        <div className="cards">
-          {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard
-              key={index}
-              feedInfo={feedInfo}
-              ribbit={this.props.ribbit}
-            />
-          ))}
-          <p id="feed-footer">
-            {" "}
-            {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
-          </p>
-        </div>
-      );
-    } else if (this.state.panel === HomePanel.Settings) {
-      middlePanel = (
-        <div className="settings-panel">
-          <ProfileSettingsCard ribbit={this.props.ribbit} />
-        </div>
-      );
-    } else if (this.state.panel === HomePanel.Notifications) {
-      middlePanel = (
-        <div className="cards">
-          {this.state.feeds.map((feedInfo, index) => (
-            <FeedCard
-              key={index}
-              feedInfo={feedInfo}
-              ribbit={this.props.ribbit}
-            />
-          ))}
-          <p id="feed-footer">
-            {" "}
-            {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
-          </p>
-        </div>
-      );
-    }
-
     if (this.props.ribbit && this.props.ribbit.accountAddress) {
       const ribbit = this.props.ribbit;
       return (
@@ -351,7 +265,21 @@ export default class Home extends React.Component<Props, State> {
             />
             <FollowingsCard ribbit={this.props.ribbit} />
           </div>
-          <div className="middle-panel">{middlePanel}</div>
+          <div className="middle-panel">
+            <div className="cards">
+              {this.state.feeds.map((feedInfo, index) => (
+                <FeedCard
+                  key={index}
+                  feedInfo={feedInfo}
+                  ribbit={this.props.ribbit}
+                />
+              ))}
+              <p id="feed-footer">
+                {" "}
+                {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+              </p>
+            </div>
+          </div>
           <div className="right-panel">
             <div className="post-btn-group">
               <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>

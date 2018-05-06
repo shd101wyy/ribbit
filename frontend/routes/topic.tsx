@@ -12,6 +12,7 @@ import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
+import Header from "../components/header";
 import { TransactionInfo } from "../lib/transaction";
 
 interface Props {
@@ -167,6 +168,7 @@ export default class profile extends React.Component<Props, State> {
     }
     return (
       <div className="topic-page">
+        <Header ribbit={this.props.ribbit} />
         <div className="container">
           <div className="topic-card card">
             <div

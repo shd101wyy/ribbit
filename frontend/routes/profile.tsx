@@ -13,6 +13,7 @@ import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
+import Header from "../components/header";
 import { BigNumber } from "bignumber.js";
 
 interface Props {
@@ -93,6 +94,7 @@ export default class profile extends React.Component<Props, State> {
     }
     return (
       <div className="profile-page">
+        <Header ribbit={this.props.ribbit} />
         <div className="container">
           <ProfileCard
             userInfo={this.state.userInfo}
