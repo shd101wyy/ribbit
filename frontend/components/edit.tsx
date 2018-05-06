@@ -247,6 +247,7 @@ export default class Edit extends Component<Props, State> {
               ribbit={this.props.ribbit}
               feedInfo={this.props.parentFeedInfo}
               hideActionsPanel={true}
+              hideParent={true}
             />
           </div>
         ) : null}

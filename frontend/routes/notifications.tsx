@@ -32,7 +32,7 @@ export default class Notifications extends React.Component<Props, State> {
     this.showNotificationFeeds(this.props.ribbit);
   }
 
-  componentWillUpdate(newProps: Props) {
+  componentWillReceiveProps(newProps: Props) {
     if (
       newProps.ribbit !== this.props.ribbit ||
       newProps.ribbit.accountAddress !== this.props.ribbit.accountAddress

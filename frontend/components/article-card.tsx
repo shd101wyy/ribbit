@@ -154,7 +154,11 @@ export default class ArticleCard extends Component<Props, State> {
       <div className="article-panel">
         <div className="parent">
           {this.state.parent ? (
-            <FeedCard ribbit={this.props.ribbit} feedInfo={this.state.parent} />
+            <FeedCard
+              ribbit={this.props.ribbit}
+              feedInfo={this.state.parent}
+              hideParent={true}
+            />
           ) : null}
         </div>
         <div className="article-card card">
@@ -180,6 +184,7 @@ export default class ArticleCard extends Component<Props, State> {
                 key={index}
                 feedInfo={feedInfo}
                 ribbit={this.props.ribbit}
+                hideParent={true}
               />
             );
           })}

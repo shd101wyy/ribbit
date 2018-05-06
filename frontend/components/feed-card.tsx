@@ -6,7 +6,11 @@ import ImagesPanel from "./images-panel";
 import UserTopPanel from "./user-top-panel";
 import ActionsBottomPanel from "./actions-bottom-panel";
 
-import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
+import {
+  FeedInfo,
+  formatFeedCreationTime,
+  generateFeedInfoFromTransactionInfo
+} from "../lib/feed";
 import { formatDate } from "../lib/utility";
 import { getTransactionCreationTimestamp } from "../lib/transaction";
 import { Ribbit } from "../lib/ribbit";
@@ -16,19 +20,34 @@ interface Props {
   feedInfo: FeedInfo;
   ribbit: Ribbit;
   hideActionsPanel?: boolean;
+  hideParent?: boolean;
 }
-interface State {}
+interface State {
+  /**
+   * The parent feed that you reply to.
+   */
+  parentFeedInfo: FeedInfo;
+}
 
 export default class FeedCard extends Component<Props, State> {
   private elem: HTMLDivElement;
   constructor(props: Props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      parentFeedInfo: null
+    };
   }
 
   componentDidMount() {
     this.addTargetBlankToAnchorElements();
+    this.checkReply(this.props.feedInfo);
+  }
+
+  componentWillReceiveProps(newProps: Props) {
+    if (this.props.feedInfo !== newProps.feedInfo) {
+      this.checkReply(newProps.feedInfo);
+    }
   }
 
   componentDidUpdate() {
@@ -46,7 +65,28 @@ export default class FeedCard extends Component<Props, State> {
     }
   }
 
-  clickCard = () => {
+  async checkReply(feedInfo: FeedInfo) {
+    if (this.props.hideParent) {
+      return;
+    }
+    if (feedInfo.feedType === "reply") {
+      const parentTransactionInfo = await this.props.ribbit.getTransactionInfo({
+        transactionHash:
+          feedInfo.transactionInfo.decodedInputData.params[
+            "parentTransactionHash"
+          ].value
+      });
+      const parentFeedInfo = await generateFeedInfoFromTransactionInfo(
+        this.props.ribbit,
+        parentTransactionInfo
+      );
+      this.setState({
+        parentFeedInfo
+      });
+    }
+  }
+
+  clickCard = event => {
     if (!this.props.feedInfo.transactionInfo.hash) {
       return;
     }
@@ -56,6 +96,8 @@ export default class FeedCard extends Component<Props, State> {
       }`,
     );
     */
+    event.stopPropagation();
+    event.preventDefault();
     console.log(
       "push: ",
       `/${this.props.ribbit.networkId}/tx/${
@@ -79,6 +121,19 @@ export default class FeedCard extends Component<Props, State> {
     const stateInfo = this.props.feedInfo.stateInfo;
     const repostUserInfo = this.props.feedInfo.repostUserInfo;
     const feedType = this.props.feedInfo.feedType;
+
+    let parentFeedCard = null;
+    if (this.state.parentFeedInfo) {
+      parentFeedCard = (
+        <div className="parent">
+          <FeedCard
+            feedInfo={this.state.parentFeedInfo}
+            ribbit={this.props.ribbit}
+            hideParent={true}
+          />
+        </div>
+      );
+    }
 
     if (summary.title) {
       // Article
@@ -104,6 +159,7 @@ export default class FeedCard extends Component<Props, State> {
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
           </div>
+          {parentFeedCard}
           {this.props.hideActionsPanel ? null : (
             <ActionsBottomPanel
               feedInfo={this.props.feedInfo}
@@ -127,13 +183,14 @@ export default class FeedCard extends Component<Props, State> {
               className="summary"
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
-            {this.props.hideActionsPanel ? null : (
-              <ActionsBottomPanel
-                feedInfo={this.props.feedInfo}
-                ribbit={this.props.ribbit}
-              />
-            )}
           </div>
+          {parentFeedCard}
+          {this.props.hideActionsPanel ? null : (
+            <ActionsBottomPanel
+              feedInfo={this.props.feedInfo}
+              ribbit={this.props.ribbit}
+            />
+          )}
         </div>
       );
     }

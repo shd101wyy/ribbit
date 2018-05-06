@@ -22,7 +22,7 @@ class Following extends React.Component<FollowingProps, FollowingState> {
     this.initializeFollowing(this.props.username);
   }
 
-  componentWillUpdate(newProps: FollowingProps) {
+  componentWillReceiveProps(newProps: FollowingProps) {
     if (newProps.username !== this.props.username) {
       this.initializeFollowing(newProps.username);
     }

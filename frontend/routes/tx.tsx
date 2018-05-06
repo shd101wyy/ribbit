@@ -98,17 +98,21 @@ export default class Tx extends React.Component<Props, State> {
       return (
         <div className="tx-page">
           <Header ribbit={this.props.ribbit} />
-          <p id="feed-footer">{this.state.msg}</p>
+          <div className="container">
+            <p id="feed-footer">{this.state.msg}</p>
+          </div>
         </div>
       );
     }
     return (
       <div className="tx-page">
         <Header ribbit={this.props.ribbit} />
-        <ArticleCard
-          ribbit={this.props.ribbit}
-          feedInfo={this.state.feedInfo}
-        />
+        <div className="container">
+          <ArticleCard
+            ribbit={this.props.ribbit}
+            feedInfo={this.state.feedInfo}
+          />
+        </div>
       </div>
     );
   }
