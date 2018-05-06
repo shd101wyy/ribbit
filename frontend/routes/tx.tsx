@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import ArticleCard from "../components/article-card";
+import Header from "../components/header";
 
 import { Ribbit, UserInfo, decodeMethod } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
@@ -96,12 +97,14 @@ export default class Tx extends React.Component<Props, State> {
     if (!this.state.feedInfo) {
       return (
         <div className="tx-page">
+          <Header ribbit={this.props.ribbit} />
           <p id="feed-footer">{this.state.msg}</p>
         </div>
       );
     }
     return (
       <div className="tx-page">
+        <Header ribbit={this.props.ribbit} />
         <ArticleCard
           ribbit={this.props.ribbit}
           feedInfo={this.state.feedInfo}

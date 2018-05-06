@@ -13,6 +13,7 @@ import Signup from "./routes/signup";
 import Profile from "./routes/profile";
 import Topic from "./routes/topic";
 import Tx from "./routes/tx";
+import Settings from "./routes/settings";
 import Footer from "./components/footer";
 import Header from "./components/header";
 
@@ -107,6 +108,11 @@ class App extends React.Component<Props, State> {
                 ribbit={this.state.ribbit}
               />
             )}
+            exact
+          />
+          <Route
+            path={`${process.env.PUBLIC_URL || ""}/:networkId/settings`}
+            render={props => <Settings ribbit={this.state.ribbit} />}
             exact
           />
           <Route

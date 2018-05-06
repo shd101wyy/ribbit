@@ -19,7 +19,7 @@ import AnnouncementCard from "../components/announcement-card";
 import TopicsCard from "../components/topics-card";
 import FollowingsCard from "../components/followings-card";
 import ProfileSettingsCard from "../components/profile-settings-card";
-import Header from "../components/header";
+import Header, { Page } from "../components/header";
 import { userInfo } from "os";
 
 enum HomePanel {
@@ -83,6 +83,10 @@ export default class Home extends React.Component<Props, State> {
       this.showUserHome(newProps.ribbit);
       this.bindWindowScrollEvent();
     }
+  }
+
+  componentWillUnmount() {
+    // TODO: Stop loading home feeds.
   }
 
   updateUserInfo(ribbit: Ribbit) {
@@ -293,65 +297,6 @@ export default class Home extends React.Component<Props, State> {
     this.setState({ showEditPanel: !showEditPanel });
   };
 
-  switchPanel = (panel: HomePanel) => {
-    return event => {
-      this.setState(
-        {
-          panel,
-          feeds: []
-        },
-        () => {
-          if (panel === HomePanel.FollowingsFeeds) {
-            this.showUserHome(this.props.ribbit);
-          } else if (panel === HomePanel.Notifications) {
-            this.showNotificationFeeds(this.props.ribbit);
-          }
-        }
-      );
-    };
-  };
-
-  searchBoxKeydown = async event => {
-    const searchValue = this.state.searchBoxValue.trim();
-    if (!searchValue.length) {
-      return;
-    }
-    const ribbit = this.props.ribbit;
-    if (event.which === 13) {
-      // enter key
-      if (ribbit.web3.utils.isAddress(searchValue)) {
-        // search for user
-        const username = await ribbit.getUsernameFromAddress(searchValue);
-        if (username && username.length) {
-          window.open(
-            `${window.location.pathname}#/${
-              ribbit.networkId
-            }/profile/${username}`,
-            "_blank"
-          );
-        } else {
-          alert(`User with address ${searchValue} doesn't exist.`);
-        }
-      } else if (searchValue.startsWith("@")) {
-        // search for user
-        window.open(
-          `${window.location.pathname}#/${
-            ribbit.networkId
-          }/profile/${searchValue.slice(1)}`,
-          "_blank"
-        );
-      } else {
-        // search for topic
-        window.open(
-          `${window.location.pathname}#/${
-            ribbit.networkId
-          }/topic/${encodeURIComponent(searchValue)}`,
-          "_blank"
-        );
-      }
-    }
-  };
-
   render() {
     let middlePanel = null;
     if (this.state.panel === HomePanel.FollowingsFeeds) {
@@ -398,7 +343,7 @@ export default class Home extends React.Component<Props, State> {
       const ribbit = this.props.ribbit;
       return (
         <div className="home">
-          <Header ribbit={this.props.ribbit} />
+          <Header ribbit={this.props.ribbit} page={Page.HomePage} />
           <div className="left-panel">
             <ProfileCard
               userInfo={this.state.userInfo}
@@ -406,60 +351,7 @@ export default class Home extends React.Component<Props, State> {
             />
             <FollowingsCard ribbit={this.props.ribbit} />
           </div>
-          <div className="middle-panel">
-            <div className="top-bar card">
-              <div className="search-box-wrapper">
-                <input
-                  className="search-box"
-                  placeholder={
-                    "Enter @username here or the topic that you are interested to start searching"
-                  }
-                  value={this.state.searchBoxValue}
-                  onChange={event => {
-                    this.setState({ searchBoxValue: event.target.value });
-                  }}
-                  onKeyDown={this.searchBoxKeydown}
-                />
-              </div>
-              <div className="icon-groups">
-                <i
-                  className={
-                    "icon fas fa-home" +
-                    (this.state.panel === HomePanel.FollowingsFeeds
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.switchPanel(HomePanel.FollowingsFeeds)}
-                />
-                <i
-                  className={
-                    "icon fab fa-slack-hash" +
-                    (this.state.panel === HomePanel.TopicsFeeds
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.switchPanel(HomePanel.TopicsFeeds)}
-                />
-                <i
-                  className={
-                    "icon fas fa-bell" +
-                    (this.state.panel === HomePanel.Notifications
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.switchPanel(HomePanel.Notifications)}
-                />
-                <i
-                  className={
-                    "icon fas fa-cog" +
-                    (this.state.panel === HomePanel.Settings ? " selected" : "")
-                  }
-                  onClick={this.switchPanel(HomePanel.Settings)}
-                />
-              </div>
-            </div>
-            {middlePanel}
-          </div>
+          <div className="middle-panel">{middlePanel}</div>
           <div className="right-panel">
             <div className="post-btn-group">
               <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>
