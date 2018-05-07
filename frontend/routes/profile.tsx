@@ -16,6 +16,11 @@ import ProfileCard from "../components/profile-card";
 import Header from "../components/header";
 import { BigNumber } from "bignumber.js";
 
+interface CurrentFeed {
+  creation: number;
+  blockNumber: number;
+}
+
 interface Props {
   ribbit: Ribbit;
   networkId: number;
@@ -25,63 +30,159 @@ interface State {
   userInfo: UserInfo;
   feeds: FeedInfo[];
   loading: boolean;
+  doneLoadingAll: boolean;
+  msg: string;
 }
 
 export default class profile extends React.Component<Props, State> {
+  private currentFeed: CurrentFeed;
   constructor(props: Props) {
     super(props);
     this.state = {
       userInfo: null,
       feeds: [],
-      loading: false
+      loading: false,
+      doneLoadingAll: false,
+      msg: ""
     };
   }
 
   componentDidMount() {
     this.initializeUser(this.props.username);
+    this.bindWindowScrollEvent();
   }
 
   componentWillReceiveProps(newProps: Props) {
     if (newProps.username !== this.props.username) {
       this.initializeUser(newProps.username);
+      this.bindWindowScrollEvent();
     }
   }
 
   async initializeUser(username: string) {
+    const ribbit = this.props.ribbit;
     const userInfo = await this.props.ribbit.getUserInfoFromUsername(username);
+    const blockNumber = parseInt(
+      await ribbit.contractInstance.methods
+        .getCurrentFeedInfo(userInfo.address)
+        .call()
+    );
+    this.currentFeed = {
+      blockNumber,
+      creation: Date.now()
+    };
     this.setState(
       {
         userInfo,
+        loading: false,
+        doneLoadingAll: false,
         feeds: []
       },
       () => {
-        this.showUserFeeds(userInfo.address);
+        this.showUserFeeds();
       }
     );
   }
 
-  async showUserFeeds(userAddress: string) {
-    this.setState({ loading: true }, () => {
-      this.props.ribbit.getFeedsFromUser(
-        userAddress,
-        { num: -1 },
-        async (done, offset, transactionInfo) => {
-          // console.log("showUserFeeds: ", done, offset, transactionInfo);
-          if (done || !transactionInfo) {
-            return this.setState({ loading: false });
+  async showUserFeeds() {
+    const userInfo = this.state.userInfo;
+    const userAddress = userInfo.address;
+    const ribbit = this.props.ribbit;
+    if (!this.currentFeed || !this.currentFeed.blockNumber) {
+      return this.setState({
+        loading: false,
+        doneLoadingAll: true
+      });
+    }
+    if (this.state.loading) {
+      return;
+    }
+    this.setState(
+      {
+        loading: true
+      },
+      async () => {
+        const transactionInfo = await ribbit.getTransactionInfo(
+          {
+            userAddress,
+            maxCreation: this.currentFeed.creation,
+            blockNumber: this.currentFeed.blockNumber
+          },
+          (blockNumber, index) => {
+            if (index >= 0) {
+              this.setState({
+                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+              });
+            } else {
+              this.setState({
+                msg: `Syncing block ${blockNumber} from database...`
+              });
+            }
           }
+        );
+        if (!transactionInfo) {
+          return this.setState({
+            loading: false,
+            doneLoadingAll: true
+          });
+        } else {
+          const eventLog = transactionInfo.decodedLogs.filter(
+            x => x.name === "SavePreviousFeedInfoEvent"
+          )[0];
+          const blockNumber = parseInt(
+            eventLog.events["previousFeedInfoBN"].value
+          );
+          this.currentFeed = {
+            blockNumber,
+            creation: transactionInfo.creation
+          };
+
           const feedInfo = await generateFeedInfoFromTransactionInfo(
-            this.props.ribbit,
+            ribbit,
             transactionInfo
           );
           const feeds = this.state.feeds;
-          console.log("render feed: ", offset, feedInfo);
           feeds.push(feedInfo);
-          this.forceUpdate();
+          this.setState(
+            {
+              feeds
+            },
+            () => {
+              this.setState(
+                {
+                  loading: false
+                },
+                () => {
+                  this.scroll();
+                }
+              );
+            }
+          );
         }
-      );
-    });
+      }
+    );
   }
+
+  bindWindowScrollEvent() {
+    window.onscroll = this.scroll;
+  }
+
+  scroll = () => {
+    if (this.state.doneLoadingAll) {
+      return;
+    } else {
+      const scrollTop = document.body.scrollTop;
+      const offsetHeight = document.body.offsetHeight;
+      const container = document.querySelector(".container") as HTMLDivElement;
+
+      if (
+        container &&
+        container.offsetHeight < scrollTop + 1.4 * offsetHeight
+      ) {
+        this.showUserFeeds();
+      }
+    }
+  };
 
   render() {
     const userInfo = this.state.userInfo;
@@ -110,7 +211,7 @@ export default class profile extends React.Component<Props, State> {
             ))}
             <p id="feed-footer">
               {" "}
-              {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+              {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
             </p>
           </div>
         </div>

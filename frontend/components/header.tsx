@@ -82,14 +82,12 @@ export default class Header extends Component<Props, State> {
             >
               <i className="icon fas fa-home" />Home
             </Link>
-            {/*
             <Link
               className={this.props.page === Page.TopicsPage ? "selected" : ""}
               to={`/${this.props.ribbit.networkId}/topics`}
             >
               <i className="icon fab fa-slack-hash" />Topics
             </Link>
-            */}
             <Link
               className={
                 this.props.page === Page.NotificationsPage ? "selected" : ""

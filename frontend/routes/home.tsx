@@ -158,11 +158,24 @@ export default class Home extends React.Component<Props, State> {
           }
         });
         // console.log("showHomeFeeds", maxBlockNumber, maxCreation, maxUserAddress)
-        const transactionInfo = await this.props.ribbit.getTransactionInfo({
-          userAddress: maxUserAddress,
-          blockNumber: maxBlockNumber,
-          maxCreation: maxCreation
-        });
+        const transactionInfo = await this.props.ribbit.getTransactionInfo(
+          {
+            userAddress: maxUserAddress,
+            blockNumber: maxBlockNumber,
+            maxCreation: maxCreation
+          },
+          (blockNumber, index) => {
+            if (index >= 0) {
+              this.setState({
+                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+              });
+            } else {
+              this.setState({
+                msg: `Syncing block ${blockNumber} from database...`
+              });
+            }
+          }
+        );
 
         if (!transactionInfo) {
           homeFeedsEntries.splice(maxOffset, 1); // finish loading all feeds from user.
@@ -270,7 +283,7 @@ export default class Home extends React.Component<Props, State> {
               ))}
               <p id="feed-footer">
                 {" "}
-                {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+                {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
               </p>
             </div>
           </div>

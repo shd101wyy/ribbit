@@ -473,7 +473,10 @@ export class Ribbit {
    * TODO: fetch IPFS messages.
    * @param blockNumber
    */
-  public async syncBlock(blockNumber: number) {
+  public async syncBlock(
+    blockNumber: number,
+    cb?: (blockNumber: number, index: number) => void
+  ) {
     console.log("syncBlock: start syncing block " + blockNumber);
     const res = await this.blockDB["find"]({
       selector: {
@@ -483,12 +486,18 @@ export class Ribbit {
     if (res && res.docs.length && res.docs[0]["fullySynced"]) {
       // already synced
       console.log(`syncBlock: block ${blockNumber} synced from database.`);
+      if (cb) {
+        cb(blockNumber, -1);
+      }
       return;
     } else {
       const transactionCount = await this.web3.eth.getBlockTransactionCount(
         blockNumber
       );
       for (let i = 0; i < transactionCount; i++) {
+        if (cb) {
+          cb(blockNumber, i);
+        }
         const transaction = await this.web3.eth.getTransactionFromBlock(
           blockNumber,
           i
@@ -557,16 +566,19 @@ export class Ribbit {
    * @param transactionHash
    * @param maxCreation  max timestamp of the creation of the feed.
    */
-  public async getTransactionInfo({
-    userAddress = "",
-    tag = "",
-    blockNumber = 0,
-    transactionHash = "",
-    maxCreation = 0
-    // TODO: there might be multiple ribbit transaction in one block,
-    //       we need to sort them by timestamp.
-    // timestamp => timestamp in transaction should be greater than this.
-  }): Promise<TransactionInfo> {
+  public async getTransactionInfo(
+    {
+      userAddress = "",
+      tag = "",
+      blockNumber = 0,
+      transactionHash = "",
+      maxCreation = 0
+      // TODO: there might be multiple ribbit transaction in one block,
+      //       we need to sort them by timestamp.
+      // timestamp => timestamp in transaction should be greater than this.
+    },
+    cb?: (blockNumber: number, index: number) => void
+  ): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("transactionHash: ", transactionHash);
@@ -592,7 +604,7 @@ export class Ribbit {
       return;
     } else {
       // Sync block;
-      await this.syncBlock(blockNumber);
+      await this.syncBlock(blockNumber, cb);
     }
 
     // Check database

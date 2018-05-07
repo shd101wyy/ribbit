@@ -24,6 +24,7 @@ interface State {
   feeds: FeedInfo[];
   loading: boolean;
   doneLoadingAll: boolean;
+  msg: string;
 }
 
 export default class Notifications extends React.Component<Props, State> {
@@ -33,7 +34,8 @@ export default class Notifications extends React.Component<Props, State> {
     this.state = {
       feeds: [],
       loading: false,
-      doneLoadingAll: false
+      doneLoadingAll: false,
+      msg: ""
     };
   }
 
@@ -94,11 +96,24 @@ export default class Notifications extends React.Component<Props, State> {
       },
       async () => {
         const formattedTag = ribbit.formatTag(ribbit.accountAddress);
-        const transactionInfo = await ribbit.getTransactionInfo({
-          tag: formattedTag,
-          maxCreation: this.currentFeed.creation,
-          blockNumber: this.currentFeed.blockNumber
-        });
+        const transactionInfo = await ribbit.getTransactionInfo(
+          {
+            tag: formattedTag,
+            maxCreation: this.currentFeed.creation,
+            blockNumber: this.currentFeed.blockNumber
+          },
+          (blockNumber, index) => {
+            if (index >= 0) {
+              this.setState({
+                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+              });
+            } else {
+              this.setState({
+                msg: `Syncing block ${blockNumber} from database...`
+              });
+            }
+          }
+        );
         if (!transactionInfo) {
           return this.setState({
             loading: false,
@@ -180,7 +195,7 @@ export default class Notifications extends React.Component<Props, State> {
             ))}
             <p id="feed-footer">
               {" "}
-              {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+              {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
             </p>
           </div>
         </div>

@@ -33,6 +33,7 @@ interface State {
   following: boolean;
   mouseOver: boolean;
   doneLoadingAll: boolean;
+  msg: string;
 }
 
 enum TopicSorting {
@@ -51,7 +52,8 @@ export default class profile extends React.Component<Props, State> {
       sorting: TopicSorting.ByTrend,
       cover: null,
       following: true,
-      mouseOver: false
+      mouseOver: false,
+      msg: ""
     };
   }
 
@@ -132,11 +134,24 @@ export default class profile extends React.Component<Props, State> {
       },
       async () => {
         const formattedTag = ribbit.formatTag(topic);
-        const transactionInfo = await ribbit.getTransactionInfo({
-          tag: formattedTag,
-          maxCreation: this.currentFeed.creation,
-          blockNumber: this.currentFeed.blockNumber
-        });
+        const transactionInfo = await ribbit.getTransactionInfo(
+          {
+            tag: formattedTag,
+            maxCreation: this.currentFeed.creation,
+            blockNumber: this.currentFeed.blockNumber
+          },
+          (blockNumber, index) => {
+            if (index >= 0) {
+              this.setState({
+                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+              });
+            } else {
+              this.setState({
+                msg: `Syncing block ${blockNumber} from database...`
+              });
+            }
+          }
+        );
         if (!transactionInfo) {
           return this.setState({
             loading: false,
@@ -355,7 +370,7 @@ export default class profile extends React.Component<Props, State> {
             ))}
             <p id="feed-footer">
               {" "}
-              {this.state.loading ? "Loading..." : "No more feeds ;)"}{" "}
+              {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
             </p>
           </div>
         </div>
