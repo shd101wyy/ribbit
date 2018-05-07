@@ -1,5 +1,12 @@
 # ribbit
 
+> I hope we didn't unleash a beast.
+
+A decentralized social media web application based on Ethereum platform.  
+基于以太坊的去中心化社交程序。
+
+github: http://shd101wyy.github.io/ribbit/
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -16,13 +23,6 @@
 	* [References](#references)
 
 <!-- /code_chunk_output -->
-
-> I hope we didn't unleash a beast.
-
-A decentralized social media web application based on Ethereum platform.  
-基于以太坊的去中心化社交程序。
-
-github: http://shd101wyy.github.io/ribbit/
 
 ## Usage
 
