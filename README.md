@@ -74,7 +74,7 @@ Hi @{ribbit} will notify the user `ribbit` this about post.
 
 ## Roadmap (TODO)
 
-* Import
+* Support `@import` in editor.
 
 ```markdown
 @import "https://..."
@@ -85,6 +85,7 @@ Hi @{ribbit} will notify the user `ribbit` this about post.
 
 * Rich content editor.
 * Multiple languages support.
+* Support syncing user settings that are saved locally not on blockchain.
 
 ## Developer section
 

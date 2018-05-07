@@ -322,6 +322,11 @@ export class Ribbit {
           return resolve(hash);
         })
         .on("receipt", receipt => {
+          new window["Noty"]({
+            type: "success",
+            text: `Your post is now saved on blockchain.`,
+            timeout: 10000
+          }).show();
           console.log("post feed receipt", receipt);
         });
     });
@@ -381,6 +386,11 @@ export class Ribbit {
           return resolve(hash);
         })
         .on("receipt", receipt => {
+          new window["Noty"]({
+            type: "success",
+            text: `Your reply is now saved on blockchain.`,
+            timeout: 10000
+          }).show();
           console.log("reply feed receipt", receipt);
         });
     });
@@ -442,6 +452,11 @@ export class Ribbit {
           return resolve(hash);
         })
         .on("receipt", receipt => {
+          new window["Noty"]({
+            type: "success",
+            text: `Your upvote is now saved on blockchain.`,
+            timeout: 10000
+          }).show();
           console.log("upvote receipt: ", receipt);
         });
     });
@@ -463,6 +478,11 @@ export class Ribbit {
           return resolve(hash);
         })
         .on("receipt", receipt => {
+          new window["Noty"]({
+            type: "success",
+            text: `Your downvote is now saved on blockchain.`,
+            timeout: 10000
+          }).show();
           console.log("downvote receipt: ", receipt);
         });
     });
@@ -970,6 +990,11 @@ export class Ribbit {
           })
           .on("receipt", receipt => {
             console.log("finish setUserMetadata: ", receipt);
+            new window["Noty"]({
+              type: "success",
+              text: `Your profile information is now saved on blockchain.`,
+              timeout: 10000
+            }).show();
           });
       });
     } else {
@@ -994,6 +1019,11 @@ export class Ribbit {
           })
           .on("receipt", receipt => {
             console.log("finish setUserMetadata: ", receipt);
+            new window["Noty"]({
+              type: "success",
+              text: `Your profile information is now saved on blockchain.`,
+              timeout: 10000
+            }).show();
           });
       });
     }
