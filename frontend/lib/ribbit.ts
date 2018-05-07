@@ -411,11 +411,24 @@ export class Ribbit {
     let tags = [];
     if (decodedInputData.name === "post") {
       tags = decodedInputData.params["tags"].value;
+    } else if (decodedInputData.name === "reply") {
+      tags = decodedInputData.params["tags"].value;
+      tags = tags.filter(tag => {
+        return !tag.startsWith("0x000000000000000000000000");
+      }); // remove user that were mentioned in that post.
     }
+    // notify the author whose post that we liked.
+    tags.push(this.formatTag(parentTransaction.from));
+    tags = Array.from(new Set(tags));
 
     if (!authorAddress) {
       authorAddress = "0x0000000000000000000000000000000000000000";
     }
+
+    console.log(`upvote:
+  * parentTransactionHash ${parentTransactionHash}
+  * tags ${JSON.stringify(tags, null, "  ")}
+  * authorAddress ${authorAddress}`);
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods

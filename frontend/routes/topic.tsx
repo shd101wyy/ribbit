@@ -15,6 +15,11 @@ import ProfileCard from "../components/profile-card";
 import Header from "../components/header";
 import { TransactionInfo } from "../lib/transaction";
 
+interface CurrentFeed {
+  creation: number;
+  blockNumber: number;
+}
+
 interface Props {
   ribbit: Ribbit;
   networkId: number;
@@ -27,6 +32,7 @@ interface State {
   cover: string;
   following: boolean;
   mouseOver: boolean;
+  doneLoadingAll: boolean;
 }
 
 enum TopicSorting {
@@ -35,11 +41,13 @@ enum TopicSorting {
 }
 
 export default class profile extends React.Component<Props, State> {
+  private currentFeed: CurrentFeed;
   constructor(props: Props) {
     super(props);
     this.state = {
       feeds: [],
       loading: false,
+      doneLoadingAll: false,
       sorting: TopicSorting.ByTrend,
       cover: null,
       following: true,
@@ -49,12 +57,14 @@ export default class profile extends React.Component<Props, State> {
 
   componentDidMount() {
     this.initializeTopic(this.props.topic);
+    this.bindWindowScrollEvent();
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (newProps.topic !== this.props.topic) {
-      this.initializeTopic(newProps.topic);
-    }
+    // if (newProps.topic !== this.props.topic) {
+    this.initializeTopic(newProps.topic);
+    this.bindWindowScrollEvent();
+    // }
   }
 
   async initializeTopic(topic: string) {
@@ -66,54 +76,160 @@ export default class profile extends React.Component<Props, State> {
       feeds: []
     });
 
-    // show feeds
-    this.showTopicFeeds(topic);
+    this.showTopic(topic);
   }
 
-  async showTopicFeeds(topic: string) {
-    const sorting = this.state.sorting;
-    this.setState({ loading: true }, () => {
-      const fn = (sorting === TopicSorting.ByTrend
-        ? this.props.ribbit.getFeedsFromTagByTrend
-        : this.props.ribbit.getFeedsFromTagByTime
-      ).bind(this.props.ribbit);
-      fn(
-        topic,
-        { num: -1 },
-        async (
-          done: boolean,
-          offset: number,
-          transactionInfo: TransactionInfo
-        ) => {
-          console.log(done, offset, transactionInfo);
-          if (done) {
-            return this.setState({ loading: false });
-          }
-          if (this.state.sorting !== sorting) {
-            return;
-          }
-
-          try {
-            const feedInfo = await generateFeedInfoFromTransactionInfo(
-              this.props.ribbit,
-              transactionInfo
-            );
-            const feeds = this.state.feeds;
-            feeds.push(feedInfo);
-            if (offset === 0 && sorting === TopicSorting.ByTrend) {
-              this.setState({
-                cover: feedInfo.userInfo.cover
-              });
-            } else {
-              this.forceUpdate();
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        }
+  async showTopic(topic: string) {
+    const ribbit = this.props.ribbit;
+    let blockNumber;
+    if (this.state.sorting === TopicSorting.ByTrend) {
+      blockNumber = parseInt(
+        await ribbit.contractInstance.methods
+          .getCurrentTagInfoByTrend(ribbit.formatTag(topic))
+          .call()
       );
-    });
+    } else {
+      blockNumber = parseInt(
+        await ribbit.contractInstance.methods
+          .getCurrentTagInfoByTime(ribbit.formatTag(topic))
+          .call()
+      );
+    }
+    console.log("Show topic: ", blockNumber);
+
+    this.currentFeed = {
+      blockNumber,
+      creation: Date.now()
+    };
+    this.setState(
+      {
+        loading: false,
+        doneLoadingAll: false,
+        feeds: []
+      },
+      () => {
+        this.showTopicFeeds();
+      }
+    );
   }
+
+  async showTopicFeeds() {
+    const topic = this.props.topic;
+    const ribbit = this.props.ribbit;
+    const sorting = this.state.sorting;
+    if (!this.currentFeed || !this.currentFeed.blockNumber) {
+      return this.setState({
+        loading: false,
+        doneLoadingAll: true
+      });
+    }
+    if (this.state.loading) {
+      return;
+    }
+    this.setState(
+      {
+        loading: true
+      },
+      async () => {
+        const formattedTag = ribbit.formatTag(topic);
+        const transactionInfo = await ribbit.getTransactionInfo({
+          tag: formattedTag,
+          maxCreation: this.currentFeed.creation,
+          blockNumber: this.currentFeed.blockNumber
+        });
+        if (!transactionInfo) {
+          return this.setState({
+            loading: false,
+            doneLoadingAll: true
+          });
+        } else {
+          const eventLog = transactionInfo.decodedLogs.filter(
+            x =>
+              x.name ===
+                (sorting === TopicSorting.ByTime
+                  ? "SavePreviousTagInfoByTimeEvent"
+                  : "SavePreviousTagInfoByTrendEvent") &&
+              x.events["tag"].value === formattedTag
+          )[0];
+          const blockNumber = parseInt(
+            eventLog.events["previousTagInfoBN"].value
+          );
+          this.currentFeed = {
+            blockNumber,
+            creation: transactionInfo.creation
+          };
+
+          const feedInfo = await generateFeedInfoFromTransactionInfo(
+            ribbit,
+            transactionInfo
+          );
+
+          const feeds = this.state.feeds;
+          if (
+            sorting === TopicSorting.ByTrend &&
+            feedInfo.feedType === "upvote"
+          ) {
+            // filter out existing content
+            let find = false;
+            feedInfo.feedType = "post";
+            feedInfo.repostUserInfo = null;
+          }
+
+          let find = false;
+          for (const displayedFeedInfo of feeds) {
+            if (
+              displayedFeedInfo.transactionInfo.hash ===
+              feedInfo.transactionInfo.hash
+            ) {
+              find = true;
+              console.log("find same post");
+              break;
+            }
+          }
+          if (!find) {
+            feeds.push(feedInfo);
+          }
+
+          this.setState(
+            {
+              feeds
+            },
+            () => {
+              this.setState(
+                {
+                  loading: false
+                },
+                () => {
+                  this.scroll();
+                }
+              );
+            }
+          );
+        }
+      }
+    );
+  }
+
+  bindWindowScrollEvent() {
+    window.onscroll = this.scroll;
+  }
+
+  scroll = () => {
+    if (this.state.doneLoadingAll) {
+      return;
+    } else {
+      const scrollTop = document.body.scrollTop;
+      const offsetHeight = document.body.offsetHeight;
+      const container = document.querySelector(".container") as HTMLDivElement;
+
+      if (
+        container &&
+        container.offsetHeight < scrollTop + 1.4 * offsetHeight
+      ) {
+        this.showTopicFeeds();
+      }
+    }
+  };
 
   selectSorting = (sorting: TopicSorting) => {
     return event => {
@@ -123,7 +239,7 @@ export default class profile extends React.Component<Props, State> {
           feeds: []
         },
         () => {
-          this.showTopicFeeds(this.props.topic);
+          this.showTopic(this.props.topic);
         }
       );
     };

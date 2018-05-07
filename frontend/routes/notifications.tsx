@@ -12,7 +12,7 @@ import {
 } from "../lib/feed";
 import { renderMarkdown } from "../lib/markdown";
 
-interface LatestNotification {
+interface CurrentFeed {
   creation: number;
   blockNumber: number;
 }
@@ -27,7 +27,7 @@ interface State {
 }
 
 export default class Notifications extends React.Component<Props, State> {
-  private latestNotification: LatestNotification;
+  private currentFeed: CurrentFeed;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -61,7 +61,7 @@ export default class Notifications extends React.Component<Props, State> {
         .getCurrentTagInfoByTime(ribbit.formatTag(ribbit.accountAddress))
         .call()
     );
-    this.latestNotification = {
+    this.currentFeed = {
       blockNumber,
       creation: Date.now()
     };
@@ -79,7 +79,7 @@ export default class Notifications extends React.Component<Props, State> {
 
   async showNotificationFeeds() {
     const ribbit = this.props.ribbit;
-    if (!this.latestNotification || !this.latestNotification.blockNumber) {
+    if (!this.currentFeed || !this.currentFeed.blockNumber) {
       return this.setState({
         loading: false,
         doneLoadingAll: true
@@ -96,8 +96,8 @@ export default class Notifications extends React.Component<Props, State> {
         const formattedTag = ribbit.formatTag(ribbit.accountAddress);
         const transactionInfo = await ribbit.getTransactionInfo({
           tag: formattedTag,
-          maxCreation: this.latestNotification.creation,
-          blockNumber: this.latestNotification.blockNumber
+          maxCreation: this.currentFeed.creation,
+          blockNumber: this.currentFeed.blockNumber
         });
         if (!transactionInfo) {
           return this.setState({
@@ -113,7 +113,7 @@ export default class Notifications extends React.Component<Props, State> {
           const blockNumber = parseInt(
             eventLog.events["previousTagInfoBN"].value
           );
-          this.latestNotification = {
+          this.currentFeed = {
             blockNumber,
             creation: transactionInfo.creation
           };

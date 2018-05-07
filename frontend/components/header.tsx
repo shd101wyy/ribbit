@@ -70,13 +70,6 @@ export default class Header extends Component<Props, State> {
     }
   };
 
-  clickHomePageTab = event => {
-    event.stopPropagation();
-    event.preventDefault();
-    hashHistory.replace(`/${this.props.ribbit.networkId}/`);
-    console.log("click here");
-  };
-
   render() {
     return (
       <header className="header">
@@ -86,7 +79,6 @@ export default class Header extends Component<Props, State> {
             <Link
               className={this.props.page === Page.HomePage ? "selected" : ""}
               to={`/${this.props.ribbit.networkId}/`}
-              onClick={this.clickHomePageTab}
             >
               <i className="icon fas fa-home" />Home
             </Link>

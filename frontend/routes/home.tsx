@@ -194,6 +194,7 @@ export default class Home extends React.Component<Props, State> {
             transactionInfo
           );
           const feeds = this.state.feeds;
+          // TODO: remove duplicates.
           feeds.push(feedInfo);
           this.setState(
             {
