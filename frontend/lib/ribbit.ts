@@ -504,14 +504,20 @@ export class Ribbit {
         );
 
         const decodedInputData = decodeMethod(transaction.input);
-        if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
+        if (
+          !decodedInputData ||
+          Object.keys(decodedInputData).length === 0 ||
+          (decodedInputData.name !== "post" &&
+            decodedInputData.name !== "upvote" &&
+            decodedInputData.name !== "reply")
+        ) {
           continue;
         } else {
           const receipt = await this.web3.eth.getTransactionReceipt(
             transaction.hash
           );
-          const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null
-          if (!logs.length) {
+          const logs = (receipt ? receipt["logs"] : null) || null; // receipt might be null
+          if (!logs || !logs.length) {
             continue;
           }
           const decodedLogs = decodeLogs(logs);
@@ -561,7 +567,7 @@ export class Ribbit {
    * then compare the data with blockNumber.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
    * @param userAddress sender of this transaction. If `userAddress` is not provided, then it means you are querying other's transactionInfo.
-   * @param tag tag of this transaction. Use it to validate transaction if tag is provided.
+   * @param tag formatted tag of this transaction. Use it to validate transaction if tag is provided.
    * @param blockNumber block number
    * @param transactionHash
    * @param maxCreation  max timestamp of the creation of the feed.
@@ -601,7 +607,7 @@ export class Ribbit {
     }
 
     if (!blockNumber) {
-      return;
+      return null;
     } else {
       // Sync block;
       await this.syncBlock(blockNumber, cb);

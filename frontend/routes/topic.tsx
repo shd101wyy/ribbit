@@ -20,6 +20,11 @@ interface CurrentFeed {
   blockNumber: number;
 }
 
+enum TopicSorting {
+  ByTrend,
+  ByTime
+}
+
 interface Props {
   ribbit: Ribbit;
   networkId: number;
@@ -34,11 +39,6 @@ interface State {
   mouseOver: boolean;
   doneLoadingAll: boolean;
   msg: string;
-}
-
-enum TopicSorting {
-  ByTrend,
-  ByTime
 }
 
 export default class profile extends React.Component<Props, State> {
@@ -97,7 +97,6 @@ export default class profile extends React.Component<Props, State> {
           .call()
       );
     }
-    console.log("Show topic: ", blockNumber);
 
     this.currentFeed = {
       blockNumber,
@@ -185,7 +184,6 @@ export default class profile extends React.Component<Props, State> {
             feedInfo.feedType === "upvote"
           ) {
             // filter out existing content
-            let find = false;
             feedInfo.feedType = "post";
             feedInfo.repostUserInfo = null;
           }

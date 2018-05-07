@@ -1,4 +1,40 @@
 // out: false
 
 .topics-page {
+  .top-card {
+    padding: 0;
+
+    .btn-group {
+      display: flex;
+      flex-direction: row;
+
+      .btn {
+        text-align: center;
+        width: 25%;
+        padding: 12px;
+        font-size: 1rem;
+        color: #969696;
+        width: 50%;
+
+        i {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          cursor: pointer;
+          background-color: #e8e8e8;
+          color: #222;
+        }
+
+        &.selected {
+          color: #fff;
+          background-color: #74a24b;
+
+          &:hover {
+            background-color: #6e964a;
+          }
+        }
+      }
+    }
+  }
 }

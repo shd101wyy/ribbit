@@ -20,7 +20,7 @@ import TopicsCard from "../components/topics-card";
 import FollowingsCard from "../components/followings-card";
 import ProfileSettingsCard from "../components/profile-settings-card";
 import Header, { Page } from "../components/header";
-import { userInfo } from "os";
+import Error from "../components/error";
 
 interface HomeFeedsEntry {
   blockNumber: number;
@@ -265,72 +265,66 @@ export default class Home extends React.Component<Props, State> {
       return (
         <div className="home">
           <Header ribbit={this.props.ribbit} page={Page.HomePage} />
-          <div className="left-panel">
-            <ProfileCard
-              userInfo={this.state.userInfo}
-              ribbit={this.props.ribbit}
-            />
-            <FollowingsCard ribbit={this.props.ribbit} />
-          </div>
-          <div className="middle-panel">
-            <div className="cards">
-              {this.state.feeds.map((feedInfo, index) => (
-                <FeedCard
-                  key={index}
-                  feedInfo={feedInfo}
-                  ribbit={this.props.ribbit}
-                />
-              ))}
-              <p id="feed-footer">
-                {" "}
-                {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
-              </p>
+          <div className="container">
+            <div className="left-panel">
+              <ProfileCard
+                userInfo={this.state.userInfo}
+                ribbit={this.props.ribbit}
+              />
+              <FollowingsCard ribbit={this.props.ribbit} />
             </div>
-          </div>
-          <div className="right-panel">
-            <div className="post-btn-group">
-              <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>
-                <i className="fas fa-pen-square" />Ribbit
+            <div className="middle-panel">
+              <div className="cards">
+                {this.state.feeds.map((feedInfo, index) => (
+                  <FeedCard
+                    key={index}
+                    feedInfo={feedInfo}
+                    ribbit={this.props.ribbit}
+                  />
+                ))}
+                <p id="feed-footer">
+                  {" "}
+                  {this.state.loading
+                    ? this.state.msg
+                    : "No more feeds ;)"}{" "}
+                </p>
               </div>
-              <a href="https://github.com/shd101wyy/ribbit" target="_blank">
-                <div className="github-btn btn">
-                  <i className="fab fa-github" />
-                </div>
-              </a>
-              <a
-                href="https://github.com/shd101wyy/ribbit/issues"
-                target="_blank"
-              >
-                <div className="bug-btn github-btn btn">
-                  <i className="fas fa-bug" />
-                </div>
-              </a>
-              <a href="https://ethgasstation.info/" target="_blank">
-                <div className="github-btn btn">
-                  <i className="fas fa-fire" />
-                </div>
-              </a>
             </div>
-            {/* <AnnouncementCard /> */}
-            <TopicsCard ribbit={this.props.ribbit} />
+            <div className="right-panel">
+              <div className="post-btn-group">
+                <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>
+                  <i className="fas fa-pen-square" />Ribbit
+                </div>
+                <a href="https://github.com/shd101wyy/ribbit" target="_blank">
+                  <div className="github-btn btn">
+                    <i className="fab fa-github" />
+                  </div>
+                </a>
+                <a
+                  href="https://github.com/shd101wyy/ribbit/issues"
+                  target="_blank"
+                >
+                  <div className="bug-btn github-btn btn">
+                    <i className="fas fa-bug" />
+                  </div>
+                </a>
+                <a href="https://ethgasstation.info/" target="_blank">
+                  <div className="github-btn btn">
+                    <i className="fas fa-fire" />
+                  </div>
+                </a>
+              </div>
+              {/* <AnnouncementCard /> */}
+              <TopicsCard ribbit={this.props.ribbit} />
+            </div>
+            {this.state.showEditPanel ? (
+              <Edit cancel={this.toggleEditPanel} ribbit={this.props.ribbit} />
+            ) : null}
           </div>
-          {this.state.showEditPanel ? (
-            <Edit cancel={this.toggleEditPanel} ribbit={this.props.ribbit} />
-          ) : null}
         </div>
       );
     } else {
-      return (
-        <div className="home">
-          <h1 className="title is-1">
-            Please make sure{" "}
-            <a href="https://metamask.io/" target="_blank">
-              MetaMask
-            </a>{" "}
-            is working in your browser.
-          </h1>
-        </div>
-      );
+      return <Error />;
     }
   }
 }

@@ -18,6 +18,7 @@ import Notifications from "./routes/notifications";
 import Topics from "./routes/topics";
 import Footer from "./components/footer";
 import Header from "./components/header";
+import Error from "./components/error";
 
 interface Props {}
 interface State {
@@ -77,17 +78,7 @@ class App extends React.Component<Props, State> {
 
   render() {
     if (!this.state.ribbit) {
-      return (
-        <div className="home">
-          <h1 className="title is-1">
-            Please make sure{" "}
-            <a href="https://metamask.io/" target="_blank">
-              MetaMask
-            </a>{" "}
-            is working in your browser.
-          </h1>
-        </div>
-      );
+      return <Error />;
     }
     return (
       <Router history={hashHistory}>
@@ -114,7 +105,12 @@ class App extends React.Component<Props, State> {
           />
           <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/topics`}
-            render={props => <Topics ribbit={this.state.ribbit} />}
+            render={props => (
+              <Topics
+                ribbit={this.state.ribbit}
+                networkId={props.match.params["networkId"]}
+              />
+            )}
             exact
           />
           <Route
