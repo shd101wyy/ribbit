@@ -72,7 +72,9 @@ For example:
 Hi @{ribbit} will notify the user `ribbit` this about post.
 ```
 
-### Import (TODO)
+## Roadmap (TODO)
+
+* Import
 
 ```markdown
 @import "https://..."
@@ -80,6 +82,9 @@ Hi @{ribbit} will notify the user `ribbit` this about post.
 @import "ribbit://profile/..."
 @import "ribbit://tx/..."
 ```
+
+* Rich content editor.
+* Multiple languages support.
 
 ## Developer section
 

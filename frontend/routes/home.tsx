@@ -22,13 +22,6 @@ import ProfileSettingsCard from "../components/profile-settings-card";
 import Header, { Page } from "../components/header";
 import { userInfo } from "os";
 
-enum HomePanel {
-  FollowingsFeeds,
-  TopicsFeeds,
-  Settings,
-  Notifications
-}
-
 interface HomeFeedsEntry {
   blockNumber: number;
   creation: number;
@@ -47,8 +40,6 @@ interface State {
   loading: boolean;
   doneLoadingAll: boolean;
   userInfo: UserInfo;
-  panel: HomePanel;
-  searchBoxValue: string;
 }
 export default class Home extends React.Component<Props, State> {
   private lastFeedCard: HTMLDivElement;
@@ -62,9 +53,7 @@ export default class Home extends React.Component<Props, State> {
       feeds: [],
       loading: false,
       doneLoadingAll: false,
-      userInfo: null,
-      panel: HomePanel.FollowingsFeeds,
-      searchBoxValue: ""
+      userInfo: null
     };
   }
 
@@ -77,12 +66,14 @@ export default class Home extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (this.props.ribbit !== newProps.ribbit) {
-      checkUserRegistration(newProps.ribbit);
-      this.updateUserInfo(newProps.ribbit);
-      this.showUserHome(newProps.ribbit);
-      this.bindWindowScrollEvent();
-    }
+    // in order to get click in Header home tab to reload home page.
+    // console.log('home will receive props')
+    // if (this.props.ribbit !== newProps.ribbit) {
+    checkUserRegistration(newProps.ribbit);
+    this.updateUserInfo(newProps.ribbit);
+    this.showUserHome(newProps.ribbit);
+    this.bindWindowScrollEvent();
+    // }
   }
 
   componentWillUnmount() {
@@ -102,6 +93,7 @@ export default class Home extends React.Component<Props, State> {
     if (!ribbit) return;
     // initialize homeFeedsEntries:
     const homeFeedsEntries: HomeFeedsEntry[] = [];
+    const creation = Date.now();
     // TODO: change followingUsernames to followingUsers and store their addresses instead of usernames.
     for (let i = 0; i < ribbit.settings.followingUsernames.length; i++) {
       const username = ribbit.settings.followingUsernames[i].username;
@@ -114,7 +106,7 @@ export default class Home extends React.Component<Props, State> {
         );
         homeFeedsEntries.push({
           blockNumber,
-          creation: Infinity,
+          creation,
           userAddress
         });
       }
@@ -168,7 +160,8 @@ export default class Home extends React.Component<Props, State> {
         // console.log("showHomeFeeds", maxBlockNumber, maxCreation, maxUserAddress)
         const transactionInfo = await this.props.ribbit.getTransactionInfo({
           userAddress: maxUserAddress,
-          blockNumber: maxBlockNumber
+          blockNumber: maxBlockNumber,
+          maxCreation: maxCreation
         });
 
         if (!transactionInfo) {

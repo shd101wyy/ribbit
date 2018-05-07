@@ -3,6 +3,7 @@ import { Component } from "react";
 import { Link } from "react-router-dom";
 
 import { Ribbit } from "../lib/ribbit";
+import hashHistory from "../lib/history";
 
 export enum Page {
   HomePage,
@@ -69,6 +70,13 @@ export default class Header extends Component<Props, State> {
     }
   };
 
+  clickHomePageTab = event => {
+    event.stopPropagation();
+    event.preventDefault();
+    hashHistory.replace(`/${this.props.ribbit.networkId}/`);
+    console.log("click here");
+  };
+
   render() {
     return (
       <header className="header">
@@ -78,15 +86,18 @@ export default class Header extends Component<Props, State> {
             <Link
               className={this.props.page === Page.HomePage ? "selected" : ""}
               to={`/${this.props.ribbit.networkId}/`}
+              onClick={this.clickHomePageTab}
             >
               <i className="icon fas fa-home" />Home
             </Link>
+            {/*
             <Link
               className={this.props.page === Page.TopicsPage ? "selected" : ""}
               to={`/${this.props.ribbit.networkId}/topics`}
             >
               <i className="icon fab fa-slack-hash" />Topics
             </Link>
+            */}
             <Link
               className={
                 this.props.page === Page.NotificationsPage ? "selected" : ""

@@ -549,7 +549,7 @@ export class Ribbit {
     tag = "",
     blockNumber = 0,
     transactionHash = "",
-    maxCreation = Infinity
+    maxCreation = 0
     // TODO: there might be multiple ribbit transaction in one block,
     //       we need to sort them by timestamp.
     // timestamp => timestamp in transaction should be greater than this.
@@ -557,6 +557,9 @@ export class Ribbit {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("transactionHash: ", transactionHash);
+    if (!maxCreation) {
+      maxCreation = Date.now();
+    }
     if (transactionHash) {
       try {
         const transaction = await this.web3.eth.getTransaction(transactionHash);
@@ -580,11 +583,15 @@ export class Ribbit {
     }
 
     // Check database
+    // TODO: there might be two entries that have the same `creation`...
     if (transactionHash) {
       const res = await this.transactionInfoDB["find"]({
         selector: {
-          hash: transactionHash
-        }
+          hash: transactionHash,
+          creation: { $lt: maxCreation }
+        },
+        // sort: ["creation"],
+        limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log(
@@ -592,21 +599,24 @@ export class Ribbit {
         );
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("getTransactionInfo: Not found in db");
+        console.log("getTransactionInfo: Not found in db for transactionHash");
         return null;
       }
     } else if (userAddress && blockNumber) {
       const res = await this.transactionInfoDB["find"]({
         selector: {
           from: userAddress,
-          blockNumber: blockNumber
-        }
+          blockNumber: blockNumber,
+          creation: { $lt: maxCreation }
+        },
+        // sort: ["creation"],
+        limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log("getTransactionInfo: Load from database for user");
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("getTransactionInfo: Not found in db");
+        console.log("getTransactionInfo: Not found in db for user");
         return null;
       }
     } else if (tag && blockNumber) {
@@ -615,14 +625,17 @@ export class Ribbit {
           blockNumber: blockNumber,
           tags: {
             $in: [tag]
-          }
-        }
+          },
+          creation: { $lt: maxCreation }
+        },
+        // sort: ["creation"],
+        limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log("getTransactionInfo: Load from database for tag");
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("getTransactionInfo: Not found in db");
+        console.log("getTransactionInfo: Not found in db for tag");
         return null;
       }
     }
