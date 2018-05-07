@@ -31,6 +31,7 @@ if (typeof Buffer === "undefined") {
 }
 import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
+import { BlockSchema } from "./db";
 const IPFS = window["Ipfs"];
 
 abiDecoder.addABI(abiArray);
@@ -85,6 +86,12 @@ export class Ribbit {
    * Pouchdb instance.
    */
   public transactionInfoDB: PouchDB.Database<TransactionInfo>;
+
+  /**
+   * Pouchdb instance.
+   */
+  public blockDB: PouchDB.Database<BlockSchema>;
+
   /**
    * Ethereum web3 instance.
    */
@@ -144,7 +151,10 @@ export class Ribbit {
     await this.transactionInfoDB["createIndex"]({
       index: { fields: ["creation", "blockNumber", "from", "tags", "hash"] }
     });
-
+    this.blockDB = new PouchDB<BlockSchema>("ribbit/block");
+    await this.blockDB["createIndex"]({
+      index: { fields: ["blockNumber", "fullySynced"] }
+    });
     this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
@@ -446,6 +456,85 @@ export class Ribbit {
   }
 
   /**
+   * Sync one block, store all ribbit related transaction information into database.
+   * TODO: fetch IPFS messages.
+   * @param blockNumber
+   */
+  public async syncBlock(blockNumber: number) {
+    console.log("syncBlock: start syncing block " + blockNumber);
+    const res = await this.blockDB["find"]({
+      selector: {
+        blockNumber
+      }
+    });
+    if (res && res.docs.length && res.docs[0]["fullySynced"]) {
+      // already synced
+      console.log(`syncBlock: block ${blockNumber} synced from database.`);
+      return;
+    } else {
+      const transactionCount = await this.web3.eth.getBlockTransactionCount(
+        blockNumber
+      );
+      for (let i = 0; i < transactionCount; i++) {
+        const transaction = await this.web3.eth.getTransactionFromBlock(
+          blockNumber,
+          i
+        );
+
+        const decodedInputData = decodeMethod(transaction.input);
+        if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
+          continue;
+        } else {
+          const receipt = await this.web3.eth.getTransactionReceipt(
+            transaction.hash
+          );
+          const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null
+          if (!logs.length) {
+            continue;
+          }
+          const decodedLogs = decodeLogs(logs);
+          const tags = [];
+          decodedLogs.forEach(decodedLog => {
+            if (
+              decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
+              decodedLog.name === "SavePreviousTagInfoByTrendEvent"
+            ) {
+              tags.push(decodedLog.events["tag"].value);
+            }
+          });
+          // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
+          const transactionInfo: TransactionInfo = Object.assign(
+            transaction as object,
+            {
+              decodedInputData,
+              decodedLogs,
+              creation: parseInt(decodedInputData.params["timestamp"].value),
+              _id: transaction.hash,
+              tags
+            }
+          ) as TransactionInfo;
+          try {
+            await this.transactionInfoDB.get(transaction.hash);
+          } catch (error) {
+            await this.transactionInfoDB.put(transactionInfo);
+          }
+        }
+      }
+
+      try {
+        await this.blockDB.get("block_" + blockNumber.toString());
+      } catch (error) {
+        await this.blockDB.put({
+          blockNumber,
+          fullySynced: true,
+          _id: "block_" + blockNumber.toString()
+        });
+      }
+      console.log(`syncBlock: block ${blockNumber} synced from blockchain.`);
+    }
+  }
+
+  /**
    * If transactionHash is provided, then get transactionInfo based on that trasactionHash,
    * then compare the data with blockNumber.
    * If comparison failed, then try to get the transactionInfo based on the blockNumber and messageHash.
@@ -453,12 +542,14 @@ export class Ribbit {
    * @param tag tag of this transaction. Use it to validate transaction if tag is provided.
    * @param blockNumber block number
    * @param transactionHash
+   * @param maxCreation  max timestamp of the creation of the feed.
    */
   public async getTransactionInfo({
     userAddress = "",
     tag = "",
     blockNumber = 0,
-    transactionHash = ""
+    transactionHash = "",
+    maxCreation = Infinity
     // TODO: there might be multiple ribbit transaction in one block,
     //       we need to sort them by timestamp.
     // timestamp => timestamp in transaction should be greater than this.
@@ -466,6 +557,27 @@ export class Ribbit {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);
     // console.log("transactionHash: ", transactionHash);
+    if (transactionHash) {
+      try {
+        const transaction = await this.web3.eth.getTransaction(transactionHash);
+        if (
+          (blockNumber && transaction.blockNumber === blockNumber) || // block number is provided
+          !blockNumber
+        ) {
+          blockNumber = transaction.blockNumber;
+        }
+      } catch (error) {
+        // transactionHash is wrong, then check blockNumber and messageHash
+        return null;
+      }
+    }
+
+    if (!blockNumber) {
+      return;
+    } else {
+      // Sync block;
+      await this.syncBlock(blockNumber);
+    }
 
     // Check database
     if (transactionHash) {
@@ -475,10 +587,13 @@ export class Ribbit {
         }
       });
       if (res && res.docs && res.docs.length) {
-        console.log("Load from database for transactionHash");
+        console.log(
+          "getTransactionInfo: Load from database for transactionHash"
+        );
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("Not found in db");
+        console.log("getTransactionInfo: Not found in db");
+        return null;
       }
     } else if (userAddress && blockNumber) {
       const res = await this.transactionInfoDB["find"]({
@@ -488,10 +603,11 @@ export class Ribbit {
         }
       });
       if (res && res.docs && res.docs.length) {
-        console.log("Load from database for user");
+        console.log("getTransactionInfo: Load from database for user");
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("Not found in db");
+        console.log("getTransactionInfo: Not found in db");
+        return null;
       }
     } else if (tag && blockNumber) {
       const res = await this.transactionInfoDB["find"]({
@@ -503,109 +619,13 @@ export class Ribbit {
         }
       });
       if (res && res.docs && res.docs.length) {
-        console.log("Load from database for tag");
+        console.log("getTransactionInfo: Load from database for tag");
         return res.docs[0] as TransactionInfo;
       } else {
-        console.log("Not found in db");
-      }
-    }
-
-    const validateTransaction = async (transaction: Transaction) => {
-      // It is weird that this.accountAddress is all lowercase, but transaction.from is not.
-      // This code is wrong for `repost` event, userAddress !== transaction.from.
-      if (
-        userAddress &&
-        userAddress.toLowerCase() !== transaction.from.toLowerCase()
-      ) {
+        console.log("getTransactionInfo: Not found in db");
         return null;
       }
-
-      const input = transaction.input;
-      const decodedInputData = decodeMethod(input);
-      if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
-        return null;
-      } else {
-        const receipt = await this.web3.eth.getTransactionReceipt(
-          transaction.hash
-        );
-        const logs = (receipt ? receipt["logs"] : []) || []; // receipt might be null
-        if (!logs.length) {
-          return null;
-        }
-        const decodedLogs = decodeLogs(logs);
-        const tags = [];
-        decodedLogs.forEach(decodedLog => {
-          if (
-            decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
-            decodedLog.name === "SavePreviousTagInfoByTrendEvent"
-          ) {
-            tags.push(decodedLog.events["tag"].value);
-          }
-        });
-        if (tag && tags.indexOf(tag) < 0) {
-          return null;
-        }
-        // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
-        const transactionInfo: TransactionInfo = Object.assign(
-          transaction as object,
-          {
-            decodedInputData,
-            decodedLogs,
-            creation: parseInt(decodedInputData.params["timestamp"].value),
-            _id: transaction.hash,
-            tags
-          }
-        ) as TransactionInfo;
-        try {
-          await this.transactionInfoDB.get(transaction.hash);
-        } catch (error) {
-          await this.transactionInfoDB.put(transactionInfo);
-        }
-        return transactionInfo;
-      }
-    };
-
-    if (transactionHash) {
-      try {
-        const transaction = await this.web3.eth.getTransaction(transactionHash);
-        if (
-          (blockNumber && transaction.blockNumber === blockNumber) || // block number is provided
-          !blockNumber
-        ) {
-          // block number is not provided
-          const validatedResult = await validateTransaction(transaction);
-          if (validatedResult) {
-            // console.log('transactionHash is valid: ', validatedResult)
-            return validatedResult;
-          }
-        }
-      } catch (error) {
-        // transactionHash is wrong, then check blockNumber and messageHash
-      }
     }
-
-    if (!blockNumber) {
-      return null;
-    }
-
-    const transactionCount = await this.web3.eth.getBlockTransactionCount(
-      blockNumber
-    );
-    // console.log("transactionCount: " + transactionCount);
-
-    for (let i = 0; i < transactionCount; i++) {
-      const transaction = await this.web3.eth.getTransactionFromBlock(
-        blockNumber,
-        i
-      );
-      const validatedResult = await validateTransaction(transaction);
-      if (validatedResult) {
-        // console.log("transactionHash is invalid: ", validatedResult);
-        return validatedResult;
-      }
-    }
-
-    return null; // not found.
   }
 
   /**
@@ -1094,5 +1114,6 @@ export class Ribbit {
 
   public async destroyDB() {
     await this.transactionInfoDB.destroy();
+    await this.blockDB.destroy();
   }
 }
