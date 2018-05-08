@@ -22,7 +22,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
       event.stopPropagation();
       event.preventDefault();
       window.open(
-        `/#/${this.props.ribbit.networkId}/profile/${username}`,
+        `${window.location.pathname}#/${this.props.ribbit.networkId}/profile/${username}`,
         "_blank"
       );
     };
