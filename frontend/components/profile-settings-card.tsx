@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 import ProfileCard from "./profile-card";
 import { Ribbit, UserInfo } from "../lib/ribbit";
 
@@ -121,61 +122,77 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       bio: this.state.bio
     };
     return (
-      <div className="profile-settings-card card">
-        <p className="title">Profile settings</p>
-        <div className="form">
-          <div className="entry">
-            <p className="entry-title">Username: </p>
-            <input
-              placeholder="@username"
-              value={this.state.username}
-              onChange={this.changeUsername}
+      <I18n>
+        {(t, { i18n }) => (
+          <div className="profile-settings-card card">
+            <p className="title">
+              {t("components/profile-settings-card/title")}
+            </p>
+            <div className="form">
+              <div className="entry">
+                <p className="entry-title">{t("general/Username")}: </p>
+                <input
+                  placeholder={"@" + t("general/username")}
+                  value={this.state.username}
+                  onChange={this.changeUsername}
+                />
+              </div>
+              <div className="entry">
+                <p className="entry-title">{t("general/Display-name")}: </p>
+                <input
+                  placeholder={t("general/Display-name")}
+                  value={this.state.name}
+                  onChange={this.changeName}
+                />
+              </div>
+              <div className="entry">
+                <p className="entry-title">{t("general/Avatar-URL")}: </p>
+                <input
+                  placeholder={t(
+                    "components/profile-settings-card/avatar-url-placeholder"
+                  )}
+                  value={this.state.avatar}
+                  onChange={this.changeAvatar}
+                />
+              </div>
+              <div className="entry">
+                <p className="entry-title">{t("general/Cover-URL")}: </p>
+                <input
+                  placeholder={t(
+                    "components/profile-settings-card/cover-url-placeholder"
+                  )}
+                  value={this.state.cover}
+                  onChange={this.changeCover}
+                />
+              </div>
+              <div className="entry markdown-entry">
+                <p className="entry-title">
+                  {t("general/Bio-markdown-ready")}:{" "}
+                </p>
+                <CodeMirror
+                  ref={elem => (this.cm = elem)}
+                  value={this.state.bio}
+                  onChange={this.updatebio}
+                  options={options}
+                />
+              </div>
+            </div>
+            <div
+              id="publish-profile"
+              className="btn"
+              onClick={this.publishProfile}
+            >
+              {t("components/profile-settings-card/publish")}
+            </div>
+            <p className="title">{t("general/Profile-preview")}</p>
+            <ProfileCard
+              userInfo={userInfo}
+              ribbit={this.props.ribbit}
+              hideFollowingBtn={true}
             />
           </div>
-          <div className="entry">
-            <p className="entry-title">Display name: </p>
-            <input
-              placeholder="Display name"
-              value={this.state.name}
-              onChange={this.changeName}
-            />
-          </div>
-          <div className="entry">
-            <p className="entry-title">Avatar URL: </p>
-            <input
-              placeholder="Avatar image url starting with http:// or https://"
-              value={this.state.avatar}
-              onChange={this.changeAvatar}
-            />
-          </div>
-          <div className="entry">
-            <p className="entry-title">Cover URL: </p>
-            <input
-              placeholder="Cover image url starting with https:// or https://"
-              value={this.state.cover}
-              onChange={this.changeCover}
-            />
-          </div>
-          <div className="entry markdown-entry">
-            <p className="entry-title">Bio (markdown ready): </p>
-            <CodeMirror
-              ref={elem => (this.cm = elem)}
-              value={this.state.bio}
-              onChange={this.updatebio}
-              options={options}
-            />
-          </div>
-        </div>
-        <div id="publish-profile" className="btn" onClick={this.publishProfile}>
-          Publish profile to blockchain
-        </div>
-        <p className="title">Profile preview</p>
-        <ProfileCard
-          userInfo={userInfo}
-          ribbit={this.props.ribbit}
-          hideFollowingBtn={true}
-        />
-      </div>
+        )}
+      </I18n>
     );
   }
 }
