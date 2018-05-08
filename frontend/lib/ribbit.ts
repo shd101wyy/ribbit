@@ -1122,7 +1122,8 @@ export class Ribbit {
       postAsIPFSHash: false,
       postToRibbitTopic: true,
       followingUsernames,
-      followingTopics
+      followingTopics,
+      language: "en"
     };
     return this.settings;
   }

@@ -19,6 +19,7 @@ interface State {
   avatar: string;
   cover: string;
   bio: string;
+  lang: string;
 }
 
 export default class ProfileSettingsCard extends React.Component<Props, State> {
@@ -31,7 +32,8 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       name: "",
       avatar: "",
       cover: "",
-      bio: "ribbit, ribbit, ribbit…"
+      bio: "ribbit, ribbit, ribbit…",
+      lang: "en"
     };
   }
 
@@ -117,6 +119,22 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       });
   };
 
+  handleLanguageChange = event => {
+    const lang: string = event.target.value;
+    console.log(lang);
+    this.setState(
+      {
+        lang
+      },
+      () => {
+        const ribbit = this.props.ribbit;
+        ribbit.settings.language = lang;
+        ribbit.setSettings(ribbit.settings);
+        i18n.changeLanguage(lang);
+      }
+    );
+  };
+
   render() {
     const options = {
       lineNumbers: false,
@@ -139,6 +157,16 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
               {t("components/profile-settings-card/title")}
             </p>
             <div className="form">
+              <div className="entry">
+                <p className="entry-title">Language/语言:</p>
+                <select
+                  value={this.state.lang}
+                  onChange={this.handleLanguageChange}
+                >
+                  <option value="en"> English </option>
+                  <option value="zh"> 简体中文 </option>
+                </select>
+              </div>
               <div className="entry">
                 <p className="entry-title">{t("general/Username")}: </p>
                 <input

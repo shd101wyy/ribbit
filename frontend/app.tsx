@@ -54,6 +54,8 @@ class App extends React.Component<Props, State> {
     try {
       await ribbit.initialize();
       console.log("user initialized.", ribbit.accountAddress);
+      console.log("user language: ", ribbit.settings.language);
+      i18n.changeLanguage(ribbit.settings.language || "en");
       this.setState(
         {
           injectWeb3: true,

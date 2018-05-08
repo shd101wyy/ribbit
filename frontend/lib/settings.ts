@@ -29,4 +29,8 @@ export interface Settings {
      */
     order?: number;
   }[];
+  /**
+   * Language for Ribbit web interface.
+   */
+  language: string;
 }
