@@ -33,6 +33,7 @@ import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
 import { BlockSchema } from "./db";
 const IPFS = window["Ipfs"];
+import i18n from "../i18n/i18n";
 
 abiDecoder.addABI(abiArray);
 
@@ -324,7 +325,7 @@ export class Ribbit {
         .on("receipt", receipt => {
           new window["Noty"]({
             type: "success",
-            text: `Your post is now saved on blockchain.`,
+            text: i18n.t("notification/publish-post-success"),
             timeout: 10000
           }).show();
           console.log("post feed receipt", receipt);
@@ -388,7 +389,7 @@ export class Ribbit {
         .on("receipt", receipt => {
           new window["Noty"]({
             type: "success",
-            text: `Your reply is now saved on blockchain.`,
+            text: i18n.t("notification/publish-reply-success"),
             timeout: 10000
           }).show();
           console.log("reply feed receipt", receipt);
@@ -454,7 +455,7 @@ export class Ribbit {
         .on("receipt", receipt => {
           new window["Noty"]({
             type: "success",
-            text: `Your upvote is now saved on blockchain.`,
+            text: i18n.t("notification/publish-upvote-success"),
             timeout: 10000
           }).show();
           console.log("upvote receipt: ", receipt);
@@ -480,7 +481,7 @@ export class Ribbit {
         .on("receipt", receipt => {
           new window["Noty"]({
             type: "success",
-            text: `Your downvote is now saved on blockchain.`,
+            text: i18n.t("notification/publish-downvote-success"),
             timeout: 10000
           }).show();
           console.log("downvote receipt: ", receipt);
@@ -992,7 +993,7 @@ export class Ribbit {
             console.log("finish setUserMetadata: ", receipt);
             new window["Noty"]({
               type: "success",
-              text: `Your profile information is now saved on blockchain.`,
+              text: i18n.t("notification/publish-profile-success"),
               timeout: 10000
             }).show();
           });
@@ -1002,7 +1003,7 @@ export class Ribbit {
         (await this.getAddressFromUsername(username)) !==
         "0x0000000000000000000000000000000000000000"
       ) {
-        throw `Username @${username} is already taken.`;
+        throw i18n.t("notification/username-taken", { username });
       }
       return new Promise((resolve, reject) => {
         this.contractInstance.methods
@@ -1021,7 +1022,7 @@ export class Ribbit {
             console.log("finish setUserMetadata: ", receipt);
             new window["Noty"]({
               type: "success",
-              text: `Your profile information is now saved on blockchain.`,
+              text: i18n.t("notification/publish-profile-success"),
               timeout: 10000
             }).show();
           });

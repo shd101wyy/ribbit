@@ -5,6 +5,7 @@ import DonatePanel from "../components/donate-panel";
 
 import { FeedInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
+import i18n from "../i18n/i18n";
 
 interface Props {
   feedInfo: FeedInfo;
@@ -48,12 +49,16 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
         // do nothing
         new window["Noty"]({
           type: "info",
-          text: `Your downvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          text: i18n.t("notification/publish-downvote"),
           timeout: 10000
         }).show();
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
   };
 

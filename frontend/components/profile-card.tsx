@@ -77,7 +77,11 @@ export default class ProfileCard extends React.Component<Props, State> {
         });
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
   };
 
@@ -90,7 +94,11 @@ export default class ProfileCard extends React.Component<Props, State> {
         });
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
   };
 

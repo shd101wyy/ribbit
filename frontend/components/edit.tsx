@@ -14,6 +14,7 @@ import { Ribbit } from "../lib/ribbit";
 import * as utility from "../lib/utility";
 import { getTopicsAndMentionsFromHTML, FeedInfo } from "../lib/feed";
 import { renderMarkdown } from "../lib/markdown";
+import i18n from "../i18n/i18n";
 
 interface Props {
   cancel: () => void;
@@ -188,11 +189,15 @@ export default class Edit extends Component<Props, State> {
 
       new window["Noty"]({
         type: "info",
-        text: `Your post is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        text: i18n.t("notification/publish-post"),
         timeout: 10000
       }).show();
     } catch (error) {
-      alert(error);
+      new window["Noty"]({
+        type: "error",
+        text: error,
+        timeout: 10000
+      }).show();
     }
   };
 

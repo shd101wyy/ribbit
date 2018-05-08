@@ -5,6 +5,7 @@ import { I18n } from "react-i18next";
 
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
+import i18n from "../i18n/i18n";
 
 export enum Page {
   HomePage,
@@ -49,7 +50,13 @@ export default class Header extends Component<Props, State> {
             "_blank"
           );
         } else {
-          alert(`User with address ${searchValue} doesn't exist.`);
+          new window["Noty"]({
+            type: "error",
+            text: i18n.t("notification/user-address-doesnt-exist", {
+              userAddress: searchValue
+            }),
+            timeout: 10000
+          }).show();
         }
       } else if (searchValue.startsWith("@")) {
         // search for user

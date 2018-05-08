@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { Ribbit } from "../lib/ribbit";
 import { FeedInfo } from "../lib/feed";
+import i18n from "../i18n/i18n";
 
 interface Props {
   ribbit: Ribbit;
@@ -79,12 +80,16 @@ export default class DonatePanel extends React.Component<Props, State> {
         // do nothing.
         new window["Noty"]({
           type: "info",
-          text: `Thank you for supporting the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          text: i18n("notification/publish-upvote"),
           timeout: 10000
         }).show();
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
     this.props.close();
   };

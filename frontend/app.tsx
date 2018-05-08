@@ -68,7 +68,7 @@ class App extends React.Component<Props, State> {
     } catch (error) {
       new window["Noty"]({
         type: "error",
-        text: i18n.t("app/error"),
+        text: i18n.t("notification/init-error"),
         timeout: 10000
       }).show();
       this.setState({ ribbit: null }, () => {

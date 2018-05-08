@@ -51,8 +51,22 @@ i18next.init({
           "Avatar image url starting with http:// or https://",
         "components/profile-settings-card/cover-url-placeholder":
           "Cover image url starting with http:// or https://",
-        "app/error":
-          "Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked."
+        "routes/signup/title": "Welcome to use Ribbit!",
+        "routes/signup/subtitle":
+          "Please finish your account registration below",
+        "notification/init-error":
+          "Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked.",
+        "notification/publish-profile": `Profile is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        "notification/publish-profile-success": `Your profile information is now saved on blockchain.`,
+        "notification/publish-downvote": `Your downvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        "notification/publish-downvote-success": `Your downvote is now saved on blockchain.`,
+        "notification/publish-upvote": `Thank you for supporting the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        "notification/publish-upvote-success": `Your upvote is now saved on blockchain.`,
+        "notification/publish-post": `Your post is being published to blockchain.\nPlease wait until the transaction finishes.`,
+        "notification/publish-post-success": `Your post is now saved on blockchain.`,
+        "notification/publish-reply-success": `Your reply is now saved on blockchain.`,
+        "notification/username-taken": `Username {{username}} is already taken.`,
+        "notification/user-address-doesnt-exist": `User with address {{userAddress}} doesn't exist.`
       }
     },
     zh: {
@@ -97,7 +111,21 @@ i18next.init({
           "头像图片链接请以 https:// 或者 https:// 开头",
         "components/profile-settings-card/cover-url-placeholder":
           "墙图片链接请以 http:// 或者 https:// 开头",
-        "app/error": "启动 Ribbit 失败。请确保 MetaMask 已启动并解锁。"
+        "routes/signup/title": "欢迎使用 Ribbit！",
+        "routes/signup/subtitle": "请在下方完成账号注册",
+        "notification/init-error":
+          "启动 Ribbit 失败。请确保 MetaMask 已启动并解锁。",
+        "notification/publish-profile": `个人信息正在被发布到区块链。\n请等候交易完成。`,
+        "notification/publish-profile-success": `你的信息已被成功保存到区块链。`,
+        "notification/publish-downvote": `你的反对正在被发布到区块链。\n请等候交易完成。`,
+        "notification/publish-downvote-success": `你的反对已被成功保存到区块链。`,
+        "notification/publish-upvote": `感谢你支持作者。你的赞同正在被发布到区块链。\n请等候交易完成。`,
+        "notification/publish-upvote-success": `你的赞同已被成功保存到区块链。`,
+        "notification/publish-post": `你的文字正在被发布到区块链。\n请等候交易完成。`,
+        "notification/publish-post-success": `你的文字已被成功保存到区块链。`,
+        "notification/publish-reply-success": `你的回复已被成功保存到区块链。`,
+        "notification/username-taken": `用户名 {{username}} 已被注册。`,
+        "notification/user-address-doesnt-exist": `用户地址 {{userAddress}} 不存在。`
       }
     }
   }

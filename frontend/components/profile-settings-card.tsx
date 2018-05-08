@@ -7,6 +7,8 @@ import * as CodeMirror from "react-codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/markdown/markdown";
 
+import i18n from "../i18n/i18n";
+
 interface Props {
   ribbit: Ribbit;
   reset?: boolean;
@@ -60,7 +62,11 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
         );
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
   }
 
@@ -98,12 +104,16 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       .then(hash => {
         new window["Noty"]({
           type: "info",
-          text: `Profile is being published to blockchain.\nPlease wait until the transaction finishes.`,
+          text: i18n.t("notification/publish-profile"),
           timeout: 10000
         }).show();
       })
       .catch(error => {
-        alert(error);
+        new window["Noty"]({
+          type: "error",
+          text: error,
+          timeout: 10000
+        }).show();
       });
   };
 
