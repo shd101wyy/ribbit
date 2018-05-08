@@ -53,7 +53,8 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
               ? ""
               : userInfo.avatar,
             cover: userInfo.cover,
-            bio: userInfo.bio || "ribbit, ribbit, ribbit…"
+            bio: userInfo.bio || "ribbit, ribbit, ribbit…",
+            lang: ribbit.settings.language
           },
           () => {
             if (this.cm) {
