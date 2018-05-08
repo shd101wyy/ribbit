@@ -495,7 +495,7 @@ export class Ribbit {
    */
   public async syncBlock(
     blockNumber: number,
-    cb?: (blockNumber: number, index: number) => void
+    cb?: (blockNumber: number, index: number, total: number) => void
   ) {
     console.log("syncBlock: start syncing block " + blockNumber);
     const res = await this.blockDB["find"]({
@@ -507,7 +507,7 @@ export class Ribbit {
       // already synced
       console.log(`syncBlock: block ${blockNumber} synced from database.`);
       if (cb) {
-        cb(blockNumber, -1);
+        cb(blockNumber, -1, -1);
       }
       return;
     } else {
@@ -516,7 +516,7 @@ export class Ribbit {
       );
       for (let i = 0; i < transactionCount; i++) {
         if (cb) {
-          cb(blockNumber, i);
+          cb(blockNumber, i, transactionCount);
         }
         const transaction = await this.web3.eth.getTransactionFromBlock(
           blockNumber,
@@ -603,7 +603,7 @@ export class Ribbit {
       //       we need to sort them by timestamp.
       // timestamp => timestamp in transaction should be greater than this.
     },
-    cb?: (blockNumber: number, index: number) => void
+    cb?: (blockNumber: number, index: number, total: number) => void
   ): Promise<TransactionInfo> {
     // console.log("userAddress: ", userAddress);
     // console.log("blockNumber: ", blockNumber);

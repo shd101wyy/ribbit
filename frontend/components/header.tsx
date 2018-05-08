@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Component } from "react";
 import { Link } from "react-router-dom";
+import { I18n } from "react-i18next";
 
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
@@ -72,52 +73,70 @@ export default class Header extends Component<Props, State> {
 
   render() {
     return (
-      <header className="header">
-        <div className="wrapper">
-          <h1>Ribbit</h1>
-          <nav>
-            <Link
-              className={this.props.page === Page.HomePage ? "selected" : ""}
-              to={`/${this.props.ribbit.networkId}/`}
-            >
-              <i className="icon fas fa-home" />Home
-            </Link>
-            <Link
-              className={this.props.page === Page.TopicsPage ? "selected" : ""}
-              to={`/${this.props.ribbit.networkId}/topics`}
-            >
-              <i className="icon fab fa-slack-hash" />Topics
-            </Link>
-            <Link
-              className={
-                this.props.page === Page.NotificationsPage ? "selected" : ""
-              }
-              to={`/${this.props.ribbit.networkId}/notifications`}
-            >
-              <i className="icon fas fa-bell" />Notifications
-            </Link>
-            <Link
-              className={
-                this.props.page === Page.SettingsPage ? "selected" : ""
-              }
-              to={`/${this.props.ribbit.networkId}/settings`}
-            >
-              <i className="icon fas fa-cog" />Settings
-            </Link>
-          </nav>
-          <div className="search-box-wrapper">
-            <input
-              className="search-box"
-              placeholder="Enter @username here or #topic that you are interested. "
-              value={this.state.searchBoxValue}
-              onChange={event => {
-                this.setState({ searchBoxValue: event.target.value });
-              }}
-              onKeyDown={this.searchBoxKeydown}
-            />
-          </div>
-        </div>
-      </header>
+      <I18n>
+        {(t, { i18n }) => (
+          <header className="header">
+            <div className="wrapper">
+              <h1>Ribbit</h1>
+              <nav>
+                <Link
+                  className={
+                    "header-tab" +
+                    (this.props.page === Page.HomePage ? "selected" : "")
+                  }
+                  to={`/${this.props.ribbit.networkId}/`}
+                >
+                  <i className="icon fas fa-home" />
+                  <span>{t("components/header/home")}</span>
+                </Link>
+                <Link
+                  className={
+                    "header-tab" +
+                    (this.props.page === Page.TopicsPage ? "selected" : "")
+                  }
+                  to={`/${this.props.ribbit.networkId}/topics`}
+                >
+                  <i className="icon fab fa-slack-hash" />
+                  <span>{t("components/header/topics")}</span>
+                </Link>
+                <Link
+                  className={
+                    "header-tab" +
+                    (this.props.page === Page.NotificationsPage
+                      ? "selected"
+                      : "")
+                  }
+                  to={`/${this.props.ribbit.networkId}/notifications`}
+                >
+                  <i className="icon fas fa-bell" />
+                  <span>{t("components/header/notifications")}</span>
+                </Link>
+                <Link
+                  className={
+                    "header-tab" +
+                    (this.props.page === Page.SettingsPage ? "selected" : "")
+                  }
+                  to={`/${this.props.ribbit.networkId}/settings`}
+                >
+                  <i className="icon fas fa-cog" />
+                  <span>{t("components/header/settings")}</span>
+                </Link>
+              </nav>
+              <div className="search-box-wrapper">
+                <input
+                  className="search-box"
+                  placeholder={t("components/header/search-box-placeholder")}
+                  value={this.state.searchBoxValue}
+                  onChange={event => {
+                    this.setState({ searchBoxValue: event.target.value });
+                  }}
+                  onKeyDown={this.searchBoxKeydown}
+                />
+              </div>
+            </div>
+          </header>
+        )}
+      </I18n>
     );
   }
 }

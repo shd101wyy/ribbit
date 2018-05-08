@@ -1,6 +1,8 @@
 import * as React from "react";
-import { Ribbit, UserInfo } from "../lib/ribbit";
+import { I18n } from "react-i18next";
 import { Link } from "react-router-dom";
+
+import { Ribbit, UserInfo } from "../lib/ribbit";
 
 interface FollowingProps {
   username: string;
@@ -81,23 +83,27 @@ export default class FollowingsCard extends React.Component<Props, State> {
   render() {
     const ribbit = this.props.ribbit;
     return (
-      <div className="followings-card card">
-        <p className="title">my followings</p>
-        <div className="followings-list">
-          {ribbit.settings.followingUsernames.map(
-            (followingUsername, offset) => {
-              return (
-                <Following
-                  username={followingUsername.username}
-                  ribbit={ribbit}
-                  networkId={ribbit.networkId}
-                  key={offset}
-                />
-              );
-            }
-          )}
-        </div>
-      </div>
+      <I18n>
+        {(t, { i18n }) => (
+          <div className="followings-card card">
+            <p className="title">{t("components/followings-card/title")}</p>
+            <div className="followings-list">
+              {ribbit.settings.followingUsernames.map(
+                (followingUsername, offset) => {
+                  return (
+                    <Following
+                      username={followingUsername.username}
+                      ribbit={ribbit}
+                      networkId={ribbit.networkId}
+                      key={offset}
+                    />
+                  );
+                }
+              )}
+            </div>
+          </div>
+        )}
+      </I18n>
     );
   }
 }

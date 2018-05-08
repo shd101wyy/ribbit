@@ -1,7 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Router, Route, Switch } from "react-router";
+import { I18nextProvider } from "react-i18next";
 const Web3 = require("web3");
+
 // import Web3 from "web3";
 import hashHistory from "./lib/history";
 import { Ribbit } from "./lib/ribbit";
@@ -19,6 +21,7 @@ import Topics from "./routes/topics";
 import Footer from "./components/footer";
 import Header from "./components/header";
 import Error from "./components/error";
+import i18n from "./i18n/i18n";
 
 interface Props {}
 interface State {
@@ -65,7 +68,7 @@ class App extends React.Component<Props, State> {
     } catch (error) {
       new window["Noty"]({
         type: "error",
-        text: `Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked.`,
+        text: i18n.t("app/error"),
         timeout: 10000
       }).show();
       this.setState({ ribbit: null }, () => {
@@ -163,4 +166,9 @@ class App extends React.Component<Props, State> {
   }
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(
+  <I18nextProvider i18n={i18n}>
+    <App />
+  </I18nextProvider>,
+  document.getElementById("root")
+);

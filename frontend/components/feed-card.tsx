@@ -60,8 +60,11 @@ export default class FeedCard extends Component<Props, State> {
     }
     const anchorElements = this.elem.getElementsByTagName("A");
     for (let i = 0; i < anchorElements.length; i++) {
-      const anchorElement = anchorElements[i];
+      const anchorElement = anchorElements[i] as HTMLAnchorElement;
       anchorElement.setAttribute("target", "_blank");
+      anchorElement.onclick = event => {
+        event.stopPropagation();
+      };
     }
   }
 

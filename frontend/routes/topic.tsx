@@ -2,6 +2,7 @@
  * /:networkId/topic/:topic
  */
 import * as React from "react";
+import { I18n } from "react-i18next";
 import { Ribbit, UserInfo } from "../lib/ribbit";
 import {
   FeedInfo,
@@ -139,10 +140,11 @@ export default class profile extends React.Component<Props, State> {
             maxCreation: this.currentFeed.creation,
             blockNumber: this.currentFeed.blockNumber
           },
-          (blockNumber, index) => {
+          (blockNumber, index, total) => {
             if (index >= 0) {
               this.setState({
-                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+                msg: `Syncing ${index +
+                  1}/${total} at block ${blockNumber} from blockchain...`
               });
             } else {
               this.setState({
@@ -290,89 +292,103 @@ export default class profile extends React.Component<Props, State> {
      */
     if (this.props.ribbit.web3.utils.isAddress(this.props.topic)) {
       return (
-        <div className="topic-page">
-          <p id="feed-footer">Invalid topic {this.props.topic}</p>
-        </div>
+        <I18n>
+          {(t, { i18n }) => (
+            <div className="topic-page">
+              <p id="feed-footer">
+                {t("general/invalid-topic")} {this.props.topic}
+              </p>
+            </div>
+          )}
+        </I18n>
       );
     }
     return (
-      <div className="topic-page">
-        <Header ribbit={this.props.ribbit} />
-        <div className="container">
-          <div className="topic-card card">
-            <div
-              className="cover"
-              style={{
-                backgroundImage: this.state.cover
-                  ? `url("${this.state.cover}")`
-                  : null
-              }}
-            />
-            <p className="title">#{this.props.topic}</p>
-            {this.state.following ? (
-              this.state.mouseOver ? (
+      <I18n>
+        {(t, { i18n }) => (
+          <div className="topic-page">
+            <Header ribbit={this.props.ribbit} />
+            <div className="container">
+              <div className="topic-card card">
                 <div
-                  className="follow-btn"
-                  onMouseEnter={() => this.setState({ mouseOver: true })}
-                  onMouseLeave={() => this.setState({ mouseOver: false })}
-                  onClick={this.unfollowTopic}
-                >
-                  Unfollow
+                  className="cover"
+                  style={{
+                    backgroundImage: this.state.cover
+                      ? `url("${this.state.cover}")`
+                      : null
+                  }}
+                />
+                <p className="title">#{this.props.topic}</p>
+                {this.state.following ? (
+                  this.state.mouseOver ? (
+                    <div
+                      className="follow-btn"
+                      onMouseEnter={() => this.setState({ mouseOver: true })}
+                      onMouseLeave={() => this.setState({ mouseOver: false })}
+                      onClick={this.unfollowTopic}
+                    >
+                      {t("general/unfollow")}
+                    </div>
+                  ) : (
+                    <div
+                      className="follow-btn"
+                      onMouseEnter={() => this.setState({ mouseOver: true })}
+                      onMouseLeave={() => this.setState({ mouseOver: false })}
+                    >
+                      {t("general/following")}
+                    </div>
+                  )
+                ) : (
+                  <div className="follow-btn" onClick={this.followTopic}>
+                    {t("general/follow")}
+                  </div>
+                )}
+                <div className="btn-group">
+                  <div
+                    className={
+                      "btn" +
+                      (this.state.sorting === TopicSorting.ByTrend
+                        ? " selected"
+                        : "")
+                    }
+                    onClick={this.selectSorting(TopicSorting.ByTrend)}
+                  >
+                    <i className="fas fa-fire" />
+                    {t("general/by-trend")}
+                  </div>
+                  <div
+                    className={
+                      "btn" +
+                      (this.state.sorting === TopicSorting.ByTime
+                        ? " selected"
+                        : "")
+                    }
+                    onClick={this.selectSorting(TopicSorting.ByTime)}
+                  >
+                    <i className="fas fa-clock" />
+                    {t("general/by-time")}
+                  </div>
                 </div>
-              ) : (
-                <div
-                  className="follow-btn"
-                  onMouseEnter={() => this.setState({ mouseOver: true })}
-                  onMouseLeave={() => this.setState({ mouseOver: false })}
-                >
-                  Following
-                </div>
-              )
-            ) : (
-              <div className="follow-btn" onClick={this.followTopic}>
-                Follow
               </div>
-            )}
-            <div className="btn-group">
-              <div
-                className={
-                  "btn" +
-                  (this.state.sorting === TopicSorting.ByTrend
-                    ? " selected"
-                    : "")
-                }
-                onClick={this.selectSorting(TopicSorting.ByTrend)}
-              >
-                <i className="fas fa-fire" />By trend
-              </div>
-              <div
-                className={
-                  "btn" +
-                  (this.state.sorting === TopicSorting.ByTime
-                    ? " selected"
-                    : "")
-                }
-                onClick={this.selectSorting(TopicSorting.ByTime)}
-              >
-                <i className="fas fa-clock" />By time
+              <div className="cards">
+                {this.state.feeds.map((feedInfo, index) => (
+                  <FeedCard
+                    key={index}
+                    feedInfo={feedInfo}
+                    ribbit={this.props.ribbit}
+                  />
+                ))}
+                <p id="feed-footer">
+                  {" "}
+                  {this.state.loading
+                    ? this.state.msg
+                    : "No more feeds ;)"}{" "}
+                </p>
               </div>
             </div>
           </div>
-          <div className="cards">
-            {this.state.feeds.map((feedInfo, index) => (
-              <FeedCard
-                key={index}
-                feedInfo={feedInfo}
-                ribbit={this.props.ribbit}
-              />
-            ))}
-            <p id="feed-footer">
-              {" "}
-              {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
-            </p>
-          </div>
-        </div>
-      </div>
+        )}
+      </I18n>
     );
   }
 }

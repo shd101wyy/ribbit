@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 import { UserInfo, Ribbit } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
@@ -98,56 +99,62 @@ export default class ProfileCard extends React.Component<Props, State> {
     const ribbit = this.props.ribbit;
     if (!userInfo) return null;
     return (
-      <div className="profile-card card">
-        <div
-          className="cover"
-          style={{
-            backgroundImage: userInfo.cover ? `url("${userInfo.cover}")` : null
-          }}
-        />
-        <div
-          className="avatar"
-          style={{ backgroundImage: `url("${userInfo.avatar}")` }}
-        />
-        <div className="name-group">
-          <p className="name">{userInfo.name}</p>
-          <p className="username">@{userInfo.username}</p>
-        </div>
-        {this.props.hideFollowingBtn ||
-        this.props.ribbit.userInfo.username ===
-          this.props.userInfo.username ? null : (
-          <div className="button-group">
-            {this.state.following ? (
-              this.state.mouseOver ? (
-                <div
-                  className="follow-btn"
-                  onMouseEnter={() => this.setState({ mouseOver: true })}
-                  onMouseLeave={() => this.setState({ mouseOver: false })}
-                  onClick={this.unfollowUser}
-                >
-                  Unfollow
-                </div>
-              ) : (
-                <div
-                  className="follow-btn"
-                  onMouseEnter={() => this.setState({ mouseOver: true })}
-                  onMouseLeave={() => this.setState({ mouseOver: false })}
-                >
-                  Following
-                </div>
-              )
-            ) : (
-              <div className="follow-btn" onClick={this.followUser}>
-                Follow
+      <I18n>
+        {(t, { i18n }) => (
+          <div className="profile-card card">
+            <div
+              className="cover"
+              style={{
+                backgroundImage: userInfo.cover
+                  ? `url("${userInfo.cover}")`
+                  : null
+              }}
+            />
+            <div
+              className="avatar"
+              style={{ backgroundImage: `url("${userInfo.avatar}")` }}
+            />
+            <div className="name-group">
+              <p className="name">{userInfo.name}</p>
+              <p className="username">@{userInfo.username}</p>
+            </div>
+            {this.props.hideFollowingBtn ||
+            this.props.ribbit.userInfo.username ===
+              this.props.userInfo.username ? null : (
+              <div className="button-group">
+                {this.state.following ? (
+                  this.state.mouseOver ? (
+                    <div
+                      className="follow-btn"
+                      onMouseEnter={() => this.setState({ mouseOver: true })}
+                      onMouseLeave={() => this.setState({ mouseOver: false })}
+                      onClick={this.unfollowUser}
+                    >
+                      {t("general/unfollow")}
+                    </div>
+                  ) : (
+                    <div
+                      className="follow-btn"
+                      onMouseEnter={() => this.setState({ mouseOver: true })}
+                      onMouseLeave={() => this.setState({ mouseOver: false })}
+                    >
+                      {t("general/following")}
+                    </div>
+                  )
+                ) : (
+                  <div className="follow-btn" onClick={this.followUser}>
+                    {t("general/follow")}
+                  </div>
+                )}
               </div>
             )}
+            <div
+              className="bio"
+              dangerouslySetInnerHTML={{ __html: this.state.bio }}
+            />
           </div>
         )}
-        <div
-          className="bio"
-          dangerouslySetInnerHTML={{ __html: this.state.bio }}
-        />
-      </div>
+      </I18n>
     );
   }
 }

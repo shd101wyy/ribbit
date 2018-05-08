@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { Ribbit } from "../lib/ribbit";
@@ -40,20 +41,24 @@ export default class TopicsCard extends React.Component<Props, State> {
   render() {
     const ribbit = this.props.ribbit;
     return (
-      <div className="topics-card card">
-        <p className="title">my favorite topics</p>
-        <div className="topics-list">
-          {ribbit.settings.followingTopics.map((followingTopic, offset) => {
-            return (
-              <Topic
-                name={followingTopic.topic}
-                networkId={ribbit.networkId}
-                key={offset}
-              />
-            );
-          })}
-        </div>
-      </div>
+      <I18n>
+        {(t, { i18n }) => (
+          <div className="topics-card card">
+            <p className="title">{t("components/topics-card/title")}</p>
+            <div className="topics-list">
+              {ribbit.settings.followingTopics.map((followingTopic, offset) => {
+                return (
+                  <Topic
+                    name={followingTopic.topic}
+                    networkId={ribbit.networkId}
+                    key={offset}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </I18n>
     );
   }
 }

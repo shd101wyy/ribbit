@@ -164,10 +164,11 @@ export default class Home extends React.Component<Props, State> {
             blockNumber: maxBlockNumber,
             maxCreation: maxCreation
           },
-          (blockNumber, index) => {
+          (blockNumber, index, total) => {
             if (index >= 0) {
               this.setState({
-                msg: `Syncing No. ${index} at block ${blockNumber} from blockchain...`
+                msg: `Syncing ${index +
+                  1}/${total} at block ${blockNumber} from blockchain...`
               });
             } else {
               this.setState({

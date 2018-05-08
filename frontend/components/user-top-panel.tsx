@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
@@ -69,18 +70,22 @@ export default class UserTopPanel extends React.Component<Props, State> {
 
     const topBar =
       feedInfo.feedType === "upvote" ? (
-        <div className="top-bar">
-          <Link
-            to={`/${this.props.ribbit.networkId}/profile/${
-              feedInfo.repostUserInfo.username
-            }`}
-            target="_blank"
-            onClick={this.gotoProfilePage(feedInfo.repostUserInfo.username)}
-          >
-            {feedInfo.repostUserInfo.name}
-          </Link>
-          <span>upvoted</span>
-        </div>
+        <I18n>
+          {(t, { i18n }) => (
+            <div className="top-bar">
+              <Link
+                to={`/${this.props.ribbit.networkId}/profile/${
+                  feedInfo.repostUserInfo.username
+                }`}
+                target="_blank"
+                onClick={this.gotoProfilePage(feedInfo.repostUserInfo.username)}
+              >
+                {feedInfo.repostUserInfo.name}
+              </Link>
+              <span className="action">{t("general/upvoted")}</span>
+            </div>
+          )}
+        </I18n>
       ) : null;
 
     return (

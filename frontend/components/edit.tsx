@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 import { Component } from "react";
 
 import * as CodeMirror from "react-codemirror";
@@ -40,10 +41,7 @@ export default class Edit extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      code:
-        window.localStorage["markdown-cache"] ||
-        `<!-- Enter your text below -->
-`,
+      code: window.localStorage["markdown-cache"] || `ribbit...`,
       previewIsOn: false,
       topics: [],
       hiddenTopics: {},
@@ -236,158 +234,175 @@ export default class Edit extends Component<Props, State> {
       mode: "markdown"
     };
     return (
-      <div
-        onClick={this.clickEdit}
-        className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}
-      >
-        {this.props.parentFeedInfo ? (
-          <div>
-            <h2 style={{ textAlign: "center" }}>Reply to</h2>
-            <FeedCard
-              ribbit={this.props.ribbit}
-              feedInfo={this.props.parentFeedInfo}
-              hideActionsPanel={true}
-              hideParent={true}
-            />
-          </div>
-        ) : null}
-        {this.state.previewIsOn ? (
-          <div>
-            <h2 style={{ textAlign: "center" }}>Preview</h2>
-            {/* topics */}
-            <div className="topics-and-mentions card">
-              {this.state.topics.length ? (
-                <p className="title">Post to topics:</p>
-              ) : null}
-              <div className="topics-list">
-                {this.state.topics.map((topic, offset) => (
-                  <div
-                    className={
-                      "topic " +
-                      (this.state.hiddenTopics[topic] ? "hidden" : "")
-                    }
-                    key={offset}
-                    onClick={this.toggleTopic(topic)}
-                  >
-                    {topic}
-                  </div>
-                ))}
+      <I18n>
+        {(t, { i18n }) => (
+          <div
+            onClick={this.clickEdit}
+            className={"edit " + (this.state.previewIsOn ? "preview-on" : "")}
+          >
+            {this.props.parentFeedInfo ? (
+              <div>
+                <h2 style={{ textAlign: "center" }}>{t("general/Reply-to")}</h2>
+                <FeedCard
+                  ribbit={this.props.ribbit}
+                  feedInfo={this.props.parentFeedInfo}
+                  hideActionsPanel={true}
+                  hideParent={true}
+                />
               </div>
-              {this.state.replies.length ? (
-                <p className="title">Reply to the following users:</p>
-              ) : null}
-              <div className="replies-list">
-                {this.state.replies.map((reply, offset) => (
-                  <div
-                    className={
-                      "reply " +
-                      (this.state.hiddenReplies[reply.address] ? "hidden" : "")
-                    }
-                    key={offset}
-                    onClick={this.toggleReply(reply.address)}
-                  >
-                    {reply.name}
+            ) : null}
+            {this.state.previewIsOn ? (
+              <div>
+                <h2 style={{ textAlign: "center" }}>{t("general/Preview")}</h2>
+                {/* topics */}
+                <div className="topics-and-mentions card">
+                  {this.state.topics.length ? (
+                    <p className="title">{t("general/Post-to-topics")}:</p>
+                  ) : null}
+                  <div className="topics-list">
+                    {this.state.topics.map((topic, offset) => (
+                      <div
+                        className={
+                          "topic " +
+                          (this.state.hiddenTopics[topic] ? "hidden" : "")
+                        }
+                        key={offset}
+                        onClick={this.toggleTopic(topic)}
+                      >
+                        {topic}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              {this.state.mentions.length ? (
-                <p className="title">Mention the following users:</p>
-              ) : null}
-              <div className="mentions-list">
-                {this.state.mentions.map((mention, offset) => (
-                  <div
-                    className={
-                      "mention " +
-                      (this.state.hiddenMentions[mention.address]
-                        ? "hidden"
-                        : "")
-                    }
-                    key={offset}
-                    onClick={this.toggleMention(mention.address)}
-                  >
-                    {mention.name}
+                  {this.state.replies.length ? (
+                    <p className="title">
+                      {t("general/Reply-to-the-following-users")}:
+                    </p>
+                  ) : null}
+                  <div className="replies-list">
+                    {this.state.replies.map((reply, offset) => (
+                      <div
+                        className={
+                          "reply " +
+                          (this.state.hiddenReplies[reply.address]
+                            ? "hidden"
+                            : "")
+                        }
+                        key={offset}
+                        onClick={this.toggleReply(reply.address)}
+                      >
+                        {reply.name}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className="title">Configuration:</p>
-              <div className="config-list">
-                {this.props.parentFeedInfo ? (
-                  <div
-                    className={
-                      "config" + (this.state.repostToTimeline ? "" : " hidden")
-                    }
-                    onClick={() =>
-                      this.setState({
-                        repostToTimeline: !this.state.repostToTimeline
-                      })
-                    }
-                  >
-                    {" "}
-                    Repost to timeline
+                  {this.state.mentions.length ? (
+                    <p className="title">
+                      {t("general/Mention-the-following-users")}:
+                    </p>
+                  ) : null}
+                  <div className="mentions-list">
+                    {this.state.mentions.map((mention, offset) => (
+                      <div
+                        className={
+                          "mention " +
+                          (this.state.hiddenMentions[mention.address]
+                            ? "hidden"
+                            : "")
+                        }
+                        key={offset}
+                        onClick={this.toggleMention(mention.address)}
+                      >
+                        {mention.name}
+                      </div>
+                    ))}
                   </div>
-                ) : null}
-                <div
-                  className={
-                    "config" + (this.state.postToRibbitTopic ? "" : " hidden")
-                  }
-                  onClick={() =>
-                    this.setState({
-                      postToRibbitTopic: !this.state.postToRibbitTopic
-                    })
-                  }
-                >
-                  {" "}
-                  Post to #ribbit
+                  <p className="title">{t("general/Configuration")}:</p>
+                  <div className="config-list">
+                    {this.props.parentFeedInfo ? (
+                      <div
+                        className={
+                          "config" +
+                          (this.state.repostToTimeline ? "" : " hidden")
+                        }
+                        onClick={() =>
+                          this.setState({
+                            repostToTimeline: !this.state.repostToTimeline
+                          })
+                        }
+                      >
+                        {" "}
+                        {t("general/Repost-to-timeline")}
+                      </div>
+                    ) : null}
+                    <div
+                      className={
+                        "config" +
+                        (this.state.postToRibbitTopic ? "" : " hidden")
+                      }
+                      onClick={() =>
+                        this.setState({
+                          postToRibbitTopic: !this.state.postToRibbitTopic
+                        })
+                      }
+                    >
+                      {" "}
+                      {t("general/Post-to-ribbit")}
+                    </div>
+                    <div
+                      className={
+                        "config" + (this.state.postAsIPFSHash ? "" : " hidden")
+                      }
+                      onClick={() =>
+                        this.setState({
+                          postAsIPFSHash: !this.state.postAsIPFSHash
+                        })
+                      }
+                    >
+                      {" "}
+                      {t("general/Post-as-IPFS-hash")}
+                    </div>
+                  </div>
                 </div>
-                <div
-                  className={
-                    "config" + (this.state.postAsIPFSHash ? "" : " hidden")
-                  }
-                  onClick={() =>
-                    this.setState({
-                      postAsIPFSHash: !this.state.postAsIPFSHash
-                    })
-                  }
-                >
-                  {" "}
-                  Post as IPFS hash
+                {/* preview */}
+                <Preview
+                  markdown={this.state.code}
+                  ribbit={this.props.ribbit}
+                />
+              </div>
+            ) : (
+              <div>
+                <h2 style={{ textAlign: "center" }}>
+                  {t("general/Write-below")}
+                </h2>
+                <div className="editor-wrapper">
+                  <CodeMirror
+                    value={this.state.code}
+                    onChange={this.updateCode}
+                    options={options}
+                  />
                 </div>
               </div>
-            </div>
-            {/* preview */}
-            <Preview markdown={this.state.code} ribbit={this.props.ribbit} />
-          </div>
-        ) : (
-          <div>
-            <h2 style={{ textAlign: "center" }}>Write below</h2>
-            <div className="editor-wrapper">
-              <CodeMirror
-                value={this.state.code}
-                onChange={this.updateCode}
-                options={options}
-              />
+            )}
+            <div className="button-group">
+              {this.state.previewIsOn ? (
+                <div className="button" onClick={this.postFeed}>
+                  <i className="fa fa-paper-plane" aria-hidden="true" />
+                </div>
+              ) : null /* We can only show `post` button after user has seen the preview. */}
+
+              <div className="button" onClick={this.togglePreview}>
+                {this.state.previewIsOn ? (
+                  <i className="fa fa-eye-slash" aria-hidden="true" />
+                ) : (
+                  <i className="fa fa-eye" aria-hidden="true" />
+                )}
+              </div>
+              <div className="button" onClick={this.props.cancel}>
+                <i className="fa fa-times" aria-hidden="true" />
+              </div>
             </div>
           </div>
         )}
-        <div className="button-group">
-          {this.state.previewIsOn ? (
-            <div className="button" onClick={this.postFeed}>
-              <i className="fa fa-paper-plane" aria-hidden="true" />
-            </div>
-          ) : null /* We can only show `post` button after user has seen the preview. */}
-
-          <div className="button" onClick={this.togglePreview}>
-            {this.state.previewIsOn ? (
-              <i className="fa fa-eye-slash" aria-hidden="true" />
-            ) : (
-              <i className="fa fa-eye" aria-hidden="true" />
-            )}
-          </div>
-          <div className="button" onClick={this.props.cancel}>
-            <i className="fa fa-times" aria-hidden="true" />
-          </div>
-        </div>
-      </div>
+      </I18n>
     );
   }
 }
