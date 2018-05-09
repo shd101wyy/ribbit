@@ -2,7 +2,7 @@ import * as React from "react";
 import { I18n } from "react-i18next";
 import { Component } from "react";
 
-import * as CodeMirror from "react-codemirror";
+import { UnControlled as CodeMirror, IInstance } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/markdown/markdown";
 
@@ -39,6 +39,7 @@ interface State {
 }
 
 export default class Edit extends Component<Props, State> {
+  private cm: IInstance = null;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -105,7 +106,7 @@ export default class Edit extends Component<Props, State> {
     });
   }
 
-  private updateCode = (newCode: string) => {
+  private updateCode = (editor, data, newCode: string) => {
     this.setState({ code: newCode }, () => {
       window.localStorage["markdown-cache"] = newCode;
       this.checkTopicsAndMentions();
@@ -229,6 +230,139 @@ export default class Edit extends Component<Props, State> {
   clickEdit = event => {
     event.preventDefault();
     event.stopPropagation();
+  };
+
+  insertHeader1 = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("# " + selection);
+  };
+
+  insertHeader2 = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("## " + selection);
+  };
+
+  insertHeader3 = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("### " + selection);
+  };
+
+  insertBold = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("**" + selection + "**");
+    if (!selection) {
+      const cursorPos = this.cm.getCursor();
+      this.cm.setCursor(cursorPos.line as any, cursorPos.ch - 2);
+    }
+  };
+
+  insertItalic = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("*" + selection + "*");
+    if (!selection) {
+      const cursorPos = this.cm.getCursor();
+      this.cm.setCursor(cursorPos.line as any, cursorPos.ch - 1);
+    }
+  };
+
+  insertCode = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("`" + selection + "`");
+    if (!selection) {
+      const cursorPos = this.cm.getCursor();
+      this.cm.setCursor(cursorPos.line as any, cursorPos.ch - 1);
+    }
+  };
+
+  insertBlockquote = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("> " + selection);
+  };
+
+  insertUnorderedList = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("* " + selection);
+  };
+
+  insertOrderedList = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("1. " + selection);
+  };
+
+  insertLink = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("[](" + selection + ")");
+  };
+
+  insertImage = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection("![](" + selection + ")");
+  };
+
+  insertTopic = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection(
+      "#{" + (selection || i18n.t("general/topic")) + "}"
+    );
+  };
+
+  insertMention = event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.cm.focus();
+    const selection = this.cm.getSelection();
+    this.cm.replaceSelection(
+      "@{" + (selection || i18n.t("general/username")) + "}"
+    );
   };
 
   render() {
@@ -379,10 +513,55 @@ export default class Edit extends Component<Props, State> {
                   {t("general/Write-below")}
                 </h2>
                 <div className="editor-wrapper">
+                  <div className="toolbar">
+                    <div className="icon" onClick={this.insertHeader1}>
+                      <span>H1</span>
+                    </div>
+                    <div className="icon" onClick={this.insertHeader2}>
+                      <span>H2</span>
+                    </div>
+                    <div className="icon" onClick={this.insertHeader3}>
+                      <span>H3</span>
+                    </div>
+                    <div className="icon" onClick={this.insertBold}>
+                      <i className="fas fa-bold" />
+                    </div>
+                    <div className="icon" onClick={this.insertItalic}>
+                      <i className="fas fa-italic" />
+                    </div>
+                    <div className="icon" onClick={this.insertCode}>
+                      <i className="fas fa-code" />
+                    </div>
+                    <div className="icon" onClick={this.insertBlockquote}>
+                      <i className="fas fa-quote-left" />
+                    </div>
+                    <div className="icon" onClick={this.insertUnorderedList}>
+                      <i className="fas fa-list-ul" />
+                    </div>
+                    <div className="icon" onClick={this.insertOrderedList}>
+                      <i className="fas fa-list-ol" />
+                    </div>
+                    <div className="icon" onClick={this.insertLink}>
+                      <i className="fas fa-link" />
+                    </div>
+                    <div className="icon" onClick={this.insertImage}>
+                      <i className="far fa-image" />
+                    </div>
+                    <div className="icon" onClick={this.insertTopic}>
+                      <i className="fas fa-hashtag" />
+                    </div>
+                    <div className="icon" onClick={this.insertMention}>
+                      <i className="fas fa-at" />
+                    </div>
+                  </div>
                   <CodeMirror
                     value={this.state.code}
                     onChange={this.updateCode}
                     options={options}
+                    autoCursor={false}
+                    editorDidMount={editor => {
+                      this.cm = editor;
+                    }}
                   />
                 </div>
               </div>
