@@ -2,7 +2,7 @@ import { getContractAddress, abiArray } from "./smartcontract";
 import { sha256 } from "js-sha256";
 import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
-import { off } from "codemirror";
+import * as chineseConv from "chinese-conv";
 import {
   compressString,
   hexEncode,
@@ -238,6 +238,7 @@ export class Ribbit {
       return tag.toLowerCase();
     }
 
+    tag = chineseConv.sify(tag); // convert to simplified Chinese.
     return "0x" + sha256(tag.toLowerCase().replace(/[\s\@\#]/g, ""));
 
     /*

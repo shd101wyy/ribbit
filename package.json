@@ -9,6 +9,7 @@
     "autolinker": "^1.6.2",
     "bignumber.js": "^6.0.0",
     "buffer": "^5.1.0",
+    "chinese-conv": "^1.0.1",
     "codemirror": "^5.37.0",
     "history": "^4.7.2",
     "i18next": "^11.2.3",

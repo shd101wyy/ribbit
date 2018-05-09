@@ -3,7 +3,7 @@ import { I18n } from "react-i18next";
 import ProfileCard from "./profile-card";
 import { Ribbit, UserInfo } from "../lib/ribbit";
 
-import * as CodeMirror from "react-codemirror";
+import { UnControlled as CodeMirror, IInstance } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/markdown/markdown";
 
@@ -23,7 +23,7 @@ interface State {
 }
 
 export default class ProfileSettingsCard extends React.Component<Props, State> {
-  private cm: HTMLElement;
+  private cm: IInstance;
 
   constructor(props: Props) {
     super(props);
@@ -42,38 +42,35 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     if (this.props.reset) {
       return;
     }
+  }
+
+  initUserProfile() {
+    const ribbit = this.props.ribbit;
     ribbit
       .getUserInfoFromAddress(ribbit.accountAddress)
       .then(userInfo => {
-        this.setState(
-          {
-            username: userInfo.username,
-            name: userInfo.name,
-            avatar: userInfo.avatar.startsWith("data:image")
-              ? ""
-              : userInfo.avatar,
-            cover: userInfo.cover,
-            bio: userInfo.bio || "ribbit, ribbit, ribbit…",
-            lang: ribbit.settings.language
-          },
-          () => {
-            if (this.cm) {
-              // This is a hack. https://github.com/JedWatson/react-codemirror/issues/121
-              this.cm["codeMirror"].setValue(this.state.bio);
-            }
-          }
-        );
+        console.log(userInfo);
+        this.setState({
+          username: userInfo.username,
+          name: userInfo.name,
+          avatar: userInfo.avatar.startsWith("data:image")
+            ? ""
+            : userInfo.avatar,
+          cover: userInfo.cover,
+          bio: userInfo.bio || "ribbit, ribbit, ribbit…",
+          lang: ribbit.settings.language
+        });
       })
       .catch(error => {
         new window["Noty"]({
           type: "error",
-          text: error,
+          text: error.toString(),
           timeout: 10000
         }).show();
       });
   }
 
-  updatebio = newCode => {
+  updatebio = (editor, data, newCode) => {
     this.setState({ bio: newCode });
   };
 
@@ -209,10 +206,14 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
                   {t("general/Bio-markdown-ready")}:{" "}
                 </p>
                 <CodeMirror
-                  ref={elem => (this.cm = elem)}
+                  editorDidMount={editor => {
+                    this.cm = editor;
+                    this.initUserProfile();
+                  }}
                   value={this.state.bio}
                   onChange={this.updatebio}
                   options={options}
+                  autoCursor={false}
                 />
               </div>
             </div>

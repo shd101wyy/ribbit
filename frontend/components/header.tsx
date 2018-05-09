@@ -88,7 +88,7 @@ export default class Header extends Component<Props, State> {
               <nav>
                 <Link
                   className={
-                    "header-tab" +
+                    "header-tab " +
                     (this.props.page === Page.HomePage ? "selected" : "")
                   }
                   to={`/${this.props.ribbit.networkId}/`}
@@ -98,17 +98,17 @@ export default class Header extends Component<Props, State> {
                 </Link>
                 <Link
                   className={
-                    "header-tab" +
+                    "header-tab " +
                     (this.props.page === Page.TopicsPage ? "selected" : "")
                   }
                   to={`/${this.props.ribbit.networkId}/topics`}
                 >
-                  <i className="icon fab fa-slack-hash" />
+                  <i className="icon fas fa-hashtag" />
                   <span>{t("components/header/topics")}</span>
                 </Link>
                 <Link
                   className={
-                    "header-tab" +
+                    "header-tab " +
                     (this.props.page === Page.NotificationsPage
                       ? "selected"
                       : "")
@@ -120,7 +120,7 @@ export default class Header extends Component<Props, State> {
                 </Link>
                 <Link
                   className={
-                    "header-tab" +
+                    "header-tab " +
                     (this.props.page === Page.SettingsPage ? "selected" : "")
                   }
                   to={`/${this.props.ribbit.networkId}/settings`}
