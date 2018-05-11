@@ -28,7 +28,7 @@ interface State {
   msg: string;
 }
 
-export default class TopicCards extends React.Component<Props, State> {
+export default class TopicFeedCards extends React.Component<Props, State> {
   private currentFeed: CurrentFeed;
   constructor(props: Props) {
     super(props);
@@ -247,32 +247,36 @@ export default class TopicCards extends React.Component<Props, State> {
       <I18n>
         {(t, { i18n }) => (
           <div className="topic-cards">
-            <div className="btn-group card">
-              <div
-                className={
-                  "btn" +
-                  (this.state.sorting === TopicSorting.ByTrend
-                    ? " selected"
-                    : "")
-                }
-                onClick={this.selectSorting(TopicSorting.ByTrend)}
-              >
-                <i className="fas fa-fire" />
-                {t("general/by-trend")}
+            {// no replies
+            this.state.doneLoadingAll &&
+            this.state.feeds.length === 0 ? null : (
+              <div className="btn-group card">
+                <div
+                  className={
+                    "btn" +
+                    (this.state.sorting === TopicSorting.ByTrend
+                      ? " selected"
+                      : "")
+                  }
+                  onClick={this.selectSorting(TopicSorting.ByTrend)}
+                >
+                  <i className="fas fa-fire" />
+                  {t("general/by-trend")}
+                </div>
+                <div
+                  className={
+                    "btn" +
+                    (this.state.sorting === TopicSorting.ByTime
+                      ? " selected"
+                      : "")
+                  }
+                  onClick={this.selectSorting(TopicSorting.ByTime)}
+                >
+                  <i className="fas fa-clock" />
+                  {t("general/by-time")}
+                </div>
               </div>
-              <div
-                className={
-                  "btn" +
-                  (this.state.sorting === TopicSorting.ByTime
-                    ? " selected"
-                    : "")
-                }
-                onClick={this.selectSorting(TopicSorting.ByTime)}
-              >
-                <i className="fas fa-clock" />
-                {t("general/by-time")}
-              </div>
-            </div>
+            )}
             <div className="cards">
               {this.state.feeds.map((feedInfo, index) => (
                 <FeedCard

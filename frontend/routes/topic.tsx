@@ -14,7 +14,7 @@ import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
 import Header from "../components/header";
-import TopicCards from "../components/topic-cards";
+import TopicFeedCards from "../components/topic-feed-cards";
 import { TransactionInfo } from "../lib/transaction";
 
 interface Props {
@@ -149,7 +149,10 @@ export default class profile extends React.Component<Props, State> {
                   </div>
                 )}
               </div>
-              <TopicCards ribbit={this.props.ribbit} topic={this.props.topic} />
+              <TopicFeedCards
+                ribbit={this.props.ribbit}
+                topic={this.props.topic}
+              />
             </div>
           </div>
         )}

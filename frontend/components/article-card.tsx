@@ -10,7 +10,7 @@ import * as utility from "../lib/utility";
 import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
 
-import TopicCards from "../components/topic-cards";
+import TopicFeedCards from "../components/topic-feed-cards";
 
 interface Props {
   feedInfo: FeedInfo;
@@ -132,7 +132,7 @@ export default class ArticleCard extends Component<Props, State> {
         </div>
         {this.props.hideReplies ? null : (
           <div className="replies">
-            <TopicCards
+            <TopicFeedCards
               areReplies={true}
               ribbit={this.props.ribbit}
               topic={this.props.feedInfo.transactionInfo.hash}
