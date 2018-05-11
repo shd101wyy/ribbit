@@ -217,7 +217,7 @@ export default class profile extends React.Component<Props, State> {
                   {" "}
                   {this.state.loading
                     ? this.state.msg
-                    : "No more feeds ;)"}{" "}
+                    : t("general/No-more-feeds")}{" "}
                 </p>
               </div>
             </div>

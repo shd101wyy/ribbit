@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 
 import Header, { Page } from "../components/header";
 import FeedCard from "../components/feed-card";
@@ -183,24 +184,30 @@ export default class Notifications extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className="notifications-page">
-        <Header ribbit={this.props.ribbit} page={Page.NotificationsPage} />
-        <div className="container">
-          <div className="cards">
-            {this.state.feeds.map((feedInfo, index) => (
-              <FeedCard
-                key={index}
-                feedInfo={feedInfo}
-                ribbit={this.props.ribbit}
-              />
-            ))}
-            <p id="feed-footer">
-              {" "}
-              {this.state.loading ? this.state.msg : "No more feeds ;)"}{" "}
-            </p>
+      <I18n>
+        {t => (
+          <div className="notifications-page">
+            <Header ribbit={this.props.ribbit} page={Page.NotificationsPage} />
+            <div className="container">
+              <div className="cards">
+                {this.state.feeds.map((feedInfo, index) => (
+                  <FeedCard
+                    key={index}
+                    feedInfo={feedInfo}
+                    ribbit={this.props.ribbit}
+                  />
+                ))}
+                <p id="feed-footer">
+                  {" "}
+                  {this.state.loading
+                    ? this.state.msg
+                    : t("general/No-more-feeds")}{" "}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+      </I18n>
     );
   }
 }

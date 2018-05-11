@@ -516,15 +516,19 @@ export class Ribbit {
       const transactionCount = await this.web3.eth.getBlockTransactionCount(
         blockNumber
       );
+      const asyncFunctions = [];
       for (let i = 0; i < transactionCount; i++) {
+        asyncFunctions.push(
+          this.web3.eth.getTransactionFromBlock(blockNumber, i)
+        );
+      }
+
+      const transactions = await Promise.all(asyncFunctions);
+      for (let i = 0; i < transactions.length; i++) {
         if (cb) {
           cb(blockNumber, i, transactionCount);
         }
-        const transaction = await this.web3.eth.getTransactionFromBlock(
-          blockNumber,
-          i
-        );
-
+        const transaction = transactions[i];
         const decodedInputData = decodeMethod(transaction.input);
         if (
           !decodedInputData ||
@@ -566,7 +570,11 @@ export class Ribbit {
           try {
             await this.transactionInfoDB.get(transaction.hash);
           } catch (error) {
-            await this.transactionInfoDB.put(transactionInfo);
+            try {
+              await this.transactionInfoDB.put(transactionInfo);
+            } catch (error) {
+              console.log(error);
+            }
           }
         }
       }
@@ -574,11 +582,15 @@ export class Ribbit {
       try {
         await this.blockDB.get("block_" + blockNumber.toString());
       } catch (error) {
-        await this.blockDB.put({
-          blockNumber,
-          fullySynced: true,
-          _id: "block_" + blockNumber.toString()
-        });
+        try {
+          await this.blockDB.put({
+            blockNumber,
+            fullySynced: true,
+            _id: "block_" + blockNumber.toString()
+          });
+        } catch (error) {
+          console.log(error);
+        }
       }
       console.log(`syncBlock: block ${blockNumber} synced from blockchain.`);
     }

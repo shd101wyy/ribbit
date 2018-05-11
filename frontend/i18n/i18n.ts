@@ -34,6 +34,8 @@ i18next.init({
         "general/Cover-URL": "Cover URL",
         "general/Bio-markdown-ready": "Bio (markdown ready)",
         "general/Profile-preview": "Profile preview",
+        "general/No-more-replies": "No more replies ;)",
+        "general/No-more-feeds": "No more feeds ;)",
         "components/error/feed-footer-part1": "Please make sure",
         "components/error/feed-footer-part2":
           "is running and unlocked in your browser.",
@@ -97,6 +99,8 @@ i18next.init({
         "general/Cover-URL": "墙图片链接",
         "general/Bio-markdown-ready": "简介（markdown 编写支持）",
         "general/Profile-preview": "个人信息预览",
+        "general/No-more-replies": "没有更多的回复了 ;)",
+        "general/No-more-feeds": "没有更多的文字了 ;)",
         "components/error/feed-footer-part1": "请确保",
         "components/error/feed-footer-part2": "在你的浏览器中工作并解锁。",
         "components/header/home": "首页",

@@ -34,6 +34,7 @@ export default class Tx extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    document.body.scrollTop = 0;
     this.analyzeTransaction(
       this.props.transactionHash,
       this.props.networkId,
@@ -46,6 +47,7 @@ export default class Tx extends React.Component<Props, State> {
       newProps.transactionHash !== this.props.transactionHash ||
       newProps.networkId !== this.props.networkId
     ) {
+      document.body.scrollTop = 0;
       this.analyzeTransaction(
         newProps.transactionHash,
         newProps.networkId,

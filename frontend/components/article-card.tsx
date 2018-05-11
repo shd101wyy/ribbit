@@ -10,6 +10,8 @@ import * as utility from "../lib/utility";
 import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
 
+import TopicCards from "../components/topic-cards";
+
 interface Props {
   feedInfo: FeedInfo;
   ribbit: Ribbit;
@@ -17,8 +19,6 @@ interface Props {
 }
 
 interface State {
-  replies: FeedInfo[];
-  loadingReplies: boolean;
   parent: FeedInfo;
 }
 
@@ -28,8 +28,6 @@ export default class ArticleCard extends Component<Props, State> {
     super(props);
 
     this.state = {
-      replies: [],
-      loadingReplies: false,
       parent: null
     };
   }
@@ -37,7 +35,6 @@ export default class ArticleCard extends Component<Props, State> {
   componentDidMount() {
     this.addTargetBlankToAnchorElements();
     this.loadParent(this.props.feedInfo);
-    this.loadReplies(this.props.feedInfo);
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -48,13 +45,10 @@ export default class ArticleCard extends Component<Props, State> {
       // reset state
       this.setState(
         {
-          replies: [],
-          loadingReplies: false,
           parent: null
         },
         () => {
           this.loadParent(nextProps.feedInfo);
-          this.loadReplies(nextProps.feedInfo);
         }
       );
     }
@@ -62,51 +56,6 @@ export default class ArticleCard extends Component<Props, State> {
 
   componentDidUpdate() {
     this.addTargetBlankToAnchorElements();
-  }
-
-  async loadReplies(feedInfo: FeedInfo) {
-    if (!feedInfo.transactionInfo.hash) {
-      return;
-    }
-    const originTransactionHash = feedInfo.transactionInfo.hash;
-    this.setState(
-      {
-        replies: [],
-        loadingReplies: true
-      },
-      () => {
-        const ribbit = this.props.ribbit;
-        // load comments by time
-        ribbit.getFeedsFromTagByTime(
-          feedInfo.transactionInfo.hash,
-          { num: -1 },
-          async (done, offset, transactionInfo) => {
-            console.log(done, offset, transactionInfo);
-            if (done) {
-              return this.setState({ loadingReplies: false });
-            }
-            try {
-              const feedInfo = await generateFeedInfoFromTransactionInfo(
-                ribbit,
-                transactionInfo
-              );
-              if (feedInfo) {
-                const replies = this.state.replies;
-                if (
-                  this.props.feedInfo.transactionInfo.hash ===
-                  originTransactionHash
-                ) {
-                  replies.push(feedInfo);
-                  this.setState({ replies });
-                }
-              }
-            } catch (error) {
-              console.log(error);
-            }
-          }
-        );
-      }
-    );
   }
 
   async loadParent(feedInfo: FeedInfo) {
@@ -159,6 +108,9 @@ export default class ArticleCard extends Component<Props, State> {
               feedInfo={this.state.parent}
               hideParent={true}
             />
+          ) : this.props.feedInfo.transactionInfo.decodedInputData.name ===
+          "reply" ? (
+            <div className="card">Loading parent...</div>
           ) : null}
         </div>
         <div className="article-card card">
@@ -178,24 +130,12 @@ export default class ArticleCard extends Component<Props, State> {
           )}
         </div>
         <div className="replies">
-          {this.state.replies.map((feedInfo, index) => {
-            return (
-              <FeedCard
-                key={index}
-                feedInfo={feedInfo}
-                ribbit={this.props.ribbit}
-                hideParent={true}
-              />
-            );
-          })}
+          <TopicCards
+            areReplies={true}
+            ribbit={this.props.ribbit}
+            topic={this.props.feedInfo.transactionInfo.hash}
+          />
         </div>
-        {this.state.replies.length ? (
-          this.state.loadingReplies ? (
-            <p id="feed-footer">Loading replies...</p>
-          ) : (
-            <p id="feed-footer">No more replies</p>
-          )
-        ) : null}
       </div>
     );
   }
