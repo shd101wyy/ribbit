@@ -16,6 +16,7 @@ interface State {
   showEditPanel: boolean;
   showDonatePanel: boolean;
   showSharePanel: boolean;
+  earnings: number; // in US dollars
 }
 
 export default class ActionsBottomPanel extends React.Component<Props, State> {
@@ -24,7 +25,8 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
     this.state = {
       showEditPanel: false,
       showDonatePanel: false,
-      showSharePanel: false
+      showSharePanel: false,
+      earnings: 0
     };
   }
 
@@ -42,6 +44,36 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
       });
   };
   */
+
+  componentDidMount() {
+    this.updateFeedEarnings(this.props.feedInfo);
+  }
+
+  componentWillReceiveProps(newProps: Props) {
+    if (
+      newProps.feedInfo.transactionInfo.hash !==
+      this.props.feedInfo.transactionInfo.hash
+    ) {
+      this.updateFeedEarnings(newProps.feedInfo);
+    }
+  }
+
+  updateFeedEarnings(feedInfo: FeedInfo) {
+    console.log(feedInfo.stateInfo.earnings);
+    if (feedInfo.stateInfo.earnings) {
+      fetch("https://api.coinmarketcap.com/v1/ticker/ethereum/")
+        .then(x => x.json())
+        .then(([data]) => {
+          const priceUSD = parseFloat(data["price_usd"]);
+          if (priceUSD > 0) {
+            this.setState({
+              earnings:
+                feedInfo.stateInfo.earnings / 1000000000000000000 * priceUSD
+            });
+          }
+        });
+    }
+  }
 
   downvote = event => {
     event.preventDefault();
@@ -132,6 +164,12 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
           <div className="share-btn btn" onClick={this.toggleSharePanel}>
             <i className="fas fa-share-alt" />
           </div>
+          {this.state.earnings ? (
+            <div className="earnings">
+              <i className="fas fa-dollar-sign" />
+              {this.state.earnings.toFixed(2)}
+            </div>
+          ) : null}
         </div>
         {/*
         <div className="donate-btn btn" onClick={this.donate}>

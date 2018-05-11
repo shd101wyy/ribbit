@@ -47,10 +47,10 @@ export default class TopicFeedCards extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(newProps: Props) {
-    // if (newProps.topic !== this.props.topic) {
-    this.initializeTopic(newProps.topic);
-    this.bindWindowScrollEvent();
-    // }
+    if (newProps.topic !== this.props.topic) {
+      this.initializeTopic(newProps.topic);
+      this.bindWindowScrollEvent();
+    }
   }
 
   async initializeTopic(topic: string) {
