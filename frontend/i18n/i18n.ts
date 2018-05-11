@@ -16,6 +16,7 @@ i18next.init({
         "general/unfollow": "Unfollow",
         "general/invalid-topic": "Invalid topic",
         "general/upvoted": "upvoted",
+        "general/Upvote": "Upvote",
         "general/Write-below": "Write below",
         "general/Preview": "Preview",
         "general/Reply-to": "Reply to",
@@ -25,7 +26,7 @@ i18next.init({
         "general/Configuration": "Configuration",
         "general/Repost-to-timeline": "Repost to timeline",
         "general/Post-to-ribbit": "Post to #{ribbit} topic",
-        "general/Post-as-IPFS-hash": "Post as IPFS hash",
+        "general/Post-as-IPFS-hash": "Post as IPFS hash (beta)",
         "general/username": "username",
         "general/Username": "Username",
         "general/topic": "topic",
@@ -36,6 +37,7 @@ i18next.init({
         "general/Profile-preview": "Profile preview",
         "general/No-more-replies": "No more replies ;)",
         "general/No-more-feeds": "No more feeds ;)",
+        "general/USD": "USD",
         "components/error/feed-footer-part1": "Please make sure",
         "components/error/feed-footer-part2":
           "is running and unlocked in your browser.",
@@ -54,6 +56,8 @@ i18next.init({
           "Avatar image url starting with http:// or https://",
         "components/profile-settings-card/cover-url-placeholder":
           "Cover image url starting with http:// or https://",
+        "components/donate-panel/donate-placeholder":
+          "(optional) donate 0.0000 ether to author",
         "routes/signup/title": "Welcome to use Ribbit!",
         "routes/signup/subtitle":
           "Please finish your account registration below",
@@ -81,6 +85,7 @@ i18next.init({
         "general/unfollow": "取消关注",
         "general/invalid-topic": "无效的话题",
         "general/upvoted": "赞同了",
+        "general/Upvote": "赞同",
         "general/Write-below": "编辑",
         "general/Preview": "预览",
         "general/Reply-to": "回复",
@@ -90,7 +95,7 @@ i18next.init({
         "general/Configuration": "发布设置",
         "general/Repost-to-timeline": "转发到个人主页",
         "general/Post-to-ribbit": "发布到 #{ribbit} 话题",
-        "general/Post-as-IPFS-hash": "发布为 IPFS 哈希",
+        "general/Post-as-IPFS-hash": "发布为 IPFS 哈希（测试中）",
         "general/username": "用户名",
         "general/Username": "用户名",
         "general/topic": "话题",
@@ -101,6 +106,7 @@ i18next.init({
         "general/Profile-preview": "个人信息预览",
         "general/No-more-replies": "没有更多的回复了 ;)",
         "general/No-more-feeds": "没有更多的文字了 ;)",
+        "general/USD": "美元",
         "components/error/feed-footer-part1": "请确保",
         "components/error/feed-footer-part2": "在你的浏览器中工作并解锁。",
         "components/header/home": "首页",
@@ -117,6 +123,8 @@ i18next.init({
           "头像图片链接请以 https:// 或者 https:// 开头",
         "components/profile-settings-card/cover-url-placeholder":
           "墙图片链接请以 http:// 或者 https:// 开头",
+        "components/donate-panel/donate-placeholder":
+          "（可选）捐赠 0.0000 以太币给作者",
         "routes/signup/title": "欢迎使用 Ribbit！",
         "routes/signup/subtitle": "请在下方完成账号注册",
         "notification/init-error":

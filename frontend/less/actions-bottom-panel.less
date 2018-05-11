@@ -1,10 +1,21 @@
 // out: false
 
 .actions-bottom-panel {
+  margin-top: 14px;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  margin-top: 14px;
+
+  .left-btn-group,
+  .right-btn-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
+
+  .right-btn-group {
+    justify-content: flex-end;
+  }
 
   .btn {
     margin-right: 28px;
@@ -46,6 +57,16 @@
       &:hover {
         color: darken(rgb(133, 144, 166), 10%);
       }
+    }
+  }
+
+  .share-btn {
+    display: none;
+    margin: 0;
+    color: #c2cad8;
+
+    &:hover {
+      color: darken(rgb(133, 144, 166), 10%);
     }
   }
 

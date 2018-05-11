@@ -1,4 +1,5 @@
 import * as React from "react";
+import { I18n } from "react-i18next";
 
 import { Ribbit } from "../lib/ribbit";
 import { FeedInfo } from "../lib/feed";
@@ -97,37 +98,43 @@ export default class DonatePanel extends React.Component<Props, State> {
   render() {
     const userInfo = this.props.feedInfo.userInfo;
     return (
-      <div className="donate-panel" onClick={this.clickDonatePanel}>
-        <div
-          className="donate-card card"
-          onClick={event => {
-            event.stopPropagation();
-          }}
-        >
-          <i className="fas fa-times" onClick={this.clickDonatePanel} />
-          <div
-            className="avatar"
-            style={{ backgroundImage: `url("${userInfo.avatar}")` }}
-          />
-          <p className="name">{userInfo.name}</p>
-          <div className="donate-wrapper">
-            <input
-              className="donate-input"
-              type="text"
-              placeholder="donate 0.0000 ether"
-              value={this.state.etherInput}
-              onChange={this.changeEther}
-            />
-            {this.state.exchangeRate && this.state.currency ? (
-              <p className="currency">{this.state.currency} USD</p>
-            ) : null}
+      <I18n>
+        {t => (
+          <div className="donate-panel" onClick={this.clickDonatePanel}>
+            <div
+              className="donate-card card"
+              onClick={event => {
+                event.stopPropagation();
+              }}
+            >
+              <i className="fas fa-times" onClick={this.clickDonatePanel} />
+              <div
+                className="avatar"
+                style={{ backgroundImage: `url("${userInfo.avatar}")` }}
+              />
+              <p className="name">{userInfo.name}</p>
+              <div className="donate-wrapper">
+                <input
+                  className="donate-input"
+                  type="text"
+                  placeholder={t("components/donate-panel/donate-placeholder")}
+                  value={this.state.etherInput}
+                  onChange={this.changeEther}
+                />
+                {this.state.exchangeRate && this.state.currency ? (
+                  <p className="currency">
+                    {this.state.currency} {t("general/USD")}
+                  </p>
+                ) : null}
+              </div>
+              <div className="upvote-btn" onClick={this.upvote}>
+                <i className="fas fa-caret-up" />
+                <span>{t("general/Upvote")}</span>
+              </div>
+            </div>
           </div>
-          <div className="upvote-btn" onClick={this.upvote}>
-            <i className="fas fa-caret-up" />
-            <span>Upvote</span>
-          </div>
-        </div>
-      </div>
+        )}
+      </I18n>
     );
   }
 }

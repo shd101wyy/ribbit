@@ -1,0 +1,67 @@
+// out: false
+
+.share-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(31, 31, 31, 0.89);
+  z-index: 98;
+  cursor: pointer;
+
+  .share-card.card {
+    position: relative;
+    top: 36%;
+    transform: translateY(-50%);
+    width: 360px;
+    max-width: 100%;
+    cursor: auto;
+
+    i.fas.fa-times {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      cursor: pointer;
+    }
+
+    p.title {
+      text-align: center;
+      margin: 0;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .icons {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .icon {
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 1.8rem;
+        color: #7d7d7d;
+
+        &:hover {
+          &.facebook-icon {
+            color: #3b5998;
+          }
+          &.twitter-icon {
+            color: #55acee;
+          }
+          &.reddit-icon {
+            color: #ff4500;
+          }
+          &.linkedin-icon {
+            color: #007bb5;
+          }
+          &.weibo-icon {
+            color: #e6162d;
+          }
+        }
+      }
+    }
+  }
+}

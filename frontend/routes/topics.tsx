@@ -411,7 +411,7 @@ export default class Topics extends React.Component<Props, State> {
 
       return (
         <div className="home topics-page">
-          <Header ribbit={this.props.ribbit} page={Page.HomePage} />
+          <Header ribbit={this.props.ribbit} page={Page.TopicsPage} />
           <div className="container">
             <MediaQuery query="(max-width: 1368px)">
               <div className="left-panel">
