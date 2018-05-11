@@ -42,6 +42,7 @@ export default class Notifications extends React.Component<Props, State> {
 
   componentDidMount() {
     const ribbit = this.props.ribbit;
+    document.body.scrollTop = 0;
     checkUserRegistration(ribbit);
     this.showUserNotifications(ribbit);
     this.bindWindowScrollEvent();
@@ -49,6 +50,7 @@ export default class Notifications extends React.Component<Props, State> {
 
   componentWillReceiveProps(newProps: Props) {
     const ribbit = this.props.ribbit;
+    document.body.scrollTop = 0;
     checkUserRegistration(ribbit);
     this.showUserNotifications(ribbit);
     this.bindWindowScrollEvent();

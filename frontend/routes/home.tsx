@@ -60,6 +60,7 @@ export default class Home extends React.Component<Props, State> {
 
   componentDidMount() {
     const ribbit = this.props.ribbit;
+    document.body.scrollTop = 0;
     checkUserRegistration(ribbit);
     this.updateUserInfo(ribbit);
     this.showUserHome(ribbit);
@@ -70,6 +71,7 @@ export default class Home extends React.Component<Props, State> {
     // in order to get click in Header home tab to reload home page.
     // console.log('home will receive props')
     // if (this.props.ribbit !== newProps.ribbit) {
+    document.body.scrollTop = 0;
     checkUserRegistration(newProps.ribbit);
     this.updateUserInfo(newProps.ribbit);
     this.showUserHome(newProps.ribbit);

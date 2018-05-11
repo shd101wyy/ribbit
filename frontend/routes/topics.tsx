@@ -62,12 +62,13 @@ export default class Topics extends React.Component<Props, State> {
       loading: false,
       doneLoadingAll: false,
       userInfo: null,
-      sorting: TopicSorting.ByTrend
+      sorting: TopicSorting.ByTime
     };
   }
 
   componentDidMount() {
     const ribbit = this.props.ribbit;
+    document.body.scrollTop = 0;
     checkUserRegistration(ribbit);
     this.updateUserInfo(ribbit);
     this.showUserTopics(ribbit);
@@ -78,6 +79,7 @@ export default class Topics extends React.Component<Props, State> {
     // in order to get click in Header home tab to reload home page.
     // console.log('home will receive props')
     // if (this.props.ribbit !== newProps.ribbit) {
+    document.body.scrollTop = 0;
     checkUserRegistration(newProps.ribbit);
     this.updateUserInfo(newProps.ribbit);
     this.showUserTopics(newProps.ribbit);

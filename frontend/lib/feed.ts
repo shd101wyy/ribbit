@@ -145,6 +145,10 @@ export async function generateSummaryFromHTML(
             i += 1;
             return resolve();
           };
+          setTimeout(() => {
+            // set timeout for analyzing images.
+            return resolve();
+          }, 2000);
         });
       }
     }
