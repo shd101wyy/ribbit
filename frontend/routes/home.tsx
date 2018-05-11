@@ -1,4 +1,5 @@
 import * as React from "react";
+import MediaQuery from "react-responsive";
 import { I18n } from "react-i18next";
 
 import { Ribbit, UserInfo } from "../lib/ribbit";
@@ -266,79 +267,87 @@ export default class Home extends React.Component<Props, State> {
   render() {
     if (this.props.ribbit && this.props.ribbit.accountAddress) {
       const ribbit = this.props.ribbit;
-      return (
+      const cards = (
         <I18n>
-          {(t, { i18n }) => (
-            <div className="home">
-              <Header ribbit={this.props.ribbit} page={Page.HomePage} />
-              <div className="container">
-                <div className="left-panel">
-                  <ProfileCard
-                    userInfo={this.state.userInfo}
-                    ribbit={this.props.ribbit}
-                  />
-                  <FollowingsCard ribbit={this.props.ribbit} />
-                </div>
-                <div className="middle-panel">
-                  <div className="cards">
-                    {this.state.feeds.map((feedInfo, index) => (
-                      <FeedCard
-                        key={index}
-                        feedInfo={feedInfo}
-                        ribbit={this.props.ribbit}
-                      />
-                    ))}
-                    <p id="feed-footer">
-                      {" "}
-                      {this.state.loading
-                        ? this.state.msg
-                        : t("general/No-more-feeds")}{" "}
-                    </p>
-                  </div>
-                </div>
-                <div className="right-panel">
-                  <div className="post-btn-group">
-                    <div
-                      className="ribbit-btn btn"
-                      onClick={this.toggleEditPanel}
-                    >
-                      <i className="fas fa-pen-square" />Ribbit
-                    </div>
-                    <a
-                      href="https://github.com/shd101wyy/ribbit"
-                      target="_blank"
-                    >
-                      <div className="github-btn btn">
-                        <i className="fab fa-github" />
-                      </div>
-                    </a>
-                    <a
-                      href="https://github.com/shd101wyy/ribbit/issues"
-                      target="_blank"
-                    >
-                      <div className="bug-btn github-btn btn">
-                        <i className="fas fa-bug" />
-                      </div>
-                    </a>
-                    <a href="https://ethgasstation.info/" target="_blank">
-                      <div className="github-btn btn">
-                        <i className="fas fa-fire" />
-                      </div>
-                    </a>
-                  </div>
-                  {/* <AnnouncementCard /> */}
-                  <TopicsCard ribbit={this.props.ribbit} />
-                </div>
-                {this.state.showEditPanel ? (
-                  <Edit
-                    cancel={this.toggleEditPanel}
-                    ribbit={this.props.ribbit}
-                  />
-                ) : null}
-              </div>
+          {t => (
+            <div className="cards">
+              {this.state.feeds.map((feedInfo, index) => (
+                <FeedCard
+                  key={index}
+                  feedInfo={feedInfo}
+                  ribbit={this.props.ribbit}
+                />
+              ))}
+              <p id="feed-footer">
+                {" "}
+                {this.state.loading
+                  ? this.state.msg
+                  : t("general/No-more-feeds")}{" "}
+              </p>
             </div>
           )}
         </I18n>
+      );
+      const profileCard = (
+        <ProfileCard
+          userInfo={this.state.userInfo}
+          ribbit={this.props.ribbit}
+        />
+      );
+      const followingsCard = <FollowingsCard ribbit={this.props.ribbit} />;
+      const topicsCard = <TopicsCard ribbit={this.props.ribbit} />;
+      const postBtnGroup = (
+        <div className="post-btn-group">
+          <div className="ribbit-btn btn" onClick={this.toggleEditPanel}>
+            <i className="fas fa-pen-square" />Ribbit
+          </div>
+          <a href="https://github.com/shd101wyy/ribbit" target="_blank">
+            <div className="github-btn btn">
+              <i className="fab fa-github" />
+            </div>
+          </a>
+          <a href="https://github.com/shd101wyy/ribbit/issues" target="_blank">
+            <div className="bug-btn github-btn btn">
+              <i className="fas fa-bug" />
+            </div>
+          </a>
+          <a href="https://ethgasstation.info/" target="_blank">
+            <div className="github-btn btn">
+              <i className="fas fa-fire" />
+            </div>
+          </a>
+        </div>
+      );
+
+      return (
+        <div className="home">
+          <Header ribbit={this.props.ribbit} page={Page.HomePage} />
+          <div className="container">
+            <MediaQuery query="(max-width: 1368px)">
+              <div className="left-panel">
+                {profileCard}
+                {postBtnGroup}
+                {followingsCard}
+                {topicsCard}
+              </div>
+              <div className="middle-panel">{cards}</div>
+            </MediaQuery>
+            <MediaQuery query="(min-width: 1368px)">
+              <div className="left-panel">
+                {profileCard}
+                {followingsCard}
+              </div>
+              <div className="middle-panel">{cards}</div>
+              <div className="right-panel">
+                {postBtnGroup}
+                {topicsCard}
+              </div>
+            </MediaQuery>
+            {this.state.showEditPanel ? (
+              <Edit cancel={this.toggleEditPanel} ribbit={this.props.ribbit} />
+            ) : null}
+          </div>
+        </div>
       );
     } else {
       return <Error />;

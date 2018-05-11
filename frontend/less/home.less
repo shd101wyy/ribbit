@@ -22,6 +22,7 @@
     max-width: 100%;
   }
 
+  // <= 1368px
   .middle-panel {
     max-width: 100%;
     width: 580px;
@@ -74,42 +75,60 @@
     }
   }
 
-  .right-panel {
+  .profile-card {
+    margin-bottom: 0;
+  }
+
+  .post-btn-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .btn {
+      margin: 16px 0 16px 0;
+      /* width: 100%; */
+      text-align: center;
+      padding: 12px;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .ribbit-btn {
+      background-color: #74a24b;
+      width: 156px;
+      color: #fff;
+
+      i {
+        margin-right: 10px;
+      }
+
+      &:hover {
+        background-color: #6e964a;
+      }
+    }
+
+    .github-btn.btn {
+      background-color: #454d54;
+      color: #fff;
+      margin-left: 8px;
+      &:hover {
+        background-color: #24292e;
+      }
+    }
+  }
+
+  .followings-card {
+    margin-bottom: 18px;
+  }
+
+  @media screen and (min-width: 1360px) {
     .post-btn-group {
-      display: flex;
-      flex-direction: row;
+      justify-content: flex-start;
+    }
 
-      .btn {
-        margin: 16px 0 16px 0;
-        /* width: 100%; */
-        text-align: center;
-        padding: 12px;
-        border-radius: 2px;
-        cursor: pointer;
-      }
-
-      .ribbit-btn {
-        background-color: #74a24b;
-        width: 156px;
-        color: #fff;
-
-        i {
-          margin-right: 10px;
-        }
-
-        &:hover {
-          background-color: #6e964a;
-        }
-      }
-
-      .github-btn.btn {
-        background-color: #454d54;
-        color: #fff;
-        margin-left: 8px;
-        &:hover {
-          background-color: #24292e;
-        }
-      }
+    .followings-card {
+      margin-top: 18px;
     }
   }
 }

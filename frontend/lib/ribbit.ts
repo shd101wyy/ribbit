@@ -500,7 +500,6 @@ export class Ribbit {
     cb?: (blockNumber: number, index: number, total: number) => void
   ) {
     console.log("syncBlock: start syncing block " + blockNumber);
-    console.log(await this.blockDB.get(`block_${blockNumber}`));
     try {
       const blockInfo = await this.blockDB.get(`block_${blockNumber}`);
       if (blockInfo && blockInfo.fullySynced) {
