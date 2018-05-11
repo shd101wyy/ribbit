@@ -16,6 +16,7 @@ interface Props {
   feedInfo: FeedInfo;
   ribbit: Ribbit;
   hideActionsPanel?: boolean;
+  hideReplies?: boolean;
 }
 
 interface State {
@@ -129,13 +130,15 @@ export default class ArticleCard extends Component<Props, State> {
             />
           )}
         </div>
-        <div className="replies">
-          <TopicCards
-            areReplies={true}
-            ribbit={this.props.ribbit}
-            topic={this.props.feedInfo.transactionInfo.hash}
-          />
-        </div>
+        {this.props.hideReplies ? null : (
+          <div className="replies">
+            <TopicCards
+              areReplies={true}
+              ribbit={this.props.ribbit}
+              topic={this.props.feedInfo.transactionInfo.hash}
+            />
+          </div>
+        )}
       </div>
     );
   }

@@ -509,9 +509,6 @@ export default class Edit extends Component<Props, State> {
               </div>
             ) : (
               <div>
-                <h2 style={{ textAlign: "center" }}>
-                  {t("general/Write-below")}
-                </h2>
                 <div className="editor-wrapper">
                   <div className="toolbar">
                     <div className="icon" onClick={this.insertHeader1}>

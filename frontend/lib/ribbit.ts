@@ -500,100 +500,98 @@ export class Ribbit {
     cb?: (blockNumber: number, index: number, total: number) => void
   ) {
     console.log("syncBlock: start syncing block " + blockNumber);
-    const res = await this.blockDB["find"]({
-      selector: {
-        blockNumber
-      }
-    });
-    if (res && res.docs.length && res.docs[0]["fullySynced"]) {
-      // already synced
-      console.log(`syncBlock: block ${blockNumber} synced from database.`);
-      if (cb) {
-        cb(blockNumber, -1, -1);
-      }
-      return;
-    } else {
-      const transactionCount = await this.web3.eth.getBlockTransactionCount(
-        blockNumber
-      );
-      const asyncFunctions = [];
-      for (let i = 0; i < transactionCount; i++) {
-        asyncFunctions.push(
-          this.web3.eth.getTransactionFromBlock(blockNumber, i)
-        );
-      }
-
-      const transactions = await Promise.all(asyncFunctions);
-      for (let i = 0; i < transactions.length; i++) {
+    console.log(await this.blockDB.get(`block_${blockNumber}`));
+    try {
+      const blockInfo = await this.blockDB.get(`block_${blockNumber}`);
+      if (blockInfo && blockInfo.fullySynced) {
         if (cb) {
-          cb(blockNumber, i, transactionCount);
+          cb(blockNumber, -1, -1);
         }
-        const transaction = transactions[i];
-        const decodedInputData = decodeMethod(transaction.input);
-        if (
-          !decodedInputData ||
-          Object.keys(decodedInputData).length === 0 ||
-          (decodedInputData.name !== "post" &&
-            decodedInputData.name !== "upvote" &&
-            decodedInputData.name !== "reply")
-        ) {
-          continue;
-        } else {
-          const receipt = await this.web3.eth.getTransactionReceipt(
-            transaction.hash
-          );
-          const logs = (receipt ? receipt["logs"] : null) || null; // receipt might be null
-          if (!logs || !logs.length) {
-            continue;
-          }
-          const decodedLogs = decodeLogs(logs);
-          const tags = [];
-          decodedLogs.forEach(decodedLog => {
-            if (
-              decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
-              decodedLog.name === "SavePreviousTagInfoByTrendEvent"
-            ) {
-              tags.push(decodedLog.events["tag"].value);
-            }
-          });
-          // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
-          const transactionInfo: TransactionInfo = Object.assign(
-            transaction as object,
-            {
-              decodedInputData,
-              decodedLogs,
-              creation: parseInt(decodedInputData.params["timestamp"].value),
-              _id: transaction.hash,
-              tags
-            }
-          ) as TransactionInfo;
-          try {
-            await this.transactionInfoDB.get(transaction.hash);
-          } catch (error) {
-            try {
-              await this.transactionInfoDB.put(transactionInfo);
-            } catch (error) {
-              console.log(error);
-            }
-          }
-        }
+        return;
       }
-
-      try {
-        await this.blockDB.get("block_" + blockNumber.toString());
-      } catch (error) {
-        try {
-          await this.blockDB.put({
-            blockNumber,
-            fullySynced: true,
-            _id: "block_" + blockNumber.toString()
-          });
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      console.log(`syncBlock: block ${blockNumber} synced from blockchain.`);
+    } catch (error) {
+      // do nothing here
     }
+    const transactionCount = await this.web3.eth.getBlockTransactionCount(
+      blockNumber
+    );
+    const asyncFunctions = [];
+    for (let i = 0; i < transactionCount; i++) {
+      asyncFunctions.push(
+        this.web3.eth.getTransactionFromBlock(blockNumber, i)
+      );
+    }
+
+    const transactions = await Promise.all(asyncFunctions);
+    for (let i = 0; i < transactions.length; i++) {
+      if (cb) {
+        cb(blockNumber, i, transactionCount);
+      }
+      const transaction = transactions[i];
+      const decodedInputData = decodeMethod(transaction.input);
+      if (
+        !decodedInputData ||
+        Object.keys(decodedInputData).length === 0 ||
+        (decodedInputData.name !== "post" &&
+          decodedInputData.name !== "upvote" &&
+          decodedInputData.name !== "reply")
+      ) {
+        continue;
+      } else {
+        const receipt = await this.web3.eth.getTransactionReceipt(
+          transaction.hash
+        );
+        const logs = (receipt ? receipt["logs"] : null) || null; // receipt might be null
+        if (!logs || !logs.length) {
+          continue;
+        }
+        const decodedLogs = decodeLogs(logs);
+        const tags = [];
+        decodedLogs.forEach(decodedLog => {
+          if (
+            decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
+            decodedLog.name === "SavePreviousTagInfoByTrendEvent"
+          ) {
+            tags.push(decodedLog.events["tag"].value);
+          }
+        });
+        // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
+        const transactionInfo: TransactionInfo = Object.assign(
+          transaction as object,
+          {
+            decodedInputData,
+            decodedLogs,
+            creation: parseInt(decodedInputData.params["timestamp"].value),
+            _id: transaction.hash,
+            tags
+          }
+        ) as TransactionInfo;
+        try {
+          await this.transactionInfoDB.get(transaction.hash);
+        } catch (error) {
+          try {
+            await this.transactionInfoDB.put(transactionInfo);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+    }
+
+    try {
+      await this.blockDB.get("block_" + blockNumber.toString());
+    } catch (error) {
+      try {
+        await this.blockDB.put({
+          blockNumber,
+          fullySynced: true,
+          _id: "block_" + blockNumber.toString()
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    console.log(`syncBlock: block ${blockNumber} synced from blockchain.`);
   }
 
   /**

@@ -64,6 +64,7 @@ export default class Preview extends Component<Props, State> {
             <ArticleCard
               feedInfo={this.state.feedInfo}
               ribbit={this.props.ribbit}
+              hideReplies={true}
             />
           ) : null}
         </div>
