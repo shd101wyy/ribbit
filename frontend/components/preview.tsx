@@ -59,14 +59,16 @@ export default class Preview extends Component<Props, State> {
       return (
         <div className="preview">
           <FeedCard feedInfo={this.state.feedInfo} ribbit={this.props.ribbit} />
-          {// Only render article if it is article
-          this.state.feedInfo.summary.title ? (
+          {
+            // Only render article if it is article
+            // this.state.feedInfo.summary.title ? (
             <ArticleCard
               feedInfo={this.state.feedInfo}
               ribbit={this.props.ribbit}
               hideReplies={true}
             />
-          ) : null}
+            // ) : null
+          }
         </div>
       );
     }

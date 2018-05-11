@@ -3,7 +3,14 @@ const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
-  breaks: true
+  breaks: true,
+  highlight: (code, language) => {
+    const html = window["Prism"].highlight(
+      code,
+      window["Prism"].languages[language]
+    );
+    return html;
+  }
 });
 
 md.inline.ruler.before("escape", "tag", (state, silent) => {
