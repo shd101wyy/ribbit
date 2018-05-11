@@ -12,14 +12,15 @@ github: http://shd101wyy.github.io/ribbit/
 <!-- code_chunk_output -->
 
 * [ribbit](#ribbit)
-  _ [Usage](#usage)
-  _ [Make a post](#make-a-post)
-  _ [Post to topic](#post-to-topic)
-  _ [Mention a user](#mention-a-user)
-  _ [Roadmap (TODO)](#roadmap-todo)
-  _ [Developer section](#developer-section)
-  _ [Development](#development)
-  _ [Deployment](#deployment) \* [References](#references)
+	* [Usage](#usage)
+	* [Make a post](#make-a-post)
+		* [Post to topic](#post-to-topic)
+		* [Mention a user](#mention-a-user)
+	* [Roadmap (TODO)](#roadmap-todo)
+	* [Developer section](#developer-section)
+		* [Development](#development)
+		* [Deployment](#deployment)
+	* [References](#references)
 
 <!-- /code_chunk_output -->
 
