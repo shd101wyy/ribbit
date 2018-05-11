@@ -106,8 +106,8 @@ export async function generateSummaryFromHTML(
         src = imgElement.src;
       cover = src;
       title = div.children[1].textContent;
-    } else {
-      title = div.children[0].textContent;
+    } else if (div.children[1].tagName === "H1") {
+      title = div.children[1].textContent;
     }
   } else if (div.children.length === 1 && div.children[0].tagName === "H1") {
     summary = div.children[0].textContent;

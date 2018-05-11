@@ -55,6 +55,8 @@ export function decodeLogs(logs: Log[]) {
   }
 }
 
+const IgnoredCharacters = /[\s\@\#,\.\!\$\%\^\&\*\(\)\-\_\+\=\~\`\<\>\?\/\，\。]/g;
+
 export interface UserInfo {
   /**
    * User username
@@ -257,7 +259,7 @@ export class Ribbit {
     }
 
     tag = chineseConv.sify(tag); // convert to simplified Chinese.
-    return "0x" + sha256(tag.toLowerCase().replace(/[\s\@\#]/g, ""));
+    return "0x" + sha256(tag.toLowerCase().replace(IgnoredCharacters, ""));
 
     /*
     const compressedTag = compressString(tag.toLowerCase().replace(/\s/g, ""));
@@ -277,7 +279,7 @@ export class Ribbit {
 
   public formatUsername(username: string) {
     const compressedUsername = compressString(
-      username.toLowerCase().replace(/[\s\@\#]/g, "")
+      username.toLowerCase().replace(IgnoredCharacters, "")
     );
     let hexString = hexEncode(compressedUsername);
     if (hexString.length >= 64) {
