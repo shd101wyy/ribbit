@@ -8,14 +8,21 @@ export default class Error extends React.Component<Props, State> {
     return (
       <I18n>
         {(t, { i18n }) => (
-          <div className="home">
-            <div className="container">
-              <p id="feed-footer">
-                {t("components/error/feed-footer-part1")}{" "}
+          <div className="error-page">
+            <div className="container" style={{ flexDirection: "column" }}>
+              <p className="error-msg">
+                {t("components/error/feed-footer-part1", { lng: "zh" })}{" "}
                 <a href="https://metamask.io/" target="_blank">
                   MetaMask
                 </a>{" "}
-                {t("components/error/feed-footer-part2")}
+                {t("components/error/feed-footer-part2", { lng: "zh" })}
+              </p>
+              <p className="error-msg">
+                {t("components/error/feed-footer-part1", { lng: "en" })}{" "}
+                <a href="https://metamask.io/" target="_blank">
+                  MetaMask
+                </a>{" "}
+                {t("components/error/feed-footer-part2", { lng: "en" })}
               </p>
             </div>
           </div>

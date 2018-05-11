@@ -166,6 +166,8 @@ export class Ribbit {
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
     await this.initializeIPFS();
     await this.initializeSettings();
+
+    this.monitorAccountChange();
   }
 
   private initializeIPFS() {
@@ -202,6 +204,22 @@ export class Ribbit {
    */
   public async ipfsCat(ipfsHash: string): Promise<string> {
     return (await this.ipfs.files.cat(ipfsHash)).toString("utf8");
+  }
+
+  /**
+   * Listen to account change, then refresh the webpage.
+   */
+  private monitorAccountChange() {
+    const accountInterval = setInterval(async () => {
+      const accountAddress = (await this.web3.eth.getAccounts())[0];
+      const networkId = await this.web3.eth.net.getId();
+      if (
+        this.accountAddress !== accountAddress ||
+        this.networkId !== networkId
+      ) {
+        window.location.reload();
+      }
+    }, 500);
   }
 
   /**
