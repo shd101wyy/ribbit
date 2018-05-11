@@ -10,11 +10,48 @@ interface Props {
   feedInfo: FeedInfo;
   ribbit: Ribbit;
 }
-interface State {}
+interface State {
+  donation: number;
+  ether: number;
+}
 
 export default class UserTopPanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      donation: 0,
+      ether: 0
+    };
+  }
+
+  componentDidMount() {
+    this.updateDonationValue(this.props.feedInfo);
+  }
+
+  componentWillReceiveProps(newProps: Props) {
+    if (
+      newProps.feedInfo.transactionInfo.hash !==
+      this.props.feedInfo.transactionInfo.hash
+    ) {
+      this.updateDonationValue(newProps.feedInfo);
+    }
+  }
+
+  updateDonationValue(feedInfo: FeedInfo) {
+    if (feedInfo.feedType === "upvote" && feedInfo.repostUserDonation) {
+      fetch("https://api.coinmarketcap.com/v1/ticker/ethereum/")
+        .then(x => x.json())
+        .then(([data]) => {
+          const priceUSD = parseFloat(data["price_usd"]);
+          if (priceUSD > 0) {
+            const ether = feedInfo.repostUserDonation / 1000000000000000000;
+            this.setState({
+              donation: ether * priceUSD,
+              ether
+            });
+          }
+        });
+    }
   }
 
   gotoProfilePage = username => {
@@ -82,9 +119,19 @@ export default class UserTopPanel extends React.Component<Props, State> {
                 target="_blank"
                 onClick={this.gotoProfilePage(feedInfo.repostUserInfo.username)}
               >
-                {feedInfo.repostUserInfo.name}
+                @{feedInfo.repostUserInfo.name}
               </Link>
               <span className="action">{t("general/upvoted")}</span>
+              <span>,&nbsp;</span>
+              {this.state.donation ? (
+                <span className="action">
+                  {t("general/donated") +
+                    " " +
+                    `\$${this.state.donation.toFixed(2)} (${
+                      this.state.ether
+                    } ether)`}
+                </span>
+              ) : null}
             </div>
           )}
         </I18n>

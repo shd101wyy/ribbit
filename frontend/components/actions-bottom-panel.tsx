@@ -59,7 +59,6 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
   }
 
   updateFeedEarnings(feedInfo: FeedInfo) {
-    console.log(feedInfo.stateInfo.earnings);
     if (feedInfo.stateInfo.earnings) {
       fetch("https://api.coinmarketcap.com/v1/ticker/ethereum/")
         .then(x => x.json())

@@ -27,6 +27,7 @@ export interface FeedInfo {
    * who reposts this feed.
    */
   repostUserInfo?: UserInfo;
+  repostUserDonation?: number;
   feedType: string; // post | repost | repostAndReply
 }
 
@@ -231,6 +232,7 @@ export async function generateFeedInfoFromTransactionInfo(
   const feedType = transactionInfo.decodedInputData.name;
 
   let message, summary, userInfo, repostUserInfo;
+  let repostUserDonation = parseInt(transactionInfo.value) || 0;
   if (feedType === "post") {
     message = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
@@ -278,7 +280,8 @@ export async function generateFeedInfoFromTransactionInfo(
     userInfo,
     stateInfo,
     feedType,
-    repostUserInfo
+    repostUserInfo,
+    repostUserDonation
   };
 
   return feedInfo;
