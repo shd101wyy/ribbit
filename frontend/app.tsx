@@ -8,6 +8,8 @@ const Web3 = require("web3");
 import hashHistory from "./lib/history";
 import { Ribbit } from "./lib/ribbit";
 
+window["hashHistory"] = hashHistory;
+
 import "./less/entry.less";
 
 import Home from "./routes/home";

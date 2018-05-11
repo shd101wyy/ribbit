@@ -6,6 +6,7 @@ import Header from "../components/header";
 import { Ribbit, UserInfo, decodeMethod } from "../lib/ribbit";
 import { decompressString } from "../lib/utility";
 import { TransactionInfo } from "../lib/transaction";
+import hashHistory from "../lib/history";
 import {
   generateSummaryFromHTML,
   FeedInfo,
@@ -108,7 +109,7 @@ export default class Tx extends React.Component<Props, State> {
     }
     return (
       <div className="tx-page">
-        <Header ribbit={this.props.ribbit} />
+        <Header ribbit={this.props.ribbit} showBackBtn={true} />
         <div className="container">
           <ArticleCard
             ribbit={this.props.ribbit}

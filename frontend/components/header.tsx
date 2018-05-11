@@ -17,6 +17,7 @@ export enum Page {
 interface Props {
   ribbit: Ribbit;
   page?: Page;
+  showBackBtn?: boolean;
 }
 
 interface State {
@@ -84,7 +85,15 @@ export default class Header extends Component<Props, State> {
         {(t, { i18n }) => (
           <header className="header">
             <div className="wrapper">
-              <h1>Ribbit</h1>
+              {this.props.showBackBtn ? (
+                <h1 className="back-btn" onClick={() => hashHistory.goBack()}>
+                  &nbsp;
+                  <i className="fas fa-chevron-left" />
+                  &nbsp;
+                </h1>
+              ) : (
+                <h1>Ribbit</h1>
+              )}
               <nav>
                 <Link
                   className={
