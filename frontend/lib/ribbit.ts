@@ -527,6 +527,9 @@ export class Ribbit {
         cb(blockNumber, i, transactionCount);
       }
       const transaction = transactions[i];
+      if (!transaction) {
+        continue;
+      }
       const decodedInputData = decodeMethod(transaction.input);
       if (
         !decodedInputData ||

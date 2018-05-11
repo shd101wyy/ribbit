@@ -81,7 +81,7 @@ export default class DonatePanel extends React.Component<Props, State> {
         // do nothing.
         new window["Noty"]({
           type: "info",
-          text: i18n("notification/publish-upvote"),
+          text: i18n.t("notification/publish-upvote"),
           timeout: 10000
         }).show();
       })
