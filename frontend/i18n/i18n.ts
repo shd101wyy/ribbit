@@ -75,7 +75,9 @@ i18next.init({
         "notification/publish-post-success": `Your post is now saved on blockchain.`,
         "notification/publish-reply-success": `Your reply is now saved on blockchain.`,
         "notification/username-taken": `Username {{username}} is already taken.`,
-        "notification/user-address-doesnt-exist": `User with address {{userAddress}} doesn't exist.`
+        "notification/user-address-doesnt-exist": `User with address {{userAddress}} doesn't exist.`,
+        "notification/Sycing-block-from-blockchain": `Syncing {{index}}/{{total}} transaction at block {{blockNumber}} from blockchain...`,
+        "notification/Syncing-block-from-database": `Syncing block {{blockNumber}} from database...`
       }
     },
     zh: {
@@ -143,7 +145,9 @@ i18next.init({
         "notification/publish-post-success": `你的文字已被成功保存到区块链。`,
         "notification/publish-reply-success": `你的回复已被成功保存到区块链。`,
         "notification/username-taken": `用户名 {{username}} 已被注册。`,
-        "notification/user-address-doesnt-exist": `用户地址 {{userAddress}} 不存在。`
+        "notification/user-address-doesnt-exist": `用户地址 {{userAddress}} 不存在。`,
+        "notification/Syncing-block-from-blockchain": `同步完成区块链 {{index}}/{{total}} 交易位于第 {{blockNumber}} 区块。`,
+        "notification/Syncing-block-from-database": `同步完成数据库中第 {{blockNumber}} 区块。`
       }
     }
   }

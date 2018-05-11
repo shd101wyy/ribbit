@@ -3,6 +3,7 @@ import { Ribbit, UserInfo } from "../lib/ribbit";
 import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
 import FeedCard from "../components/feed-card";
 import { I18n } from "react-i18next";
+import i18n from "../i18n/i18n";
 
 interface CurrentFeed {
   creation: number;
@@ -123,12 +124,17 @@ export default class TopicFeedCards extends React.Component<Props, State> {
           (blockNumber, index, total) => {
             if (index >= 0) {
               this.setState({
-                msg: `Syncing ${index +
-                  1}/${total} at block ${blockNumber} from blockchain...`
+                msg: i18n.t("notification/Syncing-block-from-blockchain", {
+                  index: index + 1,
+                  total,
+                  blockNumber
+                })
               });
             } else {
               this.setState({
-                msg: `Syncing block ${blockNumber} from database...`
+                msg: i18n.t("notification/Syncing-block-from-database", {
+                  blockNumber
+                })
               });
             }
           }
