@@ -242,7 +242,7 @@ contract Ribbit {
 
     // Repost Feed => Upvote
     event DonateEvent(uint value);
-    function upvote(uint timestamp, bytes32 parentTransactionHash, bytes32[] tags, address authorAddress) external payable {
+    function upvote(uint timestamp, bytes32 parentTransactionHash, bytes32[] tags, bool repost, address authorAddress) external payable {
         bool isDonation = (authorAddress != address(0)); 
         if (isDonation) {
             require(msg.value > donationBar);
@@ -256,8 +256,10 @@ contract Ribbit {
             owner.transfer(unit * developerIncomePercent);
         }
 
-        emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
-        currentFeedInfoMap[msg.sender] = block.number;
+        if (repost) {
+            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            currentFeedInfoMap[msg.sender] = block.number;
+        }
 
         state[parentTransactionHash][1] = state[parentTransactionHash][1] + 1; // increase number of upvotes.
 
@@ -278,12 +280,16 @@ contract Ribbit {
 
     // Downvote
     // Downvote will affect trend. See function above
-    function downvote(bytes32 transactionHash) external {
+    function downvote(bytes32 transactionHash, bool repost) external {
         state[transactionHash][2] = state[transactionHash][2] + 1;
+        if (repost) {
+            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            currentFeedInfoMap[msg.sender] = block.number;
+        }
     }
     
     // Reply
-    function reply(uint timestamp, string message, bytes32[] tags, bytes32 parentTransactionHash, bool repost) external {
+    function reply(uint timestamp, bytes32 parentTransactionHash, string message, bytes32[] tags, bool repost) external {
         if (repost) {
             emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
             currentFeedInfoMap[msg.sender] = block.number;

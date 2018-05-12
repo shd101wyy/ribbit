@@ -394,9 +394,9 @@ export class Ribbit {
       this.contractInstance.methods
         .reply(
           currentTimestamp, // timestamp
+          parentTransactionHash, // parentTransactionHash
           compressedMessage, // message
           tags, // tags
-          parentTransactionHash, // parentTransactionHash
           repostToTimeline // repostToTimeline
         )
         .send({ from: this.accountAddress })
@@ -464,7 +464,7 @@ export class Ribbit {
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .upvote(Date.now(), parentTransactionHash, tags, authorAddress)
+        .upvote(Date.now(), parentTransactionHash, tags, true, authorAddress)
         .send({ from: this.accountAddress, value: wei })
         .on("error", error => {
           return reject(error);
@@ -490,7 +490,7 @@ export class Ribbit {
   public async downvote(parentTransactionHash: string) {
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .downvote(parentTransactionHash)
+        .downvote(parentTransactionHash, false)
         .send({ from: this.accountAddress })
         .on("error", error => {
           return reject(error);
