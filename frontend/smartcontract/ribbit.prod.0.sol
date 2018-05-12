@@ -29,16 +29,16 @@ contract Ribbit {
     mapping (bytes32 => mapping(uint => uint)) public state;
 
     /**
-     * 0x0 => likes
-     * 0x1 => dislikes
+     * 0x0 => upvotes
+     * 0x1 => downvotes
      * 0x2 => reports
      * tagHash => field => value
      */
     mapping (bytes32 => mapping(uint => uint)) public tagState;
 
     /**
-     * 0x0 => likes
-     * 0x1 => dislikes
+     * 0x0 => upvotes
+     * 0x1 => downvotes
      * 0x2 => reports
      * userAddress => field => value
      */
@@ -264,7 +264,7 @@ contract Ribbit {
         bytes32 tag;
         for (uint i = 0; i < tags.length; i++) {
             tag = tags[i];
-            if (tag >> 160 == 0) { // it's a user address, notify that user that someone likes his post & reply.
+            if (tag >> 160 == 0x0) { // it's a user address, notify that user that someone likes his post & reply.
                 emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
                 currentTagInfoByTimeMap[tag] = block.number;
             } else if ( isDonation ||                                                        // for donation, we pop that to trend directly
@@ -283,58 +283,6 @@ contract Ribbit {
     }
     
     // Reply
-    // mode:
-    //  0x0: do nothing
-    //  0x1: upvote
-    //  0x2: downvote
-    //  0x3: donate
-    /*
-    function reply(uint timestamp, bytes32 parentTransactionHash, string message, bytes32[] tags, uint8 mode, address authorAddress) external payable {
-        if (authorAddress != address(0)) {
-            require(msg.value > donationBar);
-            // donate:
-            // 0.9 to author
-            // 0.1 to developer
-            state[parentTransactionHash][0] = state[parentTransactionHash][0] + msg.value;
-            emit DonateEvent(msg.value);
-            uint unit = msg.value / 100;
-            authorAddress.transfer(unit * (100 - developerIncomePercent));
-            owner.transfer(unit * developerIncomePercent);
-        }
-
-        state[parentTransactionHash][3] = state[parentTransactionHash][3] + 1; // increase number of replies
-
-        if (mode == 1 || mode == 3) { // upvote or donate
-            state[parentTransactionHash][1] = state[parentTransactionHash][1] + 1; // increase number of upvotes
-            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);        // display in timeline
-            currentFeedInfoMap[msg.sender] = block.number;
-        } else if (mode == 2) {
-            state[parentTransactionHash][2] = state[parentTransactionHash][2] + 1; // increase number of downvotes
-        }
-
-        bytes32 tag;
-        for (uint i = 0; i < tags.length; i++) {
-            tag = tags[i];
-            if (tag >> 160 == 0) { // it's a user address
-                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
-                currentTagInfoByTimeMap[tag] = block.number;
-            } else if (mode == 3 ||  // is donation.
-                      (mode != 2 && state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar)   // not downvote, and upvotes >= downvotes.
-            ){
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
-                currentTagInfoByTrendMap[tag] = block.number;
-            }
-        }
-
-        // here we use parentTransactionHash as tag.
-        // Drawback: there might be collision with the real tag, but we just ignore it.
-        emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[parentTransactionHash], parentTransactionHash);
-        currentTagInfoByTimeMap[parentTransactionHash] = block.number;
-
-        emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
-        currentTagInfoByTrendMap[parentTransactionHash] = block.number;
-    }
-    */
     function reply(uint timestamp, string message, bytes32[] tags, bytes32 parentTransactionHash, bool repost) external {
         if (repost) {
             emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
