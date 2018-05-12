@@ -175,6 +175,7 @@ export class Ribbit {
   private initializeIPFS() {
     const ipfsOption = {};
     this.ipfs = new IPFS(ipfsOption);
+    window["ipfsNode"] = this.ipfs;
     return new Promise((resolve, reject) => {
       this.ipfs.on("ready", () => {
         console.log("IPFS node initialized");
@@ -204,8 +205,20 @@ export class Ribbit {
    * Retrieve content from IPFS node.
    * @param ipfsHash
    */
-  public async ipfsCat(ipfsHash: string): Promise<string> {
-    return (await this.ipfs.files.cat(ipfsHash)).toString("utf8");
+  public ipfsCat(ipfsHash: string): Promise<string> {
+    return new Promise((resolve, reject)=> {
+      let timeout = setTimeout(()=> {
+        return resolve(`Failed to load ipfs hash: [${ipfsHash.slice(0, 6) + "..."}](https://ipfs.io/ipfs/${ipfsHash})`)
+      }, 1500);
+      this.ipfs.files.cat(ipfsHash, (error, file)=> {
+        clearTimeout(timeout)
+        if (error) {
+          return reject(error)
+        } else {
+          return resolve(file.toString("utf8"))
+        }
+      })
+    })
   }
 
   /**

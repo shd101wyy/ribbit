@@ -122,14 +122,16 @@ export default class UserTopPanel extends React.Component<Props, State> {
                 @{feedInfo.repostUserInfo.name}
               </Link>
               <span className="action">{t("general/upvoted")}</span>
-              <span>,&nbsp;</span>
               {this.state.donation ? (
-                <span className="action">
-                  {t("general/donated") +
-                    " " +
-                    `\$${this.state.donation.toFixed(2)} (${
-                      this.state.ether
-                    } ether)`}
+                <span>
+                  <span>,&nbsp;</span>
+                  <span className="action">
+                    {t("general/donated") +
+                      " " +
+                      `\$${this.state.donation.toFixed(2)} (${
+                        this.state.ether
+                      } ether)`}
+                  </span>
                 </span>
               ) : null}
             </div>
