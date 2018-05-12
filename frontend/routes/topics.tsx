@@ -20,7 +20,6 @@ import ProfileCard from "../components/profile-card";
 import AnnouncementCard from "../components/announcement-card";
 import TopicsCard from "../components/topics-card";
 import FollowingsCard from "../components/followings-card";
-import ProfileSettingsCard from "../components/profile-settings-card";
 import Header, { Page } from "../components/header";
 import Error from "../components/error";
 import i18n from "../i18n/i18n";

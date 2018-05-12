@@ -27,7 +27,10 @@ export default class Settings extends React.Component<Props, State> {
     return (
       <div className="settings-page">
         <Header ribbit={this.props.ribbit} page={Page.SettingsPage} />
-        <ProfileSettingsCard ribbit={this.props.ribbit} />
+        <ProfileSettingsCard
+          ribbit={this.props.ribbit}
+          showDeleteAppCacheButton={true}
+        />
       </div>
     );
   }

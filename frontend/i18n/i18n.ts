@@ -58,6 +58,8 @@ i18next.init({
           "Avatar image url starting with http:// or https://",
         "components/profile-settings-card/cover-url-placeholder":
           "Cover image url starting with http:// or https://",
+        "components/profile-settings-card/delete-app-cache":
+          "Delete app local cache",
         "components/donate-panel/donate-placeholder":
           "(optional) donate 0.0000 ether to author",
         "routes/signup/title": "Welcome to use Ribbit!",
@@ -65,8 +67,8 @@ i18next.init({
           "Please finish your account registration below",
         "notification/init-error":
           "Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked.",
-        "notification/publish-profile": `Profile is being published to blockchain.\nPlease wait until the transaction finishes.`,
-        "notification/publish-profile-success": `Your profile information is now saved on blockchain.`,
+        "notification/publish-profile": `Profile is being published to blockchain.\nPlease wait until the transaction finishes, then refresh your browser.`,
+        "notification/publish-profile-success": `Your profile information is now saved on blockchain. Please refresh your browser.`,
         "notification/publish-downvote": `Your downvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
         "notification/publish-downvote-success": `Your downvote is now saved on blockchain.`,
         "notification/publish-upvote": `Thank you for supporting the author :)\nYour upvote is being published to blockchain.\nPlease wait until the transaction finishes.`,
@@ -77,7 +79,11 @@ i18next.init({
         "notification/username-taken": `Username {{username}} is already taken.`,
         "notification/user-address-doesnt-exist": `User with address {{userAddress}} doesn't exist.`,
         "notification/Sycing-block-from-blockchain": `Syncing {{index}}/{{total}} transaction at block {{blockNumber}} from blockchain...`,
-        "notification/Syncing-block-from-database": `Syncing block {{blockNumber}} from database...`
+        "notification/Syncing-block-from-database": `Syncing block {{blockNumber}} from database...`,
+        "notification/app-local-cache-deletion-success":
+          "App local cache are deleted successfully. Browser will be refreshed soon.",
+        "notification/app-local-cache-deletion-failure":
+          "Failed to delete app local cache"
       }
     },
     zh: {
@@ -129,14 +135,15 @@ i18next.init({
           "头像图片链接请以 https:// 或者 https:// 开头",
         "components/profile-settings-card/cover-url-placeholder":
           "墙图片链接请以 http:// 或者 https:// 开头",
+        "components/profile-settings-card/delete-app-cache": "清除程序本地缓存",
         "components/donate-panel/donate-placeholder":
           "（可选）捐赠 0.0000 以太币给作者",
         "routes/signup/title": "欢迎使用 Ribbit！",
         "routes/signup/subtitle": "请在下方完成账号注册",
         "notification/init-error":
           "启动 Ribbit 失败。请确保 MetaMask 已启动并解锁。",
-        "notification/publish-profile": `个人信息正在被发布到区块链。\n请等候交易完成。`,
-        "notification/publish-profile-success": `你的信息已被成功保存到区块链。`,
+        "notification/publish-profile": `个人信息正在被发布到区块链。\n请等候交易完成，然后刷新浏览器。`,
+        "notification/publish-profile-success": `你的信息已被成功保存到区块链。请刷新浏览器，`,
         "notification/publish-downvote": `你的反对正在被发布到区块链。\n请等候交易完成。`,
         "notification/publish-downvote-success": `你的反对已被成功保存到区块链。`,
         "notification/publish-upvote": `感谢你支持作者。你的赞同正在被发布到区块链。\n请等候交易完成。`,
@@ -147,7 +154,10 @@ i18next.init({
         "notification/username-taken": `用户名 {{username}} 已被注册。`,
         "notification/user-address-doesnt-exist": `用户地址 {{userAddress}} 不存在。`,
         "notification/Syncing-block-from-blockchain": `同步完成区块链 {{index}}/{{total}} 交易位于第 {{blockNumber}} 区块。`,
-        "notification/Syncing-block-from-database": `同步完成数据库中第 {{blockNumber}} 区块。`
+        "notification/Syncing-block-from-database": `同步完成数据库中第 {{blockNumber}} 区块。`,
+        "notification/app-local-cache-deletion-success":
+          "成功删除程序本地缓存。浏览器将会在不久后刷新。",
+        "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存"
       }
     }
   }

@@ -12,6 +12,7 @@ import i18n from "../i18n/i18n";
 interface Props {
   ribbit: Ribbit;
   reset?: boolean;
+  showDeleteAppCacheButton?: boolean;
 }
 interface State {
   username: string;
@@ -133,6 +134,28 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
     );
   };
 
+  deleteAppCache = () => {
+    this.props.ribbit
+      .destroyDB()
+      .then(() => {
+        new window["Noty"]({
+          type: "success",
+          text: i18n.t("notification/app-local-cache-deletion-success"),
+          timeout: 60000
+        }).show();
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+      })
+      .catch(error => {
+        new window["Noty"]({
+          type: "error",
+          text: i18n.t("notification/app-local-cache-deletion-failure"),
+          timeout: 60000
+        }).show();
+      });
+  };
+
   render() {
     const options = {
       lineNumbers: false,
@@ -230,6 +253,17 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
               ribbit={this.props.ribbit}
               hideFollowingBtn={true}
             />
+            {this.props.showDeleteAppCacheButton ? (
+              <div style={{ padding: "24px 0" }}>
+                <div
+                  id="delete-app-cache"
+                  className="btn"
+                  onClick={this.deleteAppCache}
+                >
+                  {t("components/profile-settings-card/delete-app-cache")}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </I18n>

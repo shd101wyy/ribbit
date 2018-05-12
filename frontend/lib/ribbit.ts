@@ -1027,7 +1027,7 @@ export class Ribbit {
             new window["Noty"]({
               type: "success",
               text: i18n.t("notification/publish-profile-success"),
-              timeout: 10000
+              timeout: 60000
             }).show();
           });
       });
@@ -1224,5 +1224,8 @@ export class Ribbit {
   public async destroyDB() {
     await this.transactionInfoDB.destroy();
     await this.blockDB.destroy();
+    if (typeof window.localStorage !== "undefined") {
+      window.localStorage.setItem(`/settings/${this.accountAddress}`, "");
+    }
   }
 }
