@@ -208,7 +208,7 @@ export class Ribbit {
   public ipfsCat(ipfsHash: string): Promise<string> {
     return new Promise((resolve, reject)=> {
       let timeout = setTimeout(()=> {
-        return resolve(`Failed to load ipfs hash: [${ipfsHash.slice(0, 6) + "..."}](https://ipfs.io/ipfs/${ipfsHash})`)
+        return resolve(i18n.t("notification/ipfs-hash-not-found", {name: (ipfsHash.slice(0, 6) + "..."), link: `https://ipfs.io/ipfs/${ipfsHash}`}))
       }, 1500);
       this.ipfs.files.cat(ipfsHash, (error, file)=> {
         clearTimeout(timeout)

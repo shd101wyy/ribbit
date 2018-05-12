@@ -84,7 +84,8 @@ i18next.init({
         "notification/app-local-cache-deletion-success":
           "App local cache are deleted successfully. Browser will be refreshed soon.",
         "notification/app-local-cache-deletion-failure":
-          "Failed to delete app local cache"
+          "Failed to delete app local cache",
+        "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`,
       }
     },
     zh: {
@@ -159,7 +160,8 @@ i18next.init({
         "notification/Syncing-block-from-database": `同步完成数据库中第 {{blockNumber}} 区块。`,
         "notification/app-local-cache-deletion-success":
           "成功删除程序本地缓存。浏览器将会在不久后刷新。",
-        "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存"
+        "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存",
+        "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`,
       }
     }
   }
