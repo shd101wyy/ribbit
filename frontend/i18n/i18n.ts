@@ -42,7 +42,7 @@ i18next.init({
         "general/USD": "USD",
         "components/error/feed-footer-part1": "Please make sure",
         "components/error/feed-footer-part2":
-          "is running and unlocked in your browser.",
+          "is running and unlocked in your browser, then refresh your browser.",
         "components/header/home": "Home",
         "components/header/topics": "Topics",
         "components/header/notifications": "Notifications",
@@ -85,7 +85,7 @@ i18next.init({
           "App local cache are deleted successfully. Browser will be refreshed soon.",
         "notification/app-local-cache-deletion-failure":
           "Failed to delete app local cache",
-        "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`,
+        "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`
       }
     },
     zh: {
@@ -122,7 +122,8 @@ i18next.init({
         "general/No-more-feeds": "没有更多的文字了 ;)",
         "general/USD": "美元",
         "components/error/feed-footer-part1": "请确保",
-        "components/error/feed-footer-part2": "在你的浏览器中工作并解锁。",
+        "components/error/feed-footer-part2":
+          "在你的浏览器中工作并解锁，然后刷新浏览器。",
         "components/header/home": "首页",
         "components/header/topics": "话题",
         "components/header/notifications": "消息",
@@ -161,7 +162,7 @@ i18next.init({
         "notification/app-local-cache-deletion-success":
           "成功删除程序本地缓存。浏览器将会在不久后刷新。",
         "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存",
-        "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`,
+        "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`
       }
     }
   }

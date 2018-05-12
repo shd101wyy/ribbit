@@ -206,19 +206,26 @@ export class Ribbit {
    * @param ipfsHash
    */
   public ipfsCat(ipfsHash: string): Promise<string> {
-    return new Promise((resolve, reject)=> {
-      let timeout = setTimeout(()=> {
-        return resolve(i18n.t("notification/ipfs-hash-not-found", {name: (ipfsHash.slice(0, 6) + "..."), link: `https://ipfs.io/ipfs/${ipfsHash}`}))
-      }, 1500);
-      this.ipfs.files.cat(ipfsHash, (error, file)=> {
-        clearTimeout(timeout)
+    return new Promise((resolve, reject) => {
+      let timeout = setTimeout(() => {
+        return resolve(
+          i18n.t("notification/ipfs-hash-not-found", {
+            name: ipfsHash.slice(0, 6) + "...",
+            link: `https://ipfs.io/ipfs/${ipfsHash}`
+          })
+        );
+      }, 400);
+      this.ipfs.files.cat(ipfsHash, (error, file) => {
+        clearTimeout(timeout);
         if (error) {
-          return reject(error)
+          return reject(error);
         } else {
-          return resolve(file.toString("utf8"))
+          const content = file.toString("utf8");
+          // this.ipfsAdd(content);
+          return resolve(content);
         }
-      })
-    })
+      });
+    });
   }
 
   /**
@@ -1101,7 +1108,9 @@ export class Ribbit {
     };
   }
 
-  public async retrieveMessage(message: string): Promise<string> {
+  public async retrieveMessage(
+    message: string
+  ): Promise<{ message: string; ipfsHash: string }> {
     message = decompressString(message);
     let match = null;
     if (
@@ -1110,9 +1119,15 @@ export class Ribbit {
       (match = message.match(/^ipfs\:\/\/(.+)$/))
     ) {
       const hash = match[1];
-      return await this.ipfsCat(hash);
+      return {
+        message: await this.ipfsCat(hash),
+        ipfsHash: hash
+      };
     } else {
-      return message;
+      return {
+        message,
+        ipfsHash: null
+      };
     }
   }
 

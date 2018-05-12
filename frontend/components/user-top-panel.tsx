@@ -67,6 +67,17 @@ export default class UserTopPanel extends React.Component<Props, State> {
     };
   };
 
+  openIPFSLink = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.props.feedInfo.ipfsHash) {
+      window.open(
+        `https://ipfs.io/ipfs/${this.props.feedInfo.ipfsHash}`,
+        "_blank"
+      );
+    }
+  };
+
   render() {
     const { feedInfo } = this.props;
     const userInfo = feedInfo.userInfo;
@@ -104,6 +115,11 @@ export default class UserTopPanel extends React.Component<Props, State> {
         <div className="create-time">
           <span>{formatFeedCreationTime(this.props.feedInfo)}</span>
         </div>
+        {this.props.feedInfo.ipfsHash ? (
+          <div className="ipfs-icon" onClick={this.openIPFSLink}>
+            <i className="icon fas fa-cube" />
+          </div>
+        ) : null}
       </div>
     );
 

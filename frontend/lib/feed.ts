@@ -29,6 +29,11 @@ export interface FeedInfo {
   repostUserInfo?: UserInfo;
   repostUserDonation?: number;
   feedType: string; // post | repost | repostAndReply
+
+  /**
+   * IPFS related fields
+   */
+  ipfsHash?: string;
 }
 
 export function formatFeedCreationTime(feedInfo: FeedInfo) {
@@ -231,12 +236,14 @@ export async function generateFeedInfoFromTransactionInfo(
   }
   const feedType = transactionInfo.decodedInputData.name;
 
-  let message, summary, userInfo, repostUserInfo;
+  let message, summary, userInfo, repostUserInfo, ipfsHash;
   let repostUserDonation = parseInt(transactionInfo.value) || 0;
   if (feedType === "post") {
-    message = await ribbit.retrieveMessage(
+    const o = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
+    message = o.message;
+    ipfsHash = o.ipfsHash;
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
@@ -255,15 +262,19 @@ export async function generateFeedInfoFromTransactionInfo(
     // author of the original feed
     userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
 
-    message = await ribbit.retrieveMessage(
+    const o = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
+    message = o.message;
+    ipfsHash = o.ipfsHash;
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
   } else if (feedType === "reply") {
-    message = await ribbit.retrieveMessage(
+    const o = await ribbit.retrieveMessage(
       transactionInfo.decodedInputData.params["message"].value
     );
+    message = o.message;
+    ipfsHash = o.ipfsHash;
 
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
 
@@ -281,7 +292,8 @@ export async function generateFeedInfoFromTransactionInfo(
     stateInfo,
     feedType,
     repostUserInfo,
-    repostUserDonation
+    repostUserDonation,
+    ipfsHash
   };
 
   return feedInfo;
