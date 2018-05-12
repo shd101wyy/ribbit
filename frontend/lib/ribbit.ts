@@ -214,7 +214,7 @@ export class Ribbit {
             link: `https://ipfs.io/ipfs/${ipfsHash}`
           })
         );
-      }, 400);
+      }, 1000);
       this.ipfs.files.cat(ipfsHash, (error, file) => {
         clearTimeout(timeout);
         if (error) {
