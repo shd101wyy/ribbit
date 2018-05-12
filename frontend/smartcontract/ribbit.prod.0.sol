@@ -57,7 +57,7 @@ contract Ribbit {
     mapping (bytes32 => uint) public currentTagInfoByTimeMap;
     mapping (bytes32 => uint) public currentTagInfoByTrendMap;
 
-    // 0, 0, 10
+    // 0x0000000000000000000000000000000000000000, 0, 10
     constructor(address _previousContractAddress, uint _version, uint _developerIncomePercent) public {
         owner = msg.sender;
         version = _version;

@@ -974,7 +974,7 @@ export const abiArray = [
 export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
-    return "0x61305789a672d5f90d427a76a848b5dce42be91d";
+    return "0xce489a1113816c042f9fdf3153615a12385c3511";
   } else if (networkId === 1) {
     // mainnet
     return null;
