@@ -196,7 +196,7 @@ export default class Edit extends Component<Props, State> {
     } catch (error) {
       new window["Noty"]({
         type: "error",
-        text: error,
+        text: i18n.t("notification/publish-post-failure"),
         timeout: 10000
       }).show();
     }
