@@ -10,7 +10,7 @@ contract Ribbit {
     uint public upvoteBar;
     uint public developerIncomePercent;                        // 10% by default
     uint public reportDownvoteEqNum;                           // 1 report = 1 downvote by default
-    mapping (bytes32 => address) public usernameToAddressMap;  // @shd101wyy and @Shd101wyy are the same
+    mapping (bytes32 => address) public usernameToAddressMap;
     mapping (address => bytes32) public addressToUsernameMap;
 
     uint public accountsNum; // number of accounts

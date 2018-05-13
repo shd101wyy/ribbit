@@ -5,7 +5,19 @@
 A decentralized social media web application based on Ethereum platform.  
 基于以太坊的去中心化社交程序。
 
-github: http://shd101wyy.github.io/ribbit/
+* [English](./README.md)
+* [中文](./README_CN.md)
+
+demo: http://shd101wyy.github.io/ribbit/
+
+![](https://user-images.githubusercontent.com/1908863/39964114-7a7d8d20-5642-11e8-8d75-8a823240c36a.PNG)
+
+**Please read this first:** 
+
+* This project is still under development. We would recommend you to try this project on Ethereum `Ropsten Test Network` instead of `Main Ethereum Network`, because using Ribbit on `Ropsten Test Network` is completely free of charge, and we might deploy new smart contract in the future and deprecate the old one. We might also make changes to the smart contract on `Ropsten Test Network`, so you posts might lose. Please use this project at your own risk.  
+* You are responsible for whatever you post, and you have to pay for the free of the speech. Think twice before you make a post because your post will stay on the blockchain forever. It is unchangeable and undeletable. All your posts will stay **public** on blockchain, so please don't post sensitive data.
+* We do not host media files for you. We only save your text written in `markdown` to Ethereum blockchain.
+
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
@@ -16,23 +28,28 @@ github: http://shd101wyy.github.io/ribbit/
 	* [Make a post](#make-a-post)
 		* [Post to topic](#post-to-topic)
 		* [Mention a user](#mention-a-user)
-	* [Roadmap (TODO)](#roadmap-todo)
+	* [What will be saved to blockchain and what will not](#what-will-be-saved-to-blockchain-and-what-will-not)
 	* [Developer section](#developer-section)
 		* [Development](#development)
 		* [Deployment](#deployment)
 	* [References](#references)
+	* [License](#license)
 
 <!-- /code_chunk_output -->
 
 ## Usage
 
-1.  Install [MetaMask](https://metamask.io/) in your Chrome browser and launch it.
-2.  Switch to `Ropsten Testnet`. Get coints from faucet by clicking `Buy` button (don't worry, it's all fake money).
-3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit.
+1.  Install [MetaMask](https://metamask.io/) in your Chrome browser and launch it. Follow the MetaMask instructions and create an account.
+2.  Switch to `Ropsten Test Network`. Visit the faucet website listed below and request test ethers. Don't worry, they are fake ether coins.
+	* http://faucet.ropsten.be:3001/ and click `request 1 ether from faucet`.
+	* https://faucet.metamask.io/ and click `Send me 1 test ether!`
+3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit. The first time you visit ribbit website, it will ask you to finish a signup. Simply finish the form and then click `Publish profile to blockchain` button to create your account. Wait for a few minutes until the transaction finishes, then refresh your browser.
+
+> You may notice the `MetaMask` window pop up when you click `Publish profile to blockchain` button, that is because writing data to blockchain isn't free. You would have to pay for the miner to execute the transaction. You only need to change the `Gas Price` field in the MetaMask window. The higher `Gas Price` you set, the faster the transaction will finish.
 
 ## Make a post
 
-Post in ribbit are writtein in Markdown.
+Posts in ribbit are writtein in Markdown.
 There are two types of posts now:
 
 * Normal post
@@ -73,20 +90,16 @@ For example:
 Hi @{ribbit} will notify the user `ribbit` this about post.
 ```
 
-## Roadmap (TODO)
+## What will be saved to blockchain and what will not
 
-* Support `@import` in editor.
+Will be on blockchain:
+* Your profile information like your username, bio, avatar url, and cover url.
+* Your posts written in markdown.
 
-```markdown
-@import "https://..."
-@import "ipfs://..."
-@import "ribbit://profile/..."
-@import "ribbit://tx/..."
-```
+Will not be on blockchain:
+* Your media files written in your markdown post, such as images, videos, etc...
+* Your followings, faviorite topics, setttings will be saved locally in your browser. 
 
-* Rich content editor.
-* Multiple languages support.
-* Support syncing user settings that are saved locally not on blockchain.
 
 ## Developer section
 
@@ -112,3 +125,9 @@ then copy `./dist` to your server.
 ## References
 
 * [web3.js](https://web3js.readthedocs.io/en/1.0/)
+
+
+## License 
+
+University of Illinois/NCSA
+Open Source License
