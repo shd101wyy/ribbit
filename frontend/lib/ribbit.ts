@@ -341,7 +341,7 @@ export class Ribbit {
 
     const currentTimestamp = Date.now();
     if (postAsIPFSHash) {
-      message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
+      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
     }
     const compressedMessage = compressString(message);
 
@@ -403,7 +403,7 @@ export class Ribbit {
 
     const currentTimestamp = Date.now();
     if (postAsIPFSHash) {
-      message = `ipfs://${(await this.ipfsAdd(message)).hash}`;
+      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
     }
     const compressedMessage = compressString(message);
 
@@ -1115,8 +1115,8 @@ export class Ribbit {
     let match = null;
     if (
       message.length ===
-        `ipfs://QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw`.length &&
-      (match = message.match(/^ipfs\:\/\/(.+)$/))
+        `@[ipfs](QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw)`.length &&
+      (match = message.match(/^@\[ipfs\]\((.+?)\)$/i))
     ) {
       const hash = match[1];
       return {
