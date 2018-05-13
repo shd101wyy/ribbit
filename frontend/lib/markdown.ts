@@ -72,5 +72,9 @@ md.renderer.rules.tag = (tokens, idx) => {
 };
 
 export function renderMarkdown(markdown: string): string {
-  return md.render(markdown);
+  try { // because md.render sometimes will fail.
+    return md.render(markdown);
+  } catch(error) {
+    return `Failed to render markdown:\n${JSON.stringify(error)}`
+  }
 }
