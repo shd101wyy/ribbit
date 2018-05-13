@@ -55,6 +55,31 @@ export default class profile extends React.Component<Props, State> {
     this.setState({
       following
     });
+
+    // update cover
+    const ribbit = this.props.ribbit;
+    const formattedTag = ribbit.formatTag(topic);
+    const blockNumber = parseInt(
+      await ribbit.contractInstance.methods
+        .getCurrentTagInfoByTrend(formattedTag)
+        .call()
+    );
+    if (blockNumber) {
+      const transactionInfo = await ribbit.getTransactionInfo({
+        tag: formattedTag,
+        maxCreation: Date.now(),
+        blockNumber
+      });
+      if (transactionInfo) {
+        const authorAddress = transactionInfo.from;
+        const userInfo = await ribbit.getUserInfoFromAddress(authorAddress);
+        if (userInfo) {
+          this.setState({
+            cover: userInfo.cover
+          });
+        }
+      }
+    }
   }
 
   followTopic = () => {

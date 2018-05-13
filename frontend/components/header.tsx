@@ -92,7 +92,13 @@ export default class Header extends Component<Props, State> {
                   &nbsp;
                 </h1>
               ) : (
-                <h1 onClick={()=> hashHistory.replace(`/${this.props.ribbit.networkId}/`)}>Ribbit</h1>
+                <h1
+                  onClick={() =>
+                    hashHistory.replace(`/${this.props.ribbit.networkId}/`)
+                  }
+                >
+                  Ribbit
+                </h1>
               )}
               <nav>
                 <Link
