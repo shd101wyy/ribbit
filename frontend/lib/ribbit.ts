@@ -148,6 +148,16 @@ export class Ribbit {
    * This function should be called immediately after creating User.
    */
   public async initialize() {
+    this.accountAddress = (await this.web3.eth.getAccounts())[0];
+    this.networkId = await this.web3.eth.net.getId();
+    this.networkName = await this.getNetworkName(this.networkId);
+    this.contractInstance = new this.web3.eth.Contract(
+      abiArray,
+      getContractAddress(this.networkId)
+    );
+    this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
+
+    // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
       "ribbit/transactionInfo"
     );
@@ -158,15 +168,11 @@ export class Ribbit {
     await this.blockDB["createIndex"]({
       index: { fields: ["blockNumber", "fullySynced"] }
     });
-    this.accountAddress = (await this.web3.eth.getAccounts())[0];
-    this.networkId = await this.web3.eth.net.getId();
-    this.networkName = await this.getNetworkName(this.networkId);
-    this.contractInstance = new this.web3.eth.Contract(
-      abiArray,
-      getContractAddress(this.networkId)
-    );
-    this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
+
+    // Initialize IPFS
     await this.initializeIPFS();
+
+    // Initialize user settings
     await this.initializeSettings();
 
     this.monitorAccountChange();

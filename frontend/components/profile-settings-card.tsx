@@ -112,7 +112,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
       .catch(error => {
         new window["Noty"]({
           type: "error",
-          text: error,
+          text: i18n.t("notification/publish-profile-failure"),
           timeout: 10000
         }).show();
       });
