@@ -29,22 +29,6 @@ contract Ribbit {
     mapping (bytes32 => mapping(uint => uint)) public state;
 
     /**
-     * 0x0 => upvotes
-     * 0x1 => downvotes
-     * 0x2 => reports
-     * tagHash => field => value
-     */
-    mapping (bytes32 => mapping(uint => uint)) public tagState;
-
-    /**
-     * 0x0 => upvotes
-     * 0x1 => downvotes
-     * 0x2 => reports
-     * userAddress => field => value
-     */
-    mapping (address => mapping(uint => uint)) public userState;
-
-    /**
      * User metadata.
      * For example, user name, profileImage, cover...
      */
@@ -151,20 +135,7 @@ contract Ribbit {
         }
         return value;
     }
-    function getUserState(address userAddress, uint field) external view returns (uint) {
-        uint value = userState[userAddress][field];
-        if (previousContractAddress != address(0)) {
-            value = value + previousContract.getUserState(userAddress, field);
-        }
-        return value;
-    }
-    function getTagState(bytes32 tag, uint field) external view returns (uint) {
-        uint value = tagState[tag][field];
-        if (previousContractAddress != address(0)) {
-            value = value + previousContract.getTagState(tag, field);
-        }
-        return value;
-    }
+
     function setMetadataJSONStringValue(string value) external {
         metadataJSONStringMap[msg.sender] = value;
     }
@@ -324,35 +295,10 @@ contract Ribbit {
         state[transactionHash][2] = state[transactionHash][2] + reportDownvoteEqNum;   // downvote
     }
 
-    // Upvote tag
-    function upvoteTag(bytes32 tag) external {
-        tagState[tag][0] = tagState[tag][0] + 1;
+    // Withdraw funds
+    function withdraw(uint amount) external returns(bool) {
+        require(msg.sender == owner);
+        owner.transfer(amount);
+        return true;
     }
-
-    // Downvote tag
-    function downvoteTag(bytes32 tag) external {
-        tagState[tag][1] = tagState[tag][1] + 1;
-    }
-
-    // Report tag
-    function reportTag(bytes32 tag) external {
-        tagState[tag][2] = tagState[tag][2] + 1;
-        tagState[tag][1] = tagState[tag][1] + reportDownvoteEqNum;
-    }
-
-    // Upvote user
-    function upvoteUser(address userAddress) external {
-        userState[userAddress][0] = userState[userAddress][0] + 1;
-    }
-
-    // Downvote user
-    function downvoteUser(address userAddress) external {
-        userState[userAddress][1] = userState[userAddress][1] + 1;
-    }
-    
-    // Report user
-    function reportUser(address userAddress) external {
-        userState[userAddress][2] = userState[userAddress][2] + 1;
-        userState[userAddress][1] = userState[userAddress][1] + reportDownvoteEqNum;
-    }    
 }
