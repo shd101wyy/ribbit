@@ -14,8 +14,8 @@ demo: http://shd101wyy.github.io/ribbit/
 
 **Please read this first:** 
 
-* This project is still under development. We would recommend you to try this project on Ethereum `Ropsten Test Network` instead of `Main Ethereum Network`, because using Ribbit on `Ropsten Test Network` is completely free of charge, and we might deploy new smart contract in the future and deprecate the old one. We might also make changes to the smart contract on `Ropsten Test Network`, so you posts might lose. Please use this project at your own risk.  
-* You are responsible for whatever you post, and you have to pay for the free of the speech. Think twice before you make a post because your post will stay on the blockchain forever. It is unchangeable and undeletable. All your posts will stay **public** on blockchain, so please don't post sensitive data.
+* This project is still under development. We would recommend you to try this project on Ethereum `Ropsten Test Network` instead of `Main Ethereum Network`, because using Ribbit on `Ropsten Test Network` is completely free of charge, and we might deploy new smart contract in the future and deprecate the old one. We might also make changes to the smart contract on `Ropsten Test Network`, so your posts might lose. Please use this project at your own risk.  
+* You are responsible for whatever you post. Think twice before you make a post because your post will stay on the blockchain **forever**. It is unchangeable and undeletable. All your posts will stay **public** on blockchain, so please don't post sensitive data.
 * We do not host media files for you. We only save your text written in `markdown` to Ethereum blockchain.
 
 
