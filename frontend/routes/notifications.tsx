@@ -4,7 +4,7 @@ import { I18n } from "react-i18next";
 import Header, { Page } from "../components/header";
 import FeedCard from "../components/feed-card";
 import { Ribbit, UserInfo } from "../lib/ribbit";
-import { checkUserRegistration } from "../lib/utility";
+import { checkUserRegistration, checkNetworkId } from "../lib/utility";
 import {
   FeedInfo,
   Summary,
@@ -21,6 +21,7 @@ interface CurrentFeed {
 
 interface Props {
   ribbit: Ribbit;
+  networkId: number;
 }
 interface State {
   feeds: FeedInfo[];
@@ -44,6 +45,7 @@ export default class Notifications extends React.Component<Props, State> {
   componentDidMount() {
     const ribbit = this.props.ribbit;
     document.body.scrollTop = 0;
+    checkNetworkId(ribbit, this.props.networkId);
     checkUserRegistration(ribbit);
     this.showUserNotifications(ribbit);
     this.bindWindowScrollEvent();
@@ -52,6 +54,7 @@ export default class Notifications extends React.Component<Props, State> {
   componentWillReceiveProps(newProps: Props) {
     const ribbit = this.props.ribbit;
     document.body.scrollTop = 0;
+    checkNetworkId(newProps.ribbit, newProps.networkId);
     checkUserRegistration(ribbit);
     this.showUserNotifications(ribbit);
     this.bindWindowScrollEvent();

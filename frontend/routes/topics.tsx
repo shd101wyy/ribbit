@@ -10,7 +10,7 @@ import {
   generateFeedInfoFromTransactionInfo
 } from "../lib/feed";
 
-import { decompressString, checkUserRegistration } from "../lib/utility";
+import { checkUserRegistration, checkNetworkId } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 
 import Footer from "../components/footer";
@@ -69,6 +69,7 @@ export default class Topics extends React.Component<Props, State> {
   componentDidMount() {
     const ribbit = this.props.ribbit;
     document.body.scrollTop = 0;
+    checkNetworkId(ribbit, this.props.networkId);
     checkUserRegistration(ribbit);
     this.updateUserInfo(ribbit);
     this.showUserTopics(ribbit);
@@ -80,6 +81,7 @@ export default class Topics extends React.Component<Props, State> {
     // console.log('home will receive props')
     // if (this.props.ribbit !== newProps.ribbit) {
     document.body.scrollTop = 0;
+    checkNetworkId(newProps.ribbit, newProps.networkId);
     checkUserRegistration(newProps.ribbit);
     this.updateUserInfo(newProps.ribbit);
     this.showUserTopics(newProps.ribbit);

@@ -9,7 +9,7 @@ import {
   generateSummaryFromHTML,
   generateFeedInfoFromTransactionInfo
 } from "../lib/feed";
-import { decompressString } from "../lib/utility";
+import { checkNetworkId } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
@@ -39,11 +39,13 @@ export default class profile extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    checkNetworkId(this.props.ribbit, this.props.networkId);
     this.initializeTopic(this.props.topic);
   }
 
   componentWillReceiveProps(newProps: Props) {
     // if (newProps.topic !== this.props.topic) {
+    checkNetworkId(newProps.ribbit, newProps.networkId);
     this.initializeTopic(newProps.topic);
     // }
   }

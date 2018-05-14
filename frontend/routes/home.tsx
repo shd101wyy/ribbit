@@ -10,7 +10,11 @@ import {
   generateFeedInfoFromTransactionInfo
 } from "../lib/feed";
 
-import { decompressString, checkUserRegistration } from "../lib/utility";
+import {
+  decompressString,
+  checkUserRegistration,
+  checkNetworkId
+} from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import i18n from "../i18n/i18n";
 
@@ -62,6 +66,7 @@ export default class Home extends React.Component<Props, State> {
   componentDidMount() {
     const ribbit = this.props.ribbit;
     document.body.scrollTop = 0;
+    checkNetworkId(ribbit, this.props.networkId);
     checkUserRegistration(ribbit);
     this.updateUserInfo(ribbit);
     this.showUserHome(ribbit);
@@ -73,6 +78,7 @@ export default class Home extends React.Component<Props, State> {
     // console.log('home will receive props')
     // if (this.props.ribbit !== newProps.ribbit) {
     document.body.scrollTop = 0;
+    checkNetworkId(newProps.ribbit, newProps.networkId);
     checkUserRegistration(newProps.ribbit);
     this.updateUserInfo(newProps.ribbit);
     this.showUserHome(newProps.ribbit);

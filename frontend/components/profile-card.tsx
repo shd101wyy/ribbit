@@ -1,7 +1,6 @@
 import * as React from "react";
 import { I18n } from "react-i18next";
 import { UserInfo, Ribbit } from "../lib/ribbit";
-import { decompressString } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import { generateSummaryFromHTML } from "../lib/feed";
 

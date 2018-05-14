@@ -94,7 +94,7 @@ class App extends React.Component<Props, State> {
             path={`${process.env.PUBLIC_URL || ""}/:networkId/signup`}
             render={props => (
               <Signup
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
                 ribbit={this.state.ribbit}
               />
             )}
@@ -104,7 +104,7 @@ class App extends React.Component<Props, State> {
             path={`${process.env.PUBLIC_URL || ""}/:networkId/`}
             render={props => (
               <Home
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
                 ribbit={this.state.ribbit}
               />
             )}
@@ -115,19 +115,29 @@ class App extends React.Component<Props, State> {
             render={props => (
               <Topics
                 ribbit={this.state.ribbit}
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
               />
             )}
             exact
           />
           <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/settings`}
-            render={props => <Settings ribbit={this.state.ribbit} />}
+            render={props => (
+              <Settings
+                ribbit={this.state.ribbit}
+                networkId={parseInt(props.match.params["networkId"])}
+              />
+            )}
             exact
           />
           <Route
             path={`${process.env.PUBLIC_URL || ""}/:networkId/notifications`}
-            render={props => <Notifications ribbit={this.state.ribbit} />}
+            render={props => (
+              <Notifications
+                ribbit={this.state.ribbit}
+                networkId={parseInt(props.match.params["networkId"])}
+              />
+            )}
             exact
           />
           <Route
@@ -135,7 +145,7 @@ class App extends React.Component<Props, State> {
               ""}/:networkId/profile/:username`}
             render={props => (
               <Profile
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
                 ribbit={this.state.ribbit}
                 username={props.match.params["username"]}
               />
@@ -146,7 +156,7 @@ class App extends React.Component<Props, State> {
             path={`${process.env.PUBLIC_URL || ""}/:networkId/topic/:topic`}
             render={props => (
               <Topic
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
                 ribbit={this.state.ribbit}
                 topic={decodeURIComponent(props.match.params["topic"])}
               />
@@ -158,7 +168,7 @@ class App extends React.Component<Props, State> {
               ""}/:networkId/tx/:transactionHash`}
             render={props => (
               <Tx
-                networkId={props.match.params["networkId"]}
+                networkId={parseInt(props.match.params["networkId"])}
                 ribbit={this.state.ribbit}
                 transactionHash={props.match.params["transactionHash"]}
               />

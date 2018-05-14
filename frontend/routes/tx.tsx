@@ -4,7 +4,7 @@ import ArticleCard from "../components/article-card";
 import Header from "../components/header";
 
 import { Ribbit, UserInfo, decodeMethod } from "../lib/ribbit";
-import { decompressString } from "../lib/utility";
+import { checkNetworkId } from "../lib/utility";
 import { TransactionInfo } from "../lib/transaction";
 import hashHistory from "../lib/history";
 import {
@@ -36,6 +36,7 @@ export default class Tx extends React.Component<Props, State> {
 
   componentDidMount() {
     document.body.scrollTop = 0;
+    checkNetworkId(this.props.ribbit, this.props.networkId);
     this.analyzeTransaction(
       this.props.transactionHash,
       this.props.networkId,
@@ -49,6 +50,7 @@ export default class Tx extends React.Component<Props, State> {
       newProps.networkId !== this.props.networkId
     ) {
       document.body.scrollTop = 0;
+      checkNetworkId(newProps.ribbit, newProps.networkId);
       this.analyzeTransaction(
         newProps.transactionHash,
         newProps.networkId,

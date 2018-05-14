@@ -10,7 +10,7 @@ import {
   generateSummaryFromHTML,
   generateFeedInfoFromTransactionInfo
 } from "../lib/feed";
-import { decompressString } from "../lib/utility";
+import { checkNetworkId } from "../lib/utility";
 import { renderMarkdown } from "../lib/markdown";
 import FeedCard from "../components/feed-card";
 import ProfileCard from "../components/profile-card";
@@ -50,11 +50,13 @@ export default class profile extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    checkNetworkId(this.props.ribbit, this.props.networkId);
     this.initializeUser(this.props.username);
     this.bindWindowScrollEvent();
   }
 
   componentWillReceiveProps(newProps: Props) {
+    checkNetworkId(newProps.ribbit, newProps.networkId);
     if (newProps.username !== this.props.username) {
       this.initializeUser(newProps.username);
       this.bindWindowScrollEvent();

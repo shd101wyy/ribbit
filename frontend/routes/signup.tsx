@@ -2,11 +2,12 @@ import * as React from "react";
 import { I18n } from "react-i18next";
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
+import { checkNetworkId } from "../lib/utility";
 
 import ProfileSettingsCard from "../components/profile-settings-card";
 
 interface Props {
-  networkId: string;
+  networkId: number;
   ribbit: Ribbit;
 }
 interface State {}
@@ -16,6 +17,7 @@ export default class Signup extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    checkNetworkId(this.props.ribbit, this.props.networkId);
     this.checkUsernameExists();
   }
 

@@ -86,7 +86,8 @@ i18next.init({
           "App local cache are deleted successfully. Browser will be refreshed soon.",
         "notification/app-local-cache-deletion-failure":
           "Failed to delete app local cache",
-        "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`
+        "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`,
+        "notification/wrong-networkId": `Connected to the wrong network: {{given}}。Please reconnect to: {{required}}`
       }
     },
     zh: {
@@ -164,7 +165,8 @@ i18next.init({
         "notification/app-local-cache-deletion-success":
           "成功删除程序本地缓存。浏览器将会在不久后刷新。",
         "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存",
-        "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`
+        "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`,
+        "notification/wrong-networkId": `连接到了错误的以太坊网络 {{given}}。请连接到 {{required}}`
       }
     }
   }

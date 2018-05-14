@@ -3,6 +3,7 @@ import * as validator from "validator";
 import * as LZString from "lz-string";
 import { Ribbit } from "./ribbit";
 import hashHistory from "./history";
+import i18n from "../i18n/i18n";
 
 export function hexEncode(h: string): string {
   var hex, i;
@@ -94,5 +95,26 @@ export async function checkUserRegistration(ribbit: Ribbit) {
   const username = await ribbit.getUsernameFromAddress(ribbit.accountAddress);
   if (!username || !username.length) {
     hashHistory.replace(`/${ribbit.networkId}/signup`);
+  }
+}
+
+export function checkNetworkId(ribbit: Ribbit, networkId: number) {
+  console.log(ribbit.networkId, networkId);
+  console.log(
+    ribbit.getNetworkName(ribbit.networkId),
+    ribbit.getNetworkName(networkId)
+  );
+  if (ribbit.networkId !== networkId) {
+    new window["Noty"]({
+      type: "success",
+      text: i18n.t("notification/wrong-networkId", {
+        given: ribbit.getNetworkName(ribbit.networkId),
+        required: ribbit.getNetworkName(networkId)
+      }),
+      timeout: 10000
+    }).show();
+    return false;
+  } else {
+    return true;
   }
 }

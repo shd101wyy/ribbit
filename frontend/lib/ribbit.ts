@@ -256,13 +256,13 @@ export class Ribbit {
   public getNetworkName(networkId: number) {
     switch (networkId) {
       case 1:
-        return "mainnet";
+        return "Main Ethereum Network";
       case 2:
-        return "morden test network";
+        return "Morden Test Network";
       case 3:
-        return "ropsten test network";
+        return "Ropsten Test Network";
       default:
-        return "unknown network";
+        return "Unknown Network";
     }
   }
 
