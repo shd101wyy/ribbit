@@ -50,7 +50,11 @@ An experimental, decentralized social media web application based on Ethereum pl
 	* https://faucet.metamask.io/ 然后点击 `Send me 1 test ether!`
 3.  访问 http://shd101wyy.github.io/ribbit/ 开始使用 ribbit。当你第一次访问 ribbit 网站是，它会要求你完成注册。请在`语言`中选择`简体中文`，然后填写完表格，接着点击 `发布个人信息到区块链` 按钮。等候几分钟直到交易结束，然后刷新你的浏览器开始使用。
 
+![signup2](https://user-images.githubusercontent.com/1908863/40032257-f3ad625c-57b8-11e8-93ab-4a8e8272bcb0.PNG)
+
+
 > 当你点击 `发布个人信息到区块链` 按钮后，你会发现 `MetaMask` 会弹出个支付窗口，那是因为往区块链中写数据不是免费的。你需要支付给矿工费用来执行交易。你只需要改变其中的 `Gas Price（油价）`。设置的 `Gas Price (油价)` 越高，交易完成的速度越快。
+> ![metamask](https://user-images.githubusercontent.com/1908863/40032235-e3bf72fe-57b8-11e8-894a-6bfea9e39c3b.PNG)
 
 ## 发布文字
 
