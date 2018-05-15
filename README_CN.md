@@ -54,6 +54,7 @@ An experimental, decentralized social media web application based on Ethereum pl
 
 
 > 当你点击 `发布个人信息到区块链` 按钮后，你会发现 `MetaMask` 会弹出个支付窗口，那是因为往区块链中写数据不是免费的。你需要支付给矿工费用来执行交易。你只需要改变其中的 `Gas Price（油价）`。设置的 `Gas Price (油价)` 越高，交易完成的速度越快。
+> 
 > ![metamask](https://user-images.githubusercontent.com/1908863/40032235-e3bf72fe-57b8-11e8-894a-6bfea9e39c3b.PNG)
 
 ## 发布文字
