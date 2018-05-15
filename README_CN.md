@@ -1,9 +1,9 @@
 # ribbit
 
-> I hope we didn't unleash a beast.
+> 这个项目已被**弃用**，因为以太坊主网使用的高成本和缓慢的交易速度。
 
-A decentralized social media web application based on Ethereum platform.  
-基于以太坊的去中心化社交程序。
+An experimental, decentralized social media web application based on Ethereum platform.  
+实验性质的，基于以太坊的去中心化社交程序。
 
 * [English](./README.md)
 * [中文](./README_CN.md)
@@ -11,6 +11,11 @@ A decentralized social media web application based on Ethereum platform.
 示例网站：http://shd101wyy.github.io/ribbit/
 
 ![](https://user-images.githubusercontent.com/1908863/39964117-8880667c-5642-11e8-956e-ea8210aaaf07.PNG)
+
+
+---
+
+> 以下为旧文档
 
 
 **在使用 Ribbit 之前，请先阅读一下内容** 

@@ -1,9 +1,9 @@
 # ribbit
 
-> I hope we didn't unleash a beast.
+> This project is **DEPRECATED** due to unexpected high cost as well as slow transaction speed on Main Ethereum Network.
 
-A decentralized social media web application based on Ethereum platform.  
-基于以太坊的去中心化社交程序。
+An experimental, decentralized social media web application based on Ethereum platform.  
+实验性质的，基于以太坊的去中心化社交程序。
 
 * [English](./README.md)
 * [中文](./README_CN.md)
@@ -11,6 +11,10 @@ A decentralized social media web application based on Ethereum platform.
 demo: http://shd101wyy.github.io/ribbit/
 
 ![](https://user-images.githubusercontent.com/1908863/39964114-7a7d8d20-5642-11e8-8d75-8a823240c36a.PNG)
+
+---
+
+> Below is the obsolete documentation.
 
 **Please read this first:** 
 
