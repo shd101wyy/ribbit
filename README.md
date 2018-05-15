@@ -53,6 +53,7 @@ demo: http://shd101wyy.github.io/ribbit/
 
 
 > You may notice the `MetaMask` window pops up when you click `Publish profile to blockchain` button, that is because writing data to blockchain isn't free. You would have to pay for the miner to execute the transaction. You only need to change the `Gas Price` field in the MetaMask window. The higher `Gas Price` you set, the faster the transaction will be executed.
+>
 > ![metamask](https://user-images.githubusercontent.com/1908863/40032235-e3bf72fe-57b8-11e8-894a-6bfea9e39c3b.PNG)
 
 
