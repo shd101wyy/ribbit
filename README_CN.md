@@ -54,6 +54,8 @@ An experimental, decentralized social media web application based on Ethereum pl
 
 ## 发布文字
 
+要发布文字，点击绿色的 `Ribbit` 按钮。
+
 ribbit 中发布的文字是基于 Markdown 格式的。
 这里有两种分类：
 

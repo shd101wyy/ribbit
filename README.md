@@ -49,9 +49,11 @@ demo: http://shd101wyy.github.io/ribbit/
 	* https://faucet.metamask.io/ and click `Send me 1 test ether!`
 3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit. The first time you visit ribbit website, it will ask you to finish a signup. Simply finish the form and then click `Publish profile to blockchain` button to create your account. Wait for a few minutes until the transaction finishes, then refresh your browser.
 
-> You may notice the `MetaMask` window pop up when you click `Publish profile to blockchain` button, that is because writing data to blockchain isn't free. You would have to pay for the miner to execute the transaction. You only need to change the `Gas Price` field in the MetaMask window. The higher `Gas Price` you set, the faster the transaction will finish.
+> You may notice the `MetaMask` window pops up when you click `Publish profile to blockchain` button, that is because writing data to blockchain isn't free. You would have to pay for the miner to execute the transaction. You only need to change the `Gas Price` field in the MetaMask window. The higher `Gas Price` you set, the faster the transaction will be executed.
 
 ## Make a post
+
+To make post, click the green `Ribbit` button.
 
 Posts in ribbit are writtein in Markdown.
 There are two types of posts now:
