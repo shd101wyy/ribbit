@@ -700,14 +700,15 @@ export class Ribbit {
         selector: {
           hash: transactionHash,
           creation: { $lt: maxCreation }
-        },
+        }
         // sort: ["creation"],
-        limit: 1
+        // limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log(
           "getTransactionInfo: Load from database for transactionHash"
         );
+        res.docs.sort((x, y) => y["creation"] - x["creation"]);
         return res.docs[0] as TransactionInfo;
       } else {
         console.log("getTransactionInfo: Not found in db for transactionHash");
@@ -719,12 +720,13 @@ export class Ribbit {
           from: userAddress,
           blockNumber: blockNumber,
           creation: { $lt: maxCreation }
-        },
-        // sort: ["creation"],
-        limit: 1
+        }
+        // sort: [{"creation": "desc"}],
+        // limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log("getTransactionInfo: Load from database for user");
+        res.docs.sort((x, y) => y["creation"] - x["creation"]);
         return res.docs[0] as TransactionInfo;
       } else {
         console.log("getTransactionInfo: Not found in db for user");
@@ -738,17 +740,20 @@ export class Ribbit {
             $in: [tag]
           },
           creation: { $lt: maxCreation }
-        },
+        }
         // sort: ["creation"],
-        limit: 1
+        // limit: 1
       });
       if (res && res.docs && res.docs.length) {
         console.log("getTransactionInfo: Load from database for tag");
+        res.docs.sort((x, y) => y["creation"] - x["creation"]);
         return res.docs[0] as TransactionInfo;
       } else {
         console.log("getTransactionInfo: Not found in db for tag");
         return null;
       }
+    } else {
+      return null;
     }
   }
 
@@ -1261,5 +1266,23 @@ export class Ribbit {
     if (typeof window.localStorage !== "undefined") {
       window.localStorage.setItem(`/settings/${this.accountAddress}`, "");
     }
+  }
+
+  public async getAccountsNum() {
+    return await this.contractInstance.methods.getAccountsNum().call();
+  }
+
+  public async getAccountsAddresses({ page = 0, limit = -1 }) {
+    const accountsNum = (await this.getAccountsNum()) || 0;
+    const addresses = [];
+    const start = page * limit;
+    const end = limit < 0 ? Infinity : page * limit + limit;
+    for (let i = start; i < end && i < accountsNum; i++) {
+      const address = await this.contractInstance.methods
+        .getAddressFromAccountNo(i + 1)
+        .call();
+      addresses.push(address);
+    }
+    return addresses;
   }
 }

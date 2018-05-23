@@ -80,7 +80,7 @@ i18next.init({
         "notification/publish-post-failure": `Failed to save your post to blockchain.`,
         "notification/username-taken": `Username {{username}} is already taken.`,
         "notification/user-address-doesnt-exist": `User with address {{userAddress}} doesn't exist.`,
-        "notification/Sycing-block-from-blockchain": `Syncing {{index}}/{{total}} transaction at block {{blockNumber}} from blockchain...`,
+        "notification/Syncing-block-from-blockchain": `Syncing {{index}}/{{total}} transaction at block {{blockNumber}} from blockchain...`,
         "notification/Syncing-block-from-database": `Syncing block {{blockNumber}} from database...`,
         "notification/app-local-cache-deletion-success":
           "App local cache are deleted successfully. Browser will be refreshed soon.",

@@ -139,9 +139,12 @@ export default class profile extends React.Component<Props, State> {
           const eventLog = transactionInfo.decodedLogs.filter(
             x => x.name === "SavePreviousFeedInfoEvent"
           )[0];
-          const blockNumber = parseInt(
-            eventLog.events["previousFeedInfoBN"].value
-          );
+          let blockNumber;
+          if (eventLog) {
+            blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
+          } else {
+            blockNumber = transactionInfo.blockNumber;
+          }
           this.currentFeed = {
             blockNumber,
             creation: transactionInfo.creation
