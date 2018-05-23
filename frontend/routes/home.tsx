@@ -208,12 +208,12 @@ export default class Home extends React.Component<Props, State> {
           const eventLog = transactionInfo.decodedLogs.filter(
             x => x.name === "SavePreviousFeedInfoEvent"
           )[0];
-          if (!eventLog) {
-            console.log("@@@ TODO: Support reply in home feeds.");
+          let blockNumber;
+          if (eventLog) {
+            blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
+          } else {
+            blockNumber = transactionInfo.blockNumber;
           }
-          let blockNumber = parseInt(
-            eventLog.events["previousFeedInfoBN"].value
-          );
           const homeFeedsEntry = homeFeedsEntries[maxOffset];
           homeFeedsEntry.blockNumber = blockNumber;
           homeFeedsEntry.creation = transactionInfo.creation;

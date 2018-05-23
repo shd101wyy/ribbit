@@ -153,9 +153,12 @@ export default class TopicFeedCards extends React.Component<Props, State> {
                   : "SavePreviousTagInfoByTrendEvent") &&
               x.events["tag"].value === formattedTag
           )[0];
-          const blockNumber = parseInt(
-            eventLog.events["previousTagInfoBN"].value
-          );
+          let blockNumber;
+          if (eventLog) {
+            blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
+          } else {
+            blockNumber = transactionInfo.blockNumber;
+          }
           this.currentFeed = {
             blockNumber,
             creation: transactionInfo.creation
@@ -187,7 +190,10 @@ export default class TopicFeedCards extends React.Component<Props, State> {
               break;
             }
           }
-          if (!find) {
+          if (
+            !find &&
+            !(sorting == TopicSorting.ByTime && feedInfo.feedType === "upvote") // no need to display upvote for ByTime
+          ) {
             feeds.push(feedInfo);
           }
 

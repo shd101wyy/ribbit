@@ -226,9 +226,12 @@ export default class Topics extends React.Component<Props, State> {
                   : "SavePreviousTagInfoByTrendEvent") &&
               x.events["tag"].value === formattedTag
           )[0];
-          const blockNumber = parseInt(
-            eventLog.events["previousTagInfoBN"].value
-          );
+          let blockNumber;
+          if (eventLog) {
+            blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
+          } else {
+            blockNumber = transactionInfo.blockNumber;
+          }
           const feedEntry = feedEntries[maxOffset];
           feedEntry.blockNumber = blockNumber;
           feedEntry.creation = transactionInfo.creation;
@@ -258,7 +261,10 @@ export default class Topics extends React.Component<Props, State> {
               break;
             }
           }
-          if (!find) {
+          if (
+            !find &&
+            !(sorting == TopicSorting.ByTime && feedInfo.feedType === "upvote") // no need to display upvote for ByTime
+          ) {
             feeds.push(feedInfo);
           }
 
