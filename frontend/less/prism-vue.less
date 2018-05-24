@@ -183,4 +183,34 @@
     text-align: right;
     top: 0;
   }
+
+  .ribbit-media {
+    &[data-media-type="youtube"] iframe {
+      width: 100%;
+      height: 400px;
+    }
+
+    &[data-media-type="vimeo"] iframe {
+      width: 100%;
+      height: 360px;
+    }
+
+    &[data-media-type="vine"] iframe {
+      width: 100%;
+      height: 400px;
+    }
+
+    &[data-media-type="mp4"] video,
+    &[data-media-type="ogg"] video,
+    &[data-media-type="webm"] video {
+      width: 100%;
+      height: 400px;
+    }
+
+    &[data-media-type="bilibili"] iframe {
+      width: 100%;
+      max-width: 100%;
+      height: 460px;
+    }
+  }
 }

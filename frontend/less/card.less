@@ -43,6 +43,23 @@
       text-overflow: ellipsis;
       word-break: break-all;
     }
+
+    .ribbit-media {
+      margin-bottom: 16px;
+
+      &[data-media-type="youtube"] iframe,
+      &[data-media-type="vimeo"] iframe,
+      &[data-media-type="vine"] iframe,
+      &[data-media-type="mp4"] video,
+      &[data-media-type="ogg"] video,
+      &[data-media-type="webm"] video {
+        height: 246px;
+      }
+
+      &[data-media-type="bilibili"] iframe {
+        height: 360px;
+      }
+    }
   }
 
   @media screen and (max-width: 500px) {
