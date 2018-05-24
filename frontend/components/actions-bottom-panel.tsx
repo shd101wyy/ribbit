@@ -71,6 +71,10 @@ export default class ActionsBottomPanel extends React.Component<Props, State> {
             });
           }
         });
+    } else {
+      this.setState({
+        earnings: 0
+      });
     }
   }
 
