@@ -42,7 +42,7 @@ i18next.init({
         "general/USD": "USD",
         "components/error/feed-footer-part1": "Please make sure",
         "components/error/feed-footer-part2":
-          "is running and unlocked in your browser, then refresh your browser.",
+          "is running and unlocked in your browser. Switch to Ropsten Test Net, then refresh your browser.",
         "components/header/home": "Home",
         "components/header/topics": "Topics",
         "components/header/notifications": "Notifications",
@@ -125,7 +125,7 @@ i18next.init({
         "general/USD": "美元",
         "components/error/feed-footer-part1": "请确保",
         "components/error/feed-footer-part2":
-          "在你的浏览器中工作并解锁，然后刷新浏览器。",
+          "在你的浏览器中工作并解锁。切换至 Ropsten 测试网络，然后刷新浏览器。",
         "components/header/home": "首页",
         "components/header/topics": "话题",
         "components/header/notifications": "消息",
