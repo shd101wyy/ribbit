@@ -180,7 +180,11 @@ export default class FeedCard extends Component<Props, State> {
             ribbit={this.props.ribbit}
           />
           <div className="content-panel">
-            <ImagesPanel images={summary.images} />
+            {summary.video ? (
+              <div dangerouslySetInnerHTML={{ __html: summary.video }} />
+            ) : (
+              <ImagesPanel images={summary.images} />
+            )}
             <div
               ref={elem => (this.elem = elem)}
               className="summary"

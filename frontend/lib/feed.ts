@@ -44,6 +44,10 @@ export interface Summary {
   title: string;
   summary: string;
   images: string[]; // If has `title`, then images[0] is cover.
+  /**
+   * HTML code for video.
+   */
+  video: string;
   tags: string[]; // TODO: support tags
   html: string; // original html
 }
@@ -191,6 +195,39 @@ export async function generateSummaryFromHTML(
 
   await renderTags(div);
 
+  async function renderMedias(div) {
+    const medias = div.getElementsByClassName("ribbit-media");
+    let video = "";
+    for (let i = 0; i < medias.length; i++) {
+      const media = medias[i];
+      const mediaType = media.getAttribute("data-media-type");
+      const mediaValue = media.getAttribute("data-media-value");
+      if (mediaType === "youtube") {
+        media.innerHTML = `<iframe src="https://www.youtube.com/embed/${mediaValue}" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>`;
+      } else if (mediaType === "vimeo") {
+        media.innerHTML = `<iframe src="https://player.vimeo.com/video/${mediaValue}" frameborder="0" allowfullscreen></iframe>`;
+      } else if (mediaType === "vine") {
+        media.innerHTML = `<iframe src="https://vine.co/v/${mediaValue}/embed/simple" frameborder="0" allowfullscreen></iframe>`;
+      } else if (mediaType === "mp4") {
+        media.innerHTML = `<video controls><source src="${mediaValue}" type="video/mp4"></source>Your browser doesn't support HTML5 video.</video>`;
+      } else if (mediaType === "ogg") {
+        media.innerHTML = `<video controls><source src="${mediaValue}" type="video/ogg"></source>Your browser doesn't support HTML5 video.</video>`;
+      } else if (mediaType === "webm") {
+        media.innerHTML = `<video controls><source src="${mediaValue}" type="video/webm"></source>Your browser doesn't support HTML5 video.</video>`;
+      } else if (mediaType === "bilibili") {
+        media.innerHTML = `<iframe src="https://player.bilibili.com/player.html?${mediaValue}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>`;
+      } else {
+        media.innerHTML = `<span class="error">Invalid media @[${mediaType}](${mediaValue})</span>`;
+      }
+      if (i === 0) {
+        video = media.outerHTML;
+      }
+    }
+    return video;
+  }
+
+  const video = await renderMedias(div);
+
   // get summary
   let plainSummary = "";
   const maxCharacters = 240;
@@ -209,9 +246,10 @@ export async function generateSummaryFromHTML(
   summary = summary.replace(/\<img.+?\>/g, ""); // remove image tag.
 
   const output = {
-    title: title,
-    summary: summary,
-    images: images,
+    title,
+    summary,
+    images,
+    video,
     tags: [],
     html: div.innerHTML
   };
