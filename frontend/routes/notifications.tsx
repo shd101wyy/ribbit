@@ -143,7 +143,7 @@ export default class Notifications extends React.Component<Props, State> {
           );
           this.currentFeed = {
             blockNumber,
-            creation: transactionInfo.creation
+            creation:  blockNumber === this.currentFeed.blockNumber ? transactionInfo.creation : Date.now()
           };
 
           const feedInfo = await generateFeedInfoFromTransactionInfo(
