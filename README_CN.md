@@ -1,6 +1,6 @@
 # ribbit
 
-> 这个项目已被**弃用**，因为以太坊主网使用的高成本和缓慢的交易速度。
+> 这个项目已被**弃用**，因为以太坊主网使用的高成本和缓慢的交易速度。所以这个项目将只会运行于 **Ropsten 测试网络**。
 
 An experimental, decentralized social media web application based on Ethereum platform.  
 实验性质的，基于以太坊的去中心化社交程序。
@@ -33,6 +33,7 @@ An experimental, decentralized social media web application based on Ethereum pl
 	* [发布文字](#发布文字)
 		* [发布到话题](#发布到话题)
 		* [提到用户](#提到用户)
+		* [嵌入视频](#嵌入视频)
 	* [什么会被保存到区块链上，什么不会](#什么会被保存到区块链上什么不会)
 	* [开发者部分](#开发者部分)
 		* [开发](#开发)
@@ -100,6 +101,19 @@ ribbit 中发布的文字是基于 Markdown 格式的。
 
 ```markdown
 你好 @{ribbit} 将会通知用户 `ribbit` 这段文字。
+```
+
+### 嵌入视频
+
+例如： 
+
+```markdown
+@[mp4](https://www.w3schools.com/html/mov\_bbb.mp4)
+@[ogg](https://www.w3schools.com/html/mov\_bbb.ogg)
+@[youtube](ZE2HxTmxfrI)
+@[vimeo](269637018)
+@[vine](5AZm7bleEj5)
+@[bilibili](aid=23642605)
 ```
 
 ## 什么会被保存到区块链上，什么不会

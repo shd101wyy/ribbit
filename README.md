@@ -1,6 +1,6 @@
 # ribbit
 
-> This project is **DEPRECATED** due to unexpected high cost as well as slow transaction speed on Main Ethereum Network.
+> This project is **DEPRECATED** due to unexpected high cost as well as slow transaction speed on Main Ethereum Network. So this project will only work on the **Ropsten Test Network**.
 
 An experimental, decentralized social media web application based on Ethereum platform.  
 实验性质的，基于以太坊的去中心化社交程序。
@@ -32,6 +32,7 @@ demo: http://shd101wyy.github.io/ribbit/
 	* [Make a post](#make-a-post)
 		* [Post to topic](#post-to-topic)
 		* [Mention a user](#mention-a-user)
+		* [Embed videos](#embed-videos)
 	* [What will be saved to blockchain and what will not](#what-will-be-saved-to-blockchain-and-what-will-not)
 	* [Developer section](#developer-section)
 		* [Development](#development)
@@ -101,6 +102,19 @@ For example:
 
 ```markdown
 Hi @{ribbit} will notify the user `ribbit` this about post.
+```
+
+### Embed videos
+
+For example: 
+
+```markdown
+@[mp4](https://www.w3schools.com/html/mov\_bbb.mp4)
+@[ogg](https://www.w3schools.com/html/mov\_bbb.ogg)
+@[youtube](ZE2HxTmxfrI)
+@[vimeo](269637018)
+@[vine](5AZm7bleEj5)
+@[bilibili](aid=23642605)
 ```
 
 ## What will be saved to blockchain and what will not
