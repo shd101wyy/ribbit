@@ -147,7 +147,10 @@ export default class profile extends React.Component<Props, State> {
           }
           this.currentFeed = {
             blockNumber,
-            creation:  blockNumber === this.currentFeed.blockNumber ? transactionInfo.creation : Date.now()
+            creation:
+              blockNumber === this.currentFeed.blockNumber
+                ? transactionInfo.creation
+                : Date.now()
           };
 
           const feedInfo = await generateFeedInfoFromTransactionInfo(

@@ -8,7 +8,8 @@ An experimental, decentralized social media web application based on Ethereum pl
 * [English](./README.md)
 * [中文](./README_CN.md)
 
-demo: http://shd101wyy.github.io/ribbit/
+ribbit: http://shd101wyy.github.io/ribbit/
+`#{ribbit}` topic: https://shd101wyy.github.io/ribbit/#/3/topic/ribbit
 
 ![](https://user-images.githubusercontent.com/1908863/39964114-7a7d8d20-5642-11e8-8d75-8a823240c36a.PNG)
 

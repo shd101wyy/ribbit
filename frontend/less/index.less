@@ -7,8 +7,8 @@ body {
   padding: 0;
   margin: 0;
   background: #e7eae4; // #f6f6f6;
-  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC, Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei,
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, PingFang SC,
+    Source Han Sans SC, Noto Sans CJK SC, WenQuanYi Micro Hei, sans-serif;
   font-weight: 400;
   color: #444;
   -webkit-font-smoothing: antialiased;
@@ -42,7 +42,7 @@ a {
 
 a:hover {
   // color: #0050a3;
-  color: contrast(@urlColor, lighten(@urlColor, 8%), darken(@urlColor, 6%));
+  // color: contrast(@urlColor, lighten(@urlColor, 8%), darken(@urlColor, 6%));
   text-decoration: none;
 }
 
@@ -78,7 +78,7 @@ pre code {
   .topic {
     border-radius: 2px;
     cursor: pointer;
-    color: #19a6bf;
+    color: @urlColor;
     font-weight: 400;
 
     &:before {
@@ -89,12 +89,16 @@ pre code {
   .mention {
     border-radius: 2px;
     cursor: pointer;
-    color: #19a6bf;
+    color: @urlColor;
     font-weight: 400;
 
     &:before {
       content: "@";
     }
+  }
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

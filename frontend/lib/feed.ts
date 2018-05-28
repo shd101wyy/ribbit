@@ -50,6 +50,7 @@ export interface Summary {
   video: string;
   tags: string[]; // TODO: support tags
   html: string; // original html
+  hasMoreContent?: boolean; // has more content => display `continue reading`
 }
 
 export async function getTopicsAndMentionsFromHTML(
@@ -232,26 +233,34 @@ export async function generateSummaryFromHTML(
   let plainSummary = "";
   const maxCharacters = 240;
   const imgElements = [].slice.call(div.getElementsByTagName("img"));
+  let hasMoreContent = false;
   for (let i = 0; i < div.children.length; i++) {
     const elem = div.children[i];
-    if (elem.tagName !== "P") continue;
+    if (elem.tagName !== "P") {
+      hasMoreContent = true;
+      continue;
+    }
     if (elem.children.length && elem.children[0].tagName === "IMG") continue;
     const text = elem.textContent;
     plainSummary += text;
     summary += elem.innerHTML;
     if (plainSummary.length >= maxCharacters) {
+      if (i < div.children.length - 1) {
+        hasMoreContent = true;
+      }
       break;
     }
   }
   summary = summary.replace(/\<img.+?\>/g, ""); // remove image tag.
 
-  const output = {
+  const output: Summary = {
     title,
     summary,
     images,
     video,
     tags: [],
-    html: div.innerHTML
+    html: div.innerHTML,
+    hasMoreContent
   };
   div.remove();
   return output;

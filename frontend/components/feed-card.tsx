@@ -161,6 +161,13 @@ export default class FeedCard extends Component<Props, State> {
               className="summary"
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
+            {summary.hasMoreContent ? (
+              <div className="continue-reading-div">
+                <div className="continue-reading-btn">
+                  &gt; continue reading...
+                </div>
+              </div>
+            ) : null}
           </div>
           {parentFeedCard}
           {this.props.hideActionsPanel ? null : (
@@ -190,6 +197,13 @@ export default class FeedCard extends Component<Props, State> {
               className="summary"
               dangerouslySetInnerHTML={{ __html: summary.summary }}
             />
+            {summary.hasMoreContent ? (
+              <div className="continue-reading-div">
+                <div className="continue-reading-btn">
+                  &gt; continue reading...
+                </div>
+              </div>
+            ) : null}
           </div>
           {parentFeedCard}
           {this.props.hideActionsPanel ? null : (

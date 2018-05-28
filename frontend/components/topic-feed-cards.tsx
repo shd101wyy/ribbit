@@ -56,11 +56,14 @@ export default class TopicFeedCards extends React.Component<Props, State> {
 
   async initializeTopic(topic: string) {
     // check following or not
-    this.setState({
-      feeds: []
-    });
-
-    this.showTopic(topic);
+    this.setState(
+      {
+        feeds: []
+      },
+      () => {
+        this.showTopic(topic);
+      }
+    );
   }
 
   async showTopic(topic: string) {
@@ -161,7 +164,10 @@ export default class TopicFeedCards extends React.Component<Props, State> {
           }
           this.currentFeed = {
             blockNumber,
-            creation:  blockNumber === this.currentFeed.blockNumber ? transactionInfo.creation : Date.now()
+            creation:
+              blockNumber === this.currentFeed.blockNumber
+                ? transactionInfo.creation
+                : Date.now()
           };
 
           const feedInfo = await generateFeedInfoFromTransactionInfo(
