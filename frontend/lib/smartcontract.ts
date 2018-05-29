@@ -828,7 +828,7 @@ export function getContractAddress(networkId: number) {
     return "0xd8cb86af02684b8ce9c756a6f93f407b0feb4c73";
   } else if (networkId === 1) {
     // mainnet
-    return null;
+    return "0xbbf856d36d04a80d9f526510ceba01ea27627488";
   } else {
     return null;
   }

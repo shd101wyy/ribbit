@@ -1,6 +1,6 @@
 # ribbit
 
-> This project is **DEPRECATED** due to unexpected high cost as well as slow transaction speed on Main Ethereum Network. So this project will only work on the **Ropsten Test Network**.
+> Recommend to try this project on **Ropsten Test Network**.
 
 An experimental, decentralized social media web application based on Ethereum platform.  
 实验性质的，基于以太坊的去中心化社交程序。
@@ -11,7 +11,12 @@ An experimental, decentralized social media web application based on Ethereum pl
 Demo: 
 
 * ribbit: http://shd101wyy.github.io/ribbit/
-* `#{ribbit}` topic: https://shd101wyy.github.io/ribbit/#/3/topic/ribbit
+* `#{ribbit}` topic (Ropsten): https://shd101wyy.github.io/ribbit/#/3/topic/ribbit
+
+Smart Contract:
+
+* Main Ethereum Network [0xbbf856d36d04a80d9f526510ceba01ea27627488](https://etherscan.io/tx/0x9bf16c6c96cf3c7b4a8d21aa5f93f79873aba4969e23c92a8d281c5a9a1afa32)
+* Ropsten Test Network [0xd8cb86af02684b8ce9c756a6f93f407b0feb4c73](https://ropsten.etherscan.io/tx/0x46eaf39784fc3142b6bbd57385ccfa282300dc6d0cd086992dfc51c47a034896)
 
 ![](https://user-images.githubusercontent.com/1908863/39964114-7a7d8d20-5642-11e8-8d75-8a823240c36a.PNG)
 

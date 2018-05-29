@@ -88,7 +88,7 @@ export default class DonatePanel extends React.Component<Props, State> {
       .catch(error => {
         new window["Noty"]({
           type: "error",
-          text: error,
+          text: JSON.stringify(error),
           timeout: 10000
         }).show();
       });
