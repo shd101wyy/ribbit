@@ -135,7 +135,7 @@ export default class UserTopPanel extends React.Component<Props, State> {
                 target="_blank"
                 onClick={this.gotoProfilePage(feedInfo.repostUserInfo.username)}
               >
-                @{feedInfo.repostUserInfo.name}
+                @{feedInfo.repostUserInfo.username}
               </Link>
               <span className="action">{t("general/upvoted")}</span>
               {this.state.donation ? (
