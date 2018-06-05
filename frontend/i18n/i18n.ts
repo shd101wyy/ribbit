@@ -65,6 +65,7 @@ i18next.init({
         "routes/signup/title": "Welcome to use Ribbit!",
         "routes/signup/subtitle":
           "Please finish your account registration below",
+        "routes/signup/topic-demo": "Or check the topic demo: ",
         "notification/init-error":
           "Failed to initialize Ribbit. Please make sure you have MetaMask enabled and unlocked.",
         "notification/publish-profile": `Profile is being published to blockchain.\nPlease wait until the transaction finishes, then refresh your browser.`,
@@ -87,7 +88,8 @@ i18next.init({
         "notification/app-local-cache-deletion-failure":
           "Failed to delete app local cache",
         "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`,
-        "notification/wrong-networkId": `Connected to the wrong network: {{given}}。Please reconnect to: {{required}}`
+        "notification/wrong-networkId": `Connected to the wrong network: {{given}}。Please reconnect to: {{required}}`,
+        "notification/invalid-username": `Invalid username: {{username}}`
       }
     },
     zh: {
@@ -145,6 +147,7 @@ i18next.init({
           "（可选）捐赠 0.0000 以太币给作者",
         "routes/signup/title": "欢迎使用 Ribbit！",
         "routes/signup/subtitle": "请在下方完成账号注册",
+        "routes/signup/topic-demo": "或者查看话题演示：",
         "notification/init-error":
           "启动 Ribbit 失败。请确保 MetaMask 已启动并解锁。",
         "notification/publish-profile": `用户信息正在被发布到区块链。\n请等候交易完成，然后刷新浏览器。`,
@@ -166,7 +169,8 @@ i18next.init({
           "成功删除程序本地缓存。浏览器将会在不久后刷新。",
         "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存",
         "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`,
-        "notification/wrong-networkId": `连接到了错误的以太坊网络 {{given}}。请连接到 {{required}}`
+        "notification/wrong-networkId": `连接到了错误的以太坊网络 {{given}}。请连接到 {{required}}`,
+        "notification/invalid-username": `无效的用户名：{{username}}`
       }
     }
   }

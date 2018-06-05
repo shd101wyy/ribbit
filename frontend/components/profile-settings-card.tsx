@@ -55,10 +55,10 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
           username: userInfo.username,
           name: userInfo.name,
           avatar: userInfo.avatar.startsWith("data:image")
-            ? ""
+            ? "https://tinyurl.com/yada8txd"
             : userInfo.avatar,
-          cover: userInfo.cover,
-          bio: userInfo.bio || "ribbit, ribbit, ribbit…",
+          cover: userInfo.cover || "https://tinyurl.com/ycozeccn",
+          bio: userInfo.bio || "#{ribbit}, #{ribbit}, #{ribbit}…",
           lang: ribbit.settings.language
         });
       })
@@ -93,13 +93,22 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
 
   publishProfile = event => {
     const userInfo = {
-      username: this.state.username,
-      name: this.state.name,
+      username: this.state.username.trim(),
+      name: this.state.name.trim(),
       cover: this.state.cover,
       avatar: this.state.avatar,
       bio: this.state.bio,
       address: this.props.ribbit.accountAddress
     };
+    if (this.state.username.trim().match(/^unknown$/i)) {
+      return new window["Noty"]({
+        type: "error",
+        text: i18n.t("notification/invalid-username", {
+          username: this.state.username
+        }),
+        timeout: 10000
+      }).show();
+    }
     this.props.ribbit
       .setUserMetadata(userInfo)
       .then(hash => {

@@ -3,6 +3,7 @@ import { I18n } from "react-i18next";
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
 import { checkNetworkId } from "../lib/utility";
+import { Link } from "react-router-dom";
 
 import ProfileSettingsCard from "../components/profile-settings-card";
 
@@ -36,7 +37,16 @@ export default class Signup extends React.Component<Props, State> {
         {(t, { i18n }) => (
           <div className="signup-page">
             <h1>{t("routes/signup/title")}</h1>
-            <p className="subtitle">{t("routes/signup/subtitle")}</p>
+            <p className="subtitle">
+              {t("routes/signup/subtitle")} <br />
+              {t("routes/signup/topic-demo")}{" "}
+              <Link
+                to={`/${this.props.networkId}/topic/ribbit`}
+                target="_blank"
+              >
+                #ribbit
+              </Link>
+            </p>
             <ProfileSettingsCard ribbit={this.props.ribbit} reset={true} />
           </div>
         )}
