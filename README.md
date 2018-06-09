@@ -71,7 +71,7 @@ Smart Contract:
 
 To make post, click the green `Ribbit` button.
 
-Posts in ribbit are writtein in Markdown.
+Posts in ribbit are written in Markdown.
 There are two types of posts now:
 
 * Normal post
