@@ -58,11 +58,15 @@ export default class Edit extends Component<Props, State> {
   }
 
   componentDidMount() {
-    console.log("@@ MOUNT Edit @@", this.props.parentFeedInfo);
+    // console.log("@@ MOUNT Edit @@", this.props.parentFeedInfo);
     utility.checkUserRegistration(this.props.ribbit);
     this.checkTopicsAndMentions();
     this.analyzeReplies();
     document.body.style.overflow = "hidden";
+    this.setState({
+      postAsIPFSHash: this.props.ribbit.settings.postAsIPFSHash,
+      postToRibbitTopic: this.props.ribbit.settings.postToRibbitTopic
+    });
   }
 
   componentWillUnmount() {
@@ -478,9 +482,17 @@ export default class Edit extends Component<Props, State> {
                         (this.state.postToRibbitTopic ? "" : " hidden")
                       }
                       onClick={() =>
-                        this.setState({
-                          postToRibbitTopic: !this.state.postToRibbitTopic
-                        })
+                        this.setState(
+                          {
+                            postToRibbitTopic: !this.state.postToRibbitTopic
+                          },
+                          () => {
+                            this.props.ribbit.settings.postToRibbitTopic = this.state.postToRibbitTopic;
+                            this.props.ribbit.setSettings(
+                              this.props.ribbit.settings
+                            );
+                          }
+                        )
                       }
                     >
                       {" "}
@@ -491,9 +503,17 @@ export default class Edit extends Component<Props, State> {
                         "config" + (this.state.postAsIPFSHash ? "" : " hidden")
                       }
                       onClick={() =>
-                        this.setState({
-                          postAsIPFSHash: !this.state.postAsIPFSHash
-                        })
+                        this.setState(
+                          {
+                            postAsIPFSHash: !this.state.postAsIPFSHash
+                          },
+                          () => {
+                            this.props.ribbit.settings.postAsIPFSHash = this.state.postAsIPFSHash;
+                            this.props.ribbit.setSettings(
+                              this.props.ribbit.settings
+                            );
+                          }
+                        )
                       }
                     >
                       {" "}

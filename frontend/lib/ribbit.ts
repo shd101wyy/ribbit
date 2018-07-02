@@ -23,6 +23,8 @@ import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 PouchDB.plugin(PouchDBFind);
 
+import * as ipfsAPI from "ipfs-api";
+
 let Buffer = window["Buffer"] || undefined;
 if (typeof Buffer === "undefined") {
   // For browser compatibility
@@ -32,7 +34,6 @@ if (typeof Buffer === "undefined") {
 import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
 import { BlockSchema } from "./db";
-const IPFS = window["Ipfs"];
 import i18n from "../i18n/i18n";
 
 abiDecoder.addABI(abiArray);
@@ -170,7 +171,7 @@ export class Ribbit {
     });
 
     // Initialize IPFS
-    await this.initializeIPFS();
+    this.initializeIPFS();
 
     // Initialize user settings
     await this.initializeSettings();
@@ -180,17 +181,12 @@ export class Ribbit {
 
   private initializeIPFS() {
     const ipfsOption = {};
-    this.ipfs = new IPFS(ipfsOption);
-    window["ipfsNode"] = this.ipfs;
-    return new Promise((resolve, reject) => {
-      this.ipfs.on("ready", () => {
-        console.log("IPFS node initialized");
-        return resolve();
-      });
-      this.ipfs.on("error", error => {
-        return reject(error);
-      });
+    this.ipfs = ipfsAPI({
+      host: "ipfs.infura.io",
+      port: "5001",
+      protocol: "https"
     });
+    window["ipfsNode"] = this.ipfs;
   }
 
   /**
@@ -217,7 +213,7 @@ export class Ribbit {
         return resolve(
           i18n.t("notification/ipfs-hash-not-found", {
             name: ipfsHash.slice(0, 6) + "...",
-            link: `https://ipfs.io/ipfs/${ipfsHash}`
+            link: `https://ipfs.infura.io/ipfs/${ipfsHash}`
           })
         );
       }, 1000);
