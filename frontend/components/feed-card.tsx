@@ -112,7 +112,6 @@ export default class FeedCard extends Component<Props, State> {
     if (!this.props.feedInfo) {
       return null;
     }
-    console.log("render feedInfo: ", this.props.feedInfo);
     const summary = this.props.feedInfo.summary;
     const transactionInfo = this.props.feedInfo.transactionInfo;
     const userInfo = this.props.feedInfo.userInfo;

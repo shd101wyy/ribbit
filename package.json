@@ -5,7 +5,6 @@
   "main": "index.js",
   "dependencies": {
     "@types/pouchdb": "^6.3.2",
-    "abi-decoder": "^1.1.0",
     "autolinker": "^1.6.2",
     "bignumber.js": "^7.2.1",
     "bs58": "^4.0.1",

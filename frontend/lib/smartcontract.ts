@@ -1,5 +1,5 @@
 // Smart contract information
-const abiMap = {
+export const abiMap = {
   "0": [
     {
       constant: false,
@@ -1701,7 +1701,7 @@ const abiMap = {
     }
   ]
 };
-export function getABIArray(version: number) {
+export function getABIArray(version: number | string) {
   return abiMap[version.toString()];
 }
 export function getContractAddress(networkId: number) {
@@ -1715,4 +1715,8 @@ export function getContractAddress(networkId: number) {
   } else {
     return null;
   }
+}
+
+export function getLatestAbiArray() {
+  return getABIArray(Object.keys(abiMap).length - 1);
 }

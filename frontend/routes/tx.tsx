@@ -3,7 +3,7 @@ import * as React from "react";
 import ArticleCard from "../components/article-card";
 import Header from "../components/header";
 
-import { Ribbit, UserInfo, decodeMethod } from "../lib/ribbit";
+import { Ribbit } from "../lib/ribbit";
 import { checkNetworkId } from "../lib/utility";
 import { TransactionInfo } from "../lib/transaction";
 import hashHistory from "../lib/history";
@@ -66,7 +66,7 @@ export default class Tx extends React.Component<Props, State> {
   ) {
     try {
       const transaction = await ribbit.web3.eth.getTransaction(transactionHash);
-      const decodedInputData = decodeMethod(transaction.input);
+      const decodedInputData = ribbit.decodeMethod(transaction.input);
       if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
         this.setState({
           msg: `Invalid transaction ${transactionHash}`

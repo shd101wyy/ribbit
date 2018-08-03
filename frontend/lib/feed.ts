@@ -34,7 +34,7 @@ export interface FeedInfo {
 }
 
 export function formatFeedCreationTime(feedInfo: FeedInfo) {
-  return formatDate(feedInfo.transactionInfo.creation);
+  return formatDate(feedInfo.transactionInfo.creation || 0);
 }
 
 export interface Summary {
@@ -329,9 +329,7 @@ export async function generateFeedInfoFromTransactionInfo(
     throw "Invalid feed type: " + feedType;
   }
 
-  console.log("start getFeedStateInfo");
   const stateInfo = await ribbit.getFeedStateInfo(transactionInfo.hash);
-  console.log("end getFeedStateInfo");
 
   const feedInfo: FeedInfo = {
     summary,
@@ -343,8 +341,6 @@ export async function generateFeedInfoFromTransactionInfo(
     repostUserDonation,
     ipfsHash
   };
-
-  console.log("feedInfo: ", feedInfo);
 
   return feedInfo;
 }

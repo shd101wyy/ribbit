@@ -1,6 +1,10 @@
-import { getContractAddress, getABIArray } from "./smartcontract";
+import {
+  getContractAddress,
+  getLatestAbiArray,
+  abiMap,
+  getABIArray
+} from "./smartcontract";
 import { sha256 } from "js-sha256";
-import * as abiDecoder from "abi-decoder";
 import * as chineseConv from "chinese-conv";
 import * as multihash from "../lib/multihash";
 import {
@@ -18,7 +22,6 @@ import {
 import * as Identicon from "identicon.js";
 import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
-import { BigNumber } from "bignumber.js";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 PouchDB.plugin(PouchDBFind);
@@ -35,27 +38,8 @@ import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
 import { BlockSchema } from "./db";
 import i18n from "../i18n/i18n";
-
-abiDecoder.addABI(getABIArray(1));
-
-export function decodeMethod(input: string) {
-  console.log("decodeMethod: ", input);
-  const decodedInputData = abiDecoder.decodeMethod(input);
-  if (!decodedInputData) {
-    return null;
-  } else {
-    return transformDecodedInputData(decodedInputData);
-  }
-}
-
-export function decodeLogs(logs: Log[]) {
-  const decodedLogData = abiDecoder.decodeLogs(logs);
-  if (!decodedLogData) {
-    return null;
-  } else {
-    return transformDecodedLogData(decodedLogData);
-  }
-}
+import { AbiDecoder } from "./abi-decoder";
+import { resolve } from "path";
 
 const IgnoredCharacters = /[\s\@\#,\.\!\$\%\^\&\*\(\)\-\_\+\=\~\`\<\>\?\/\，\。]/g;
 
@@ -139,11 +123,20 @@ export class Ribbit {
   settings: Settings;
 
   /**
+   * Abi decoders
+   */
+  public abiDecoders: AbiDecoder[];
+
+  /**
    * Constructor
    * @param web3
    */
   constructor(web3: Web3) {
     this.web3 = web3;
+
+    this.abiDecoders = Object.keys(abiMap).map(offset => {
+      return new AbiDecoder(web3, getABIArray(offset));
+    });
   }
 
   /**
@@ -154,7 +147,7 @@ export class Ribbit {
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
     this.contractInstance = new this.web3.eth.Contract(
-      getABIArray(1),
+      getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
@@ -314,6 +307,40 @@ export class Ribbit {
       }
       return "0x" + hexString;
     }
+  }
+
+  /**
+   * @description Iterate over all abiDecoders
+   * @param input
+   */
+  public decodeMethod(input: string) {
+    for (let i = this.abiDecoders.length - 1; i >= 0; i--) {
+      const abiDecoder = this.abiDecoders[i];
+      const decodedInputData = abiDecoder.decodeMethod(input);
+      if (!decodedInputData) {
+        continue;
+      } else {
+        return transformDecodedInputData(decodedInputData);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @description Iterate over all abiDecoders
+   * @param input
+   */
+  public decodeLogs(logs: Log[]) {
+    for (let i = this.abiDecoders.length - 1; i >= 0; i--) {
+      const abiDecoder = this.abiDecoders[i];
+      const decodedLogData = abiDecoder.decodeLogs(logs);
+      if (!decodedLogData) {
+        continue;
+      } else {
+        return transformDecodedLogData(decodedLogData);
+      }
+    }
+    return null;
   }
 
   /**
@@ -493,7 +520,7 @@ export class Ribbit {
     const parentTransaction = await this.web3.eth.getTransaction(
       parentTransactionHash
     );
-    const decodedInputData = decodeMethod(parentTransaction.input);
+    const decodedInputData = this.decodeMethod(parentTransaction.input);
     if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
       return null;
     }
@@ -614,9 +641,7 @@ export class Ribbit {
       if (!transaction) {
         continue;
       }
-      console.log("ENTER HERE");
-      const decodedInputData = decodeMethod(transaction.input);
-      console.log(decodedInputData);
+      const decodedInputData = this.decodeMethod(transaction.input);
       if (
         !decodedInputData ||
         Object.keys(decodedInputData).length === 0 ||
@@ -633,7 +658,7 @@ export class Ribbit {
         if (!logs || !logs.length) {
           continue;
         }
-        const decodedLogs = decodeLogs(logs);
+        const decodedLogs = this.decodeLogs(logs);
         const tags = [];
         decodedLogs.forEach(decodedLog => {
           if (
@@ -1137,30 +1162,37 @@ export class Ribbit {
 
   // TODO: change to Promise.all for parallel
   public async getFeedStateInfo(transactionHash: string): Promise<StateInfo> {
-    console.log("getFeedStateInfo: ", transactionHash);
-    const earnings = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 0).call()
-    );
-    console.log("done earning");
-    const upvotes = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 1).call()
-    );
-    const downvotes = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 2).call()
-    );
-    const replies = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 3).call()
-    );
-    const reports = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 4).call()
-    );
-    return {
-      earnings,
-      upvotes,
-      downvotes,
-      reports,
-      replies
+    const asyncFunctions = [
+      "earnings",
+      "upvotes",
+      "downvotes",
+      "replies",
+      "reports"
+    ].map((key, offset) => {
+      return new Promise((resolve, reject) => {
+        return this.contractInstance.methods
+          .getState(transactionHash, offset)
+          .call()
+          .then(value => {
+            return resolve([key, parseInt(value)]);
+          })
+          .catch(error => {
+            return reject(error);
+          });
+      });
+    });
+    const results = await Promise.all(asyncFunctions);
+    const output: StateInfo = {
+      earnings: 0,
+      upvotes: 0,
+      downvotes: 0,
+      reports: 0,
+      replies: 0
     };
+    results.forEach(([key, value]) => {
+      output[key] = value;
+    });
+    return output;
   }
 
   public async retrieveMessage(
