@@ -1,8 +1,8 @@
-import { getContractAddress, abiArray } from "./smartcontract";
+import { getContractAddress, getABIArray } from "./smartcontract";
 import { sha256 } from "js-sha256";
-import * as LZString from "lz-string";
 import * as abiDecoder from "abi-decoder";
 import * as chineseConv from "chinese-conv";
+import * as multihash from "../lib/multihash";
 import {
   compressString,
   hexEncode,
@@ -36,9 +36,10 @@ import { Settings } from "./settings";
 import { BlockSchema } from "./db";
 import i18n from "../i18n/i18n";
 
-abiDecoder.addABI(abiArray);
+abiDecoder.addABI(getABIArray(1));
 
 export function decodeMethod(input: string) {
+  console.log("decodeMethod: ", input);
   const decodedInputData = abiDecoder.decodeMethod(input);
   if (!decodedInputData) {
     return null;
@@ -153,7 +154,7 @@ export class Ribbit {
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
     this.contractInstance = new this.web3.eth.Contract(
-      abiArray,
+      getABIArray(1),
       getContractAddress(this.networkId)
     );
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
@@ -223,7 +224,6 @@ export class Ribbit {
           return reject(error);
         } else {
           const content = file.toString("utf8");
-          // this.ipfsAdd(content);
           return resolve(content);
         }
       });
@@ -320,7 +320,7 @@ export class Ribbit {
    * throw error or return null if failed to post feed
    * @param message the string that you want to post.
    */
-  public async postFeed(message: string, tags = [], postAsIPFSHash = false) {
+  public async postFeed(message: string, tags = []) {
     // Validate tags
     // TODO: change to Promise.all
     for (let i = 0; i < tags.length; i++) {
@@ -341,20 +341,43 @@ export class Ribbit {
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
-    const currentTimestamp = Date.now();
-    if (postAsIPFSHash) {
-      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
+    let ipfsHash = null;
+    let digest = "";
+    let hashFunction = 0;
+    let size = 0;
+    try {
+      new window["Noty"]({
+        type: "info",
+        text: "Generating IPFS hash, please wait...",
+        timeout: 2000
+      }).show();
+      console.log("generating ipfs hash");
+      ipfsHash = (await this.ipfsAdd(message)).hash;
+      console.log("ipfsHash: ", ipfsHash);
+      const d = multihash.getBytes32FromMultiash(ipfsHash);
+      digest = d.digest;
+      hashFunction = d.hashFunction;
+      size = d.size;
+    } catch (error) {
+      return new window["Noty"]({
+        type: "error",
+        text: "Failed to generate IPFS hash.",
+        timeout: 2000
+      }).show();
     }
-    const compressedMessage = compressString(message);
 
     console.log("post    :");
+    console.log("    digest: ", digest);
+    console.log("    hashFunction: ", hashFunction);
+    console.log("    size: ", size);
     console.log("    tags: ", tags);
 
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .post(
-          currentTimestamp, // timestamp
-          compressedMessage, // message
+          digest,
+          hashFunction,
+          size,
           tags // tags
         )
         .send({ from: this.accountAddress })
@@ -380,8 +403,7 @@ export class Ribbit {
     message: string,
     tags = [],
     repostToTimeline = false,
-    parentFeedInfo: FeedInfo,
-    postAsIPFSHash = false
+    parentFeedInfo: FeedInfo
   ) {
     // Validate tags
     // TODO: change to Promise.all
@@ -403,11 +425,28 @@ export class Ribbit {
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
-    const currentTimestamp = Date.now();
-    if (postAsIPFSHash) {
-      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
+    let ipfsHash = null;
+    let digest = "";
+    let hashFunction = 0;
+    let size = 0;
+    try {
+      new window["Noty"]({
+        type: "info",
+        text: "Generating IPFS hash, please wait...",
+        timeout: 2000
+      }).show();
+      ipfsHash = (await this.ipfsAdd(message)).hash;
+      const d = multihash.getBytes32FromMultiash(ipfsHash);
+      digest = d.digest;
+      hashFunction = d.hashFunction;
+      size = d.size;
+    } catch (error) {
+      return new window["Noty"]({
+        type: "error",
+        text: "Failed to generate IPFS hash.",
+        timeout: 2000
+      }).show();
     }
-    const compressedMessage = compressString(message);
 
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
     let authorAddress = "0x0000000000000000000000000000000000000000";
@@ -415,9 +454,10 @@ export class Ribbit {
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .reply(
-          currentTimestamp, // timestamp
           parentTransactionHash, // parentTransactionHash
-          compressedMessage, // message
+          digest, // digest
+          hashFunction, // hashFunction
+          size, // size
           tags, // tags
           repostToTimeline // repostToTimeline
         )
@@ -553,10 +593,12 @@ export class Ribbit {
     } catch (error) {
       // do nothing here
     }
+    const blockTimestamp =
+      (await this.web3.eth.getBlock(blockNumber)).timestamp * 1000;
     const transactionCount = await this.web3.eth.getBlockTransactionCount(
       blockNumber
     );
-    const asyncFunctions = [];
+    const asyncFunctions: Promise<Transaction>[] = [];
     for (let i = 0; i < transactionCount; i++) {
       asyncFunctions.push(
         this.web3.eth.getTransactionFromBlock(blockNumber, i)
@@ -572,7 +614,9 @@ export class Ribbit {
       if (!transaction) {
         continue;
       }
+      console.log("ENTER HERE");
       const decodedInputData = decodeMethod(transaction.input);
+      console.log(decodedInputData);
       if (
         !decodedInputData ||
         Object.keys(decodedInputData).length === 0 ||
@@ -599,13 +643,14 @@ export class Ribbit {
             tags.push(decodedLog.events["tag"].value);
           }
         });
+
         // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         const transactionInfo: TransactionInfo = Object.assign(
           transaction as object,
           {
             decodedInputData,
             decodedLogs,
-            creation: parseInt(decodedInputData.params["timestamp"].value),
+            creation: blockTimestamp + i,
             _id: transaction.hash,
             tags
           }
@@ -1090,10 +1135,13 @@ export class Ribbit {
     }
   }
 
+  // TODO: change to Promise.all for parallel
   public async getFeedStateInfo(transactionHash: string): Promise<StateInfo> {
+    console.log("getFeedStateInfo: ", transactionHash);
     const earnings = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 0).call()
     );
+    console.log("done earning");
     const upvotes = parseInt(
       await this.contractInstance.methods.getState(transactionHash, 1).call()
     );
@@ -1116,24 +1164,41 @@ export class Ribbit {
   }
 
   public async retrieveMessage(
-    message: string
+    params: object
   ): Promise<{ message: string; ipfsHash: string }> {
-    message = decompressString(message);
-    let match = null;
-    if (
-      message.length ===
-        `@[ipfs](QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw)`.length &&
-      (match = message.match(/^@\[ipfs\]\((.+?)\)$/i))
-    ) {
-      const hash = match[1];
-      return {
-        message: await this.ipfsCat(hash),
-        ipfsHash: hash
-      };
+    if ("message" in params) {
+      // smart contract version 0
+      let message = params["message"].value;
+      message = decompressString(message);
+      let match = null;
+      if (
+        message.length ===
+          `@[ipfs](QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw)`.length &&
+        (match = message.match(/^@\[ipfs\]\((.+?)\)$/i))
+      ) {
+        const hash = match[1];
+        return {
+          message: await this.ipfsCat(hash),
+          ipfsHash: hash
+        };
+      } else {
+        return {
+          message,
+          ipfsHash: null
+        };
+      }
     } else {
+      // smart contract version 1
+      console.log("retrieve message: ", params);
+      const ipfsHash = multihash.getMultihashFromBytes32({
+        digest: params["digest"].value,
+        hashFunction: parseInt(params["hashFunction"].value, 10),
+        size: parseInt(params["size"].value, 10)
+      });
+      console.log("retrieve message ipfsHash: ", ipfsHash);
       return {
-        message,
-        ipfsHash: null
+        message: await this.ipfsCat(ipfsHash),
+        ipfsHash
       };
     }
   }

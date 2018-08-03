@@ -34,7 +34,6 @@ interface State {
   replies: { name: string; address: string }[];
   hiddenReplies: { [key: string]: boolean }; // key is address
   postToRibbitTopic: boolean;
-  postAsIPFSHash: boolean;
   repostToTimeline: boolean;
 }
 
@@ -52,7 +51,6 @@ export default class Edit extends Component<Props, State> {
       replies: [],
       hiddenReplies: {},
       postToRibbitTopic: false,
-      postAsIPFSHash: false,
       repostToTimeline: false
     };
   }
@@ -64,7 +62,6 @@ export default class Edit extends Component<Props, State> {
     this.analyzeReplies();
     document.body.style.overflow = "hidden";
     this.setState({
-      postAsIPFSHash: this.props.ribbit.settings.postAsIPFSHash,
       postToRibbitTopic: this.props.ribbit.settings.postToRibbitTopic
     });
   }
@@ -182,12 +179,11 @@ export default class Edit extends Component<Props, State> {
           content,
           tags,
           this.state.repostToTimeline,
-          this.props.parentFeedInfo,
-          this.state.postAsIPFSHash
+          this.props.parentFeedInfo
         );
       } else {
         // post
-        await ribbit.postFeed(content, tags, this.state.postAsIPFSHash);
+        await ribbit.postFeed(content, tags);
       }
       window.localStorage["markdown-cache"] = "";
       this.props.cancel();
@@ -497,27 +493,6 @@ export default class Edit extends Component<Props, State> {
                     >
                       {" "}
                       {t("general/Post-to-ribbit")}
-                    </div>
-                    <div
-                      className={
-                        "config" + (this.state.postAsIPFSHash ? "" : " hidden")
-                      }
-                      onClick={() =>
-                        this.setState(
-                          {
-                            postAsIPFSHash: !this.state.postAsIPFSHash
-                          },
-                          () => {
-                            this.props.ribbit.settings.postAsIPFSHash = this.state.postAsIPFSHash;
-                            this.props.ribbit.setSettings(
-                              this.props.ribbit.settings
-                            );
-                          }
-                        )
-                      }
-                    >
-                      {" "}
-                      {t("general/Post-as-IPFS-hash")}
                     </div>
                   </div>
                 </div>

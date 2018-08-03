@@ -57,20 +57,21 @@ contract RibbitV1 {
      * 
      * transactionHash => field => value
      */
-    mapping (bytes32 => mapping(uint => uint)) public state;
+    mapping (bytes32 => mapping(uint8 => uint256)) public state;
 
     /**
      * User metadata.
      * For example, user name, profileImage, cover...
      */
-    mapping (address => string) public metadataJSONStringMap;  
+    mapping (address => string) public metadataJSONStringMap;
+    mapping (address => bytes32) public metadataJSONBytes32Map;
     
     /**
      * uint => block number
      */
-    mapping (address => uint) public currentFeedInfoMap;
-    mapping (bytes32 => uint) public currentTagInfoByTimeMap;
-    mapping (bytes32 => uint) public currentTagInfoByTrendMap;
+    mapping (address => uint256) public currentFeedInfoMap;
+    mapping (bytes32 => uint256) public currentTagInfoByTimeMap;
+    mapping (bytes32 => uint256) public currentTagInfoByTrendMap;
 
     // 0x0000000000000000000000000000000000000000, 0, 10
     constructor(address _previousContractAddress, uint32 _version, uint8 _developerIncomePercent) public {
@@ -129,10 +130,10 @@ contract RibbitV1 {
         }
     }
 
-    function getAccountNoFromAddress(address addr) public view returns (uint) {
-        uint n = addressToAccountNoMap[addr];
+    function getAccountNoFromAddress(address addr) public view returns (uint64) {
+        uint64 n = addressToAccountNoMap[addr];
         if (n == 0 && previousContractAddress != address(0)) {
-            return previousContract.getAccountNoFromAddress(addr);
+            return uint64(previousContract.getAccountNoFromAddress(addr));
         } else {
             return n;
         }
@@ -159,8 +160,8 @@ contract RibbitV1 {
         metadataJSONStringMap[msg.sender] = value;
     }
     
-    function getState(bytes32 transactionHash, uint field) external view returns (uint)  {
-        uint value = state[transactionHash][field];
+    function getState(bytes32 transactionHash, uint8 field) external view returns (uint256)  {
+        uint256 value = state[transactionHash][field];
         if (previousContractAddress != address(0)) {
             value = value + previousContract.getState(transactionHash, field);
         }
@@ -178,29 +179,38 @@ contract RibbitV1 {
             return metadataJSONStringMap[addr];
         }
     }
-    function getCurrentFeedInfo(address authorAddress) external view returns (uint) {
-        if (currentFeedInfoMap[authorAddress] == 0 && previousContractAddress != address(0)) { // read from previousContract
+    function setMetadataJSONBytes32Value(bytes32 value) external {
+        metadataJSONBytes32Map[msg.sender] = value;
+    }
+    function getMetadataJSONBytes32Value(address addr) public view returns (bytes32) {
+        return  metadataJSONBytes32Map[addr]; // this function has no previousContract for now
+    }
+    function getCurrentFeedInfo(address authorAddress) public view returns (uint256) {
+        uint256 n = currentFeedInfoMap[authorAddress];
+        if (n == 0 && previousContractAddress != address(0)) { // read from previousContract
             return previousContract.getCurrentFeedInfo(authorAddress);
         } else {
-            return currentFeedInfoMap[authorAddress];
+            return n;
         }
     }
-    function getCurrentTagInfoByTime(bytes32 tag) external view returns (uint) {
-        if (currentTagInfoByTimeMap[tag] == 0 && previousContractAddress != address(0)) { // read from previousContract
+    function getCurrentTagInfoByTime(bytes32 tag) public view returns (uint256) {
+        uint256 n = currentTagInfoByTimeMap[tag];
+        if (n == 0 && previousContractAddress != address(0)) { // read from previousContract
             return previousContract.getCurrentTagInfoByTime(tag);
         } else {
-            return currentTagInfoByTimeMap[tag];
+            return n;
         }
     }
-    function getCurrentTagInfoByTrend(bytes32 tag) external view returns (uint) {
-        if (currentTagInfoByTrendMap[tag] == 0 && previousContractAddress != address(0)) { // read from previousContract
+    function getCurrentTagInfoByTrend(bytes32 tag) public view returns (uint256) {
+        uint256 n = currentTagInfoByTrendMap[tag];
+        if (n == 0 && previousContractAddress != address(0)) { // read from previousContract
             return previousContract.getCurrentTagInfoByTrend(tag);
         } else {
-            return currentTagInfoByTrendMap[tag];
+            return n;
         }
     }
 
-    function setDonationBar(uint _donationBar) external {
+    function setDonationBar(uint256 _donationBar) external {
         require(msg.sender == owner);
         donationBar = _donationBar;
     }
@@ -221,29 +231,29 @@ contract RibbitV1 {
     }
     
     // Post Feed 
-    event SavePreviousFeedInfoEvent(uint previousFeedInfoBN);
-    event SavePreviousTagInfoByTimeEvent(uint previousTagInfoBN, bytes32 tag);
-    event SavePreviousTagInfoByTrendEvent(uint previousTagInfoBN, bytes32 tag);
-    function post(bytes32 message, bytes32[] tags) external {
-        emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+    event SavePreviousFeedInfoEvent(uint256 previousFeedInfoBN);
+    event SavePreviousTagInfoByTimeEvent(uint256 previousTagInfoBN, bytes32 tag);
+    event SavePreviousTagInfoByTrendEvent(uint256 previousTagInfoBN, bytes32 tag);
+    function post(bytes32 digest, uint8 hashFunction, uint8 size, bytes32[] tags) external {
+        emit SavePreviousFeedInfoEvent(getCurrentFeedInfo(msg.sender));
         currentFeedInfoMap[msg.sender] = block.number;
 
         bytes32 tag;
-        uint i;
+        uint8 i;
         for (i = 0; i < tags.length; i++) {
             tag = tags[i];
-            emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
+            emit SavePreviousTagInfoByTimeEvent(getCurrentTagInfoByTime(tag), tag);
             currentTagInfoByTimeMap[tag] = block.number;
             
             if (tag >> 160 != 0x0) { // this tag is not a user address.
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+                emit SavePreviousTagInfoByTrendEvent(getCurrentTagInfoByTrend(tag), tag);
                 currentTagInfoByTrendMap[tag] = block.number;
             }
         }
     }
 
     // Repost Feed => Upvote
-    event DonateEvent(uint value);
+    event DonateEvent(uint256 value);
     function upvote(bytes32 parentTransactionHash, bytes32[] tags, bool repost, address authorAddress) external payable {
         bool isDonation = (authorAddress != address(0)); 
         if (isDonation) {
@@ -253,28 +263,28 @@ contract RibbitV1 {
             // 0.1 to developer
             state[parentTransactionHash][0] = state[parentTransactionHash][0] + msg.value;
             emit DonateEvent(msg.value);
-            uint unit = msg.value / 100;
+            uint256 unit = msg.value / 100;
             authorAddress.transfer(unit * (100 - developerIncomePercent));
             owner.transfer(unit * developerIncomePercent);
         }
 
         if (repost) {
-            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            emit SavePreviousFeedInfoEvent(getCurrentFeedInfo(msg.sender));
             currentFeedInfoMap[msg.sender] = block.number;
         }
 
         state[parentTransactionHash][1] = state[parentTransactionHash][1] + 1; // increase number of upvotes.
 
         bytes32 tag;
-        for (uint i = 0; i < tags.length; i++) {
+        for (uint8 i = 0; i < tags.length; i++) {
             tag = tags[i];
             if (tag >> 160 == 0x0) { // it's a user address, notify that user that someone likes his post & reply.
-                emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
+                emit SavePreviousTagInfoByTimeEvent(getCurrentTagInfoByTime(tag), tag);
                 currentTagInfoByTimeMap[tag] = block.number;
             } else if ( isDonation ||                                                        // for donation, we pop that to trend directly
                         state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar   // upvotes >= downvotes.
             ) {
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+                emit SavePreviousTagInfoByTrendEvent(getCurrentTagInfoByTrend(tag), tag);
                 currentTagInfoByTrendMap[tag] = block.number;
             }
         }
@@ -285,38 +295,38 @@ contract RibbitV1 {
     function downvote(bytes32 transactionHash, bool repost) external {
         state[transactionHash][2] = state[transactionHash][2] + 1;
         if (repost) {
-            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            emit SavePreviousFeedInfoEvent(getCurrentFeedInfo(msg.sender));
             currentFeedInfoMap[msg.sender] = block.number;
         }
     }
     
     // Reply
-    function reply(bytes32 parentTransactionHash, bytes32 message, bytes32[] tags, bool repost) external {
+    function reply(bytes32 parentTransactionHash, bytes32 digest, uint8 hashFunction, uint8 size, bytes32[] tags, bool repost) external {
         if (repost) {
-            emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
+            emit SavePreviousFeedInfoEvent(getCurrentFeedInfo(msg.sender));
             currentFeedInfoMap[msg.sender] = block.number;
         }
 
         state[parentTransactionHash][3] = state[parentTransactionHash][3] + 1; // increase number of replies
         bytes32 tag;
-        uint i;
+        uint8 i;
         for (i = 0; i < tags.length; i++) {
             tag = tags[i];
-            emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[tag], tag);
+            emit SavePreviousTagInfoByTimeEvent(getCurrentTagInfoByTime(tag), tag);
             currentTagInfoByTimeMap[tag] = block.number;
             
             if (tag >> 160 != 0x0) { // this tag is not a user address.
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+                emit SavePreviousTagInfoByTrendEvent(getCurrentTagInfoByTrend(tag), tag);
                 currentTagInfoByTrendMap[tag] = block.number;
             }
         }
 
         // here we use parentTransactionHash as tag.
         // Drawback: there might be collision with the real tag, but we just ignore it.
-        emit SavePreviousTagInfoByTimeEvent(currentTagInfoByTimeMap[parentTransactionHash], parentTransactionHash);
+        emit SavePreviousTagInfoByTimeEvent(getCurrentTagInfoByTime(parentTransactionHash), parentTransactionHash);
         currentTagInfoByTimeMap[parentTransactionHash] = block.number;
 
-        emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
+        emit SavePreviousTagInfoByTrendEvent(getCurrentTagInfoByTrend(parentTransactionHash), parentTransactionHash);
         currentTagInfoByTrendMap[parentTransactionHash] = block.number;
     }
 
@@ -327,7 +337,7 @@ contract RibbitV1 {
     }
 
     // Withdraw funds
-    function withdraw(uint amount) external returns(bool) {
+    function withdraw(uint256 amount) external returns(bool) {
         require(msg.sender == owner);
         owner.transfer(amount);
         return true;

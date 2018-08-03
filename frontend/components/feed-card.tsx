@@ -6,13 +6,7 @@ import ImagesPanel from "./images-panel";
 import UserTopPanel from "./user-top-panel";
 import ActionsBottomPanel from "./actions-bottom-panel";
 
-import {
-  FeedInfo,
-  formatFeedCreationTime,
-  generateFeedInfoFromTransactionInfo
-} from "../lib/feed";
-import { formatDate } from "../lib/utility";
-import { getTransactionCreationTimestamp } from "../lib/transaction";
+import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
 
@@ -118,6 +112,7 @@ export default class FeedCard extends Component<Props, State> {
     if (!this.props.feedInfo) {
       return null;
     }
+    console.log("render feedInfo: ", this.props.feedInfo);
     const summary = this.props.feedInfo.summary;
     const transactionInfo = this.props.feedInfo.transactionInfo;
     const userInfo = this.props.feedInfo.userInfo;
