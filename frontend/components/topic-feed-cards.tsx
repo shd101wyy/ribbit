@@ -162,9 +162,7 @@ export default class TopicFeedCards extends React.Component<Props, State> {
           );
 
           const feeds = this.state.feeds;
-          if (
-            feedInfo.feedType === "upvote"
-          ) {
+          if (feedInfo.feedType === "upvote") {
             // filter out existing content
             feedInfo.feedType = "post";
             feedInfo.repostUserInfo = null;
@@ -181,9 +179,7 @@ export default class TopicFeedCards extends React.Component<Props, State> {
               break;
             }
           }
-          if (
-            !find
-          ) {
+          if (!find) {
             feeds.push(feedInfo);
           }
 
@@ -236,8 +232,9 @@ export default class TopicFeedCards extends React.Component<Props, State> {
         {(t, { i18n }) => (
           <div className="topic-cards">
             {// no replies
-            this.state.doneLoadingAll &&
-            this.state.feeds.length === 0 ? null : null}
+            this.state.doneLoadingAll && this.state.feeds.length === 0
+              ? null
+              : null}
             <div className="cards">
               {this.state.feeds.map((feedInfo, index) => (
                 <FeedCard

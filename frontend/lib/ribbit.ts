@@ -101,7 +101,11 @@ export class Ribbit {
   /**
    * Current connected network name
    */
-  private networkName: string;
+  public networkName: string;
+  /**
+   * Current connected network name abbreviation
+   */
+  public networkNameAbbrev: string;
   /**
    * Smart contract instance
    */
@@ -145,15 +149,16 @@ export class Ribbit {
   public async initialize() {
     this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
-    this.networkName = await this.getNetworkName(this.networkId);
-    console.log('enter here')
+    this.networkName = this.getNetworkName(this.networkId, false);
+    this.networkNameAbbrev = this.getNetworkName(this.networkId, true);
+    console.log("enter here");
     this.contractInstance = new this.web3.eth.Contract(
       getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
-    console.log('enter here 2')
+    console.log("enter here 2");
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
-    console.log('enter here 3')
+    console.log("enter here 3");
 
     // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
@@ -170,12 +175,12 @@ export class Ribbit {
     // Initialize IPFS
     this.initializeIPFS();
 
-    console.log('enter here 4')
+    console.log("enter here 4");
 
     // Initialize user settings
     await this.initializeSettings();
 
-    console.log('enter here 5')
+    console.log("enter here 5");
 
     this.monitorAccountChange();
   }
@@ -249,16 +254,32 @@ export class Ribbit {
   /**
    * Get the name of the network
    */
-  public getNetworkName(networkId: number) {
+  public getNetworkName(networkId: number, abbrev?: boolean) {
     switch (networkId) {
       case 1:
-        return "Main Ethereum Network";
+        if (abbrev) {
+          return "Main";
+        } else {
+          return "Main Ethereum Network";
+        }
       case 2:
-        return "Morden Test Network";
+        if (abbrev) {
+          return "Morden";
+        } else {
+          return "Morden Test Network";
+        }
       case 3:
-        return "Ropsten Test Network";
+        if (abbrev) {
+          return "Ropsten";
+        } else {
+          return "Ropsten Test Network";
+        }
       default:
-        return "Unknown Network";
+        if (abbrev) {
+          return "Unknown";
+        } else {
+          return "Unknown Network";
+        }
     }
   }
 
@@ -354,7 +375,12 @@ export class Ribbit {
    * throw error or return null if failed to post feed
    * @param message the string that you want to post.
    */
-  public async postFeed(message: string, tags = []) {
+  public async postFeed(
+    digest: string,
+    hashFunction: number,
+    size: number,
+    tags = []
+  ) {
     // Validate tags
     // TODO: change to Promise.all
     for (let i = 0; i < tags.length; i++) {
@@ -374,31 +400,6 @@ export class Ribbit {
       }
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
-
-    let ipfsHash = null;
-    let digest = "";
-    let hashFunction = 0;
-    let size = 0;
-    try {
-      new window["Noty"]({
-        type: "info",
-        text: "Generating IPFS hash, please wait...",
-        timeout: 2000
-      }).show();
-      console.log("generating ipfs hash");
-      ipfsHash = (await this.ipfsAdd(message)).hash;
-      console.log("ipfsHash: ", ipfsHash);
-      const d = multihash.getBytes32FromMultiash(ipfsHash);
-      digest = d.digest;
-      hashFunction = d.hashFunction;
-      size = d.size;
-    } catch (error) {
-      return new window["Noty"]({
-        type: "error",
-        text: "Failed to generate IPFS hash.",
-        timeout: 2000
-      }).show();
-    }
 
     console.log("post    :");
     console.log("    digest: ", digest);
@@ -434,7 +435,9 @@ export class Ribbit {
   }
 
   public async replyFeed(
-    message: string,
+    digest: string,
+    hashFunction: number,
+    size: number,
     tags = [],
     repostToTimeline = false,
     parentFeedInfo: FeedInfo
@@ -458,29 +461,6 @@ export class Ribbit {
       }
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
-
-    let ipfsHash = null;
-    let digest = "";
-    let hashFunction = 0;
-    let size = 0;
-    try {
-      new window["Noty"]({
-        type: "info",
-        text: "Generating IPFS hash, please wait...",
-        timeout: 2000
-      }).show();
-      ipfsHash = (await this.ipfsAdd(message)).hash;
-      const d = multihash.getBytes32FromMultiash(ipfsHash);
-      digest = d.digest;
-      hashFunction = d.hashFunction;
-      size = d.size;
-    } catch (error) {
-      return new window["Noty"]({
-        type: "error",
-        text: "Failed to generate IPFS hash.",
-        timeout: 2000
-      }).show();
-    }
 
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
     let authorAddress = "0x0000000000000000000000000000000000000000";
@@ -668,9 +648,7 @@ export class Ribbit {
         const decodedLogs = this.decodeLogs(logs);
         const tags = [];
         decodedLogs.forEach(decodedLog => {
-          if (
-            decodedLog.name === "SavePreviousTagInfoByTrendEvent"
-          ) {
+          if (decodedLog.name === "SavePreviousTagInfoByTrendEvent") {
             tags.push(decodedLog.events["tag"].value);
           }
         });
@@ -844,7 +822,7 @@ export class Ribbit {
       blockNumber: currentFeedBlockNumber
     });
   }
-  
+
   /**
    *
    * @param tag original string of tag.
@@ -967,16 +945,14 @@ export class Ribbit {
           // Tag events.
           eventLog = decodedLogs.filter(
             x =>
-              ( x.name === "SavePreviousTagInfoByTrendEvent") &&
+              x.name === "SavePreviousTagInfoByTrendEvent" &&
               x.events["tag"].value === tag
           )[0];
         }
         if (!eventLog) {
           return cb(true); // done
         } else {
-          if (
-            eventLog.name === "SavePreviousTagInfoByTrendEvent"
-          ) {
+          if (eventLog.name === "SavePreviousTagInfoByTrendEvent") {
             blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
             blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
@@ -1047,7 +1023,7 @@ export class Ribbit {
       userInfo.username ||
       (await this.getUsernameFromAddress(address)) ||
       "unknown";
-    userInfo.username = username.replace(/[@]+/, ''); // Sanitize username
+    userInfo.username = username.replace(/[@]+/, ""); // Sanitize username
 
     return userInfo;
   }
@@ -1214,7 +1190,7 @@ export class Ribbit {
           const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
           this.settings = settings;
           return settings;
-        } catch(error) {
+        } catch (error) {
           localStorage.removeItem(`/settings/${this.accountAddress}`); // There is error with the IPFS hash.
           return this.initializeDefaultSettings();
         }

@@ -60,7 +60,7 @@ export default class Topics extends React.Component<Props, State> {
       feeds: [],
       loading: false,
       doneLoadingAll: false,
-      userInfo: null,
+      userInfo: null
     };
   }
 
@@ -227,9 +227,7 @@ export default class Topics extends React.Component<Props, State> {
             transactionInfo
           );
           const feeds = this.state.feeds;
-          if (
-            feedInfo.feedType === "upvote"
-          ) {
+          if (feedInfo.feedType === "upvote") {
             // filter out existing content
             feedInfo.feedType = "post";
             feedInfo.repostUserInfo = null;
@@ -246,9 +244,7 @@ export default class Topics extends React.Component<Props, State> {
               break;
             }
           }
-          if (
-            !find
-          ) {
+          if (!find) {
             feeds.push(feedInfo);
           }
 
@@ -356,14 +352,7 @@ export default class Topics extends React.Component<Props, State> {
           </a>
         </div>
       );
-      const topCard = (
-        <I18n>
-          {t => (
-            <div className="top-card card">
-            </div>
-          )}
-        </I18n>
-      );
+      const topCard = <I18n>{t => <div className="top-card card" />}</I18n>;
 
       return (
         <div className="home topics-page">

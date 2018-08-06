@@ -6,30 +6,30 @@ interface Ribbit {
     function transferAccount(address from, address to) external;
     function getUsernameFromAddress(address addr) external view returns (bytes32);
     function getAddressFromUsername(bytes32 username) external view returns (address);
-    function getAccountsNum() external view returns (uint);
-    function getAccountNoFromAddress(address addr) external view returns (uint);
-    function getAddressFromAccountNo(uint n) external view returns (address);
+    function getAccountsNum() external view returns (uint256);
+    function getAccountNoFromAddress(address addr) external view returns (uint256);
+    function getAddressFromAccountNo(uint256 n) external view returns (address);
     function setUsernameAndMetadataJSONString(bytes32 username, string value) external;
-    function getState(bytes32 transactionHash, uint field) external view returns (uint);
+    function getState(bytes32 transactionHash, uint256 field) external view returns (uint256);
     function setMetadataJSONStringValue(string value) external;
     function getMetadataJSONStringValue(address addr) external view returns (string);
-    function getCurrentFeedInfo(address authorAddress) external view returns (uint);
-    function getCurrentTagInfoByTime(bytes32 tag) external view returns (uint);
-    function getCurrentTagInfoByTrend(bytes32 tag) external view returns (uint);
-    function setDonationBar(uint _donationBar) external;
-    function setUpvoteBar(uint _upvoteBar) external;
-    function setDeveloperIncomePercent(uint _percent) external;
-    function setReportDownvoteEqNum(uint _reportDownvoteEqNum) external;
-    event SavePreviousFeedInfoEvent(uint previousFeedInfoBN);
-    event SavePreviousTagInfoByTimeEvent(uint previousTagInfoBN, bytes32 tag);
-    event SavePreviousTagInfoByTrendEvent(uint previousTagInfoBN, bytes32 tag);
-    function post(uint timestamp, string message, bytes32[] tags) external;
-    event DonateEvent(uint value);
-    function upvote(uint timestamp, bytes32 parentTransactionHash, bytes32[] tags, bool repost, address authorAddress) external payable;
+    function getCurrentFeedInfo(address authorAddress) external view returns (uint256);
+    function getCurrentTagInfoByTime(bytes32 tag) external view returns (uint256);
+    function getCurrentTagInfoByTrend(bytes32 tag) external view returns (uint256);
+    function setDonationBar(uint256 _donationBar) external;
+    function setUpvoteBar(uint256 _upvoteBar) external;
+    function setDeveloperIncomePercent(uint256 _percent) external;
+    function setReportDownvoteEqNum(uint256 _reportDownvoteEqNum) external;
+    event SavePreviousFeedInfoEvent(uint256 previousFeedInfoBN);
+    event SavePreviousTagInfoByTimeEvent(uint256 previousTagInfoBN, bytes32 tag);
+    event SavePreviousTagInfoByTrendEvent(uint256 previousTagInfoBN, bytes32 tag);
+    function post(uint256 timestamp, string message, bytes32[] tags) external;
+    event DonateEvent(uint256 value);
+    function upvote(uint256 timestamp, bytes32 parentTransactionHash, bytes32[] tags, bool repost, address authorAddress) external payable;
     function downvote(bytes32 transactionHash, bool repost) external;
-    function reply(uint timestamp, bytes32 parentTransactionHash, string message, bytes32[] tags, bool repost) external;
+    function reply(uint256 timestamp, bytes32 parentTransactionHash, string message, bytes32[] tags, bool repost) external;
     function report(bytes32 transactionHash) external;
-    function withdraw(uint amount) external returns(bool);
+    function withdraw(uint256 amount) external returns(bool);
 }
 
 contract RibbitV1 {
@@ -100,7 +100,7 @@ contract RibbitV1 {
         addressToAccountNoMap[to] = accountsNum;
         accountNoToAddressMap[accountsNum] = to;
 
-        currentFeedInfoMap[to] = uint(from); // here we save the address inherited account.
+        currentFeedInfoMap[to] = uint256(from); // here we save the address of inherited account.
     }
 
     function getUsernameFromAddress(address addr) public view returns (bytes32) {

@@ -97,7 +97,10 @@ export default class Header extends Component<Props, State> {
                     hashHistory.replace(`/${this.props.ribbit.networkId}/`)
                   }
                 >
-                  Ribbit
+                  Ribbit{" "}
+                  <span className="network-name" style={{ fontSize: "0.6em" }}>
+                    ({this.props.ribbit.networkNameAbbrev})
+                  </span>
                 </h1>
               )}
               <nav>
