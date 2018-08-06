@@ -146,11 +146,14 @@ export class Ribbit {
     this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = await this.getNetworkName(this.networkId);
+    console.log('enter here')
     this.contractInstance = new this.web3.eth.Contract(
       getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
+    console.log('enter here 2')
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
+    console.log('enter here 3')
 
     // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
@@ -167,8 +170,12 @@ export class Ribbit {
     // Initialize IPFS
     this.initializeIPFS();
 
+    console.log('enter here 4')
+
     // Initialize user settings
     await this.initializeSettings();
+
+    console.log('enter here 5')
 
     this.monitorAccountChange();
   }
@@ -662,7 +669,6 @@ export class Ribbit {
         const tags = [];
         decodedLogs.forEach(decodedLog => {
           if (
-            decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
             decodedLog.name === "SavePreviousTagInfoByTrendEvent"
           ) {
             tags.push(decodedLog.events["tag"].value);
@@ -838,22 +844,7 @@ export class Ribbit {
       blockNumber: currentFeedBlockNumber
     });
   }
-
-  /**
-   *
-   * @param tag original string of tag.
-   */
-  public async getNewestFeedTransactionFromTagByTime(tag: string) {
-    tag = this.formatTag(tag);
-    const currentFeedInfo = await this.contractInstance.methods
-      .getCurrentTagInfoByTime(tag)
-      .call();
-    const currentFeedBlockNumber = parseInt(currentFeedInfo);
-    return await this.getTransactionInfo({
-      blockNumber: currentFeedBlockNumber
-    });
-  }
-
+  
   /**
    *
    * @param tag original string of tag.
@@ -895,35 +886,6 @@ export class Ribbit {
     }
     return await this.getFeeds({
       userAddress,
-      blockNumber,
-      num,
-      cb
-    });
-  }
-
-  public async getFeedsFromTagByTime(
-    tag: string,
-    {
-      num = -1, // how many feeds to read?
-      blockNumber = 0,
-      transactionHash = null
-    },
-    cb: (
-      done: boolean,
-      offset?: number,
-      transactionInfo?: TransactionInfo
-    ) => void
-  ) {
-    tag = this.formatTag(tag);
-    const currentFeedInfo = await this.contractInstance.methods
-      .getCurrentTagInfoByTime(tag)
-      .call();
-    if (!blockNumber) {
-      blockNumber = parseInt(currentFeedInfo);
-    }
-    return await this.getFeeds({
-      userAddress: "",
-      tag,
       blockNumber,
       num,
       cb
@@ -1005,8 +967,7 @@ export class Ribbit {
           // Tag events.
           eventLog = decodedLogs.filter(
             x =>
-              (x.name === "SavePreviousTagInfoByTimeEvent" ||
-                x.name === "SavePreviousTagInfoByTrendEvent") &&
+              ( x.name === "SavePreviousTagInfoByTrendEvent") &&
               x.events["tag"].value === tag
           )[0];
         }
@@ -1014,8 +975,7 @@ export class Ribbit {
           return cb(true); // done
         } else {
           if (
-            eventLog.name === "SavePreviousTagInfoByTrendEvent" ||
-            eventLog.name === "SavePreviousTagInfoByTimeEvent"
+            eventLog.name === "SavePreviousTagInfoByTrendEvent"
           ) {
             blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
@@ -1087,7 +1047,7 @@ export class Ribbit {
       userInfo.username ||
       (await this.getUsernameFromAddress(address)) ||
       "unknown";
-    userInfo.username = username;
+    userInfo.username = username.replace(/[@]+/, ''); // Sanitize username
 
     return userInfo;
   }
@@ -1250,9 +1210,14 @@ export class Ribbit {
         `/settings/${this.accountAddress}`
       );
       if (hash) {
-        const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
-        this.settings = settings;
-        return settings;
+        try {
+          const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
+          this.settings = settings;
+          return settings;
+        } catch(error) {
+          localStorage.removeItem(`/settings/${this.accountAddress}`); // There is error with the IPFS hash.
+          return this.initializeDefaultSettings();
+        }
       } else {
         return this.initializeDefaultSettings();
       }

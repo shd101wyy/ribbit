@@ -47,7 +47,6 @@ interface State {
   loading: boolean;
   doneLoadingAll: boolean;
   userInfo: UserInfo;
-  sorting: TopicSorting;
 }
 export default class Topics extends React.Component<Props, State> {
   private lastFeedCard: HTMLDivElement;
@@ -62,7 +61,6 @@ export default class Topics extends React.Component<Props, State> {
       loading: false,
       doneLoadingAll: false,
       userInfo: null,
-      sorting: TopicSorting.ByTime
     };
   }
 
@@ -112,19 +110,11 @@ export default class Topics extends React.Component<Props, State> {
       const topic = ribbit.settings.followingTopics[i].topic;
       if (topic) {
         let blockNumber;
-        if (this.state.sorting === TopicSorting.ByTrend) {
-          blockNumber = parseInt(
-            await ribbit.contractInstance.methods
-              .getCurrentTagInfoByTrend(ribbit.formatTag(topic))
-              .call()
-          );
-        } else {
-          blockNumber = parseInt(
-            await ribbit.contractInstance.methods
-              .getCurrentTagInfoByTime(ribbit.formatTag(topic))
-              .call()
-          );
-        }
+        blockNumber = parseInt(
+          await ribbit.contractInstance.methods
+            .getCurrentTagInfoByTrend(ribbit.formatTag(topic))
+            .call()
+        );
         feedEntries.push({
           blockNumber,
           creation,
@@ -148,7 +138,6 @@ export default class Topics extends React.Component<Props, State> {
   showTopicsFeeds() {
     const feedEntries = this.state.feedEntries;
     const ribbit = this.props.ribbit;
-    const sorting = this.state.sorting;
     if (!feedEntries.length) {
       return this.setState({
         loading: false,
@@ -220,10 +209,7 @@ export default class Topics extends React.Component<Props, State> {
         } else {
           const eventLog = transactionInfo.decodedLogs.filter(
             x =>
-              x.name ===
-                (sorting === TopicSorting.ByTime
-                  ? "SavePreviousTagInfoByTimeEvent"
-                  : "SavePreviousTagInfoByTrendEvent") &&
+              x.name === "SavePreviousTagInfoByTrendEvent" &&
               x.events["tag"].value === formattedTag
           )[0];
           let blockNumber;
@@ -242,7 +228,6 @@ export default class Topics extends React.Component<Props, State> {
           );
           const feeds = this.state.feeds;
           if (
-            sorting === TopicSorting.ByTrend &&
             feedInfo.feedType === "upvote"
           ) {
             // filter out existing content
@@ -262,8 +247,7 @@ export default class Topics extends React.Component<Props, State> {
             }
           }
           if (
-            !find &&
-            !(sorting == TopicSorting.ByTime && feedInfo.feedType === "upvote") // no need to display upvote for ByTime
+            !find
           ) {
             feeds.push(feedInfo);
           }
@@ -316,20 +300,6 @@ export default class Topics extends React.Component<Props, State> {
   toggleEditPanel = () => {
     const { showEditPanel } = this.state;
     this.setState({ showEditPanel: !showEditPanel });
-  };
-
-  selectSorting = (sorting: TopicSorting) => {
-    return event => {
-      this.setState(
-        {
-          sorting,
-          feeds: []
-        },
-        () => {
-          this.showUserTopics(this.props.ribbit);
-        }
-      );
-    };
   };
 
   render() {
@@ -390,32 +360,6 @@ export default class Topics extends React.Component<Props, State> {
         <I18n>
           {t => (
             <div className="top-card card">
-              <div className="btn-group">
-                <div
-                  className={
-                    "btn" +
-                    (this.state.sorting === TopicSorting.ByTrend
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.selectSorting(TopicSorting.ByTrend)}
-                >
-                  <i className="fas fa-fire" />
-                  {t("general/by-trend")}
-                </div>
-                <div
-                  className={
-                    "btn" +
-                    (this.state.sorting === TopicSorting.ByTime
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.selectSorting(TopicSorting.ByTime)}
-                >
-                  <i className="fas fa-clock" />
-                  {t("general/by-time")}
-                </div>
-              </div>
             </div>
           )}
         </I18n>

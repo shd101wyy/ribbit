@@ -70,6 +70,7 @@ class App extends React.Component<Props, State> {
         }
       );
     } catch (error) {
+      console.log(error)
       new window["Noty"]({
         type: "error",
         text: i18n.t("notification/init-error"),
