@@ -80,7 +80,7 @@ export async function getTopicsAndMentionsFromHTML(
   div.remove();
 
   return {
-    topics,
+    topics: Array.from(new Set(topics)),
     mentions
   };
 }
