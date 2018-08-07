@@ -135,7 +135,7 @@ export default class Notifications extends React.Component<Props, State> {
         } else {
           const eventLog = transactionInfo.decodedLogs.filter(
             x =>
-              x.name === "SavePreviousTagInfoByTrendEvent" &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === formattedTag
           )[0];
           const blockNumber = parseInt(

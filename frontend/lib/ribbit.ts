@@ -648,7 +648,7 @@ export class Ribbit {
         const decodedLogs = this.decodeLogs(logs);
         const tags = [];
         decodedLogs.forEach(decodedLog => {
-          if (decodedLog.name === "SavePreviousTagInfoByTrendEvent") {
+          if (decodedLog.name === "SavePreviousTagInfoEvent") {
             tags.push(decodedLog.events["tag"].value);
           }
         });
@@ -945,14 +945,14 @@ export class Ribbit {
           // Tag events.
           eventLog = decodedLogs.filter(
             x =>
-              x.name === "SavePreviousTagInfoByTrendEvent" &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === tag
           )[0];
         }
         if (!eventLog) {
           return cb(true); // done
         } else {
-          if (eventLog.name === "SavePreviousTagInfoByTrendEvent") {
+          if (eventLog.name === "SavePreviousTagInfoEvent") {
             blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
             blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
@@ -1298,7 +1298,7 @@ export class Ribbit {
     await this.transactionInfoDB.destroy();
     await this.blockDB.destroy();
     if (typeof window.localStorage !== "undefined") {
-      window.localStorage.setItem(`/settings/${this.accountAddress}`, "");
+      window.localStorage.removeItem(`/settings/${this.accountAddress}`);
     }
   }
 

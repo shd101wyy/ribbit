@@ -209,7 +209,7 @@ export default class Topics extends React.Component<Props, State> {
         } else {
           const eventLog = transactionInfo.decodedLogs.filter(
             x =>
-              x.name === "SavePreviousTagInfoByTrendEvent" &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === formattedTag
           )[0];
           let blockNumber;

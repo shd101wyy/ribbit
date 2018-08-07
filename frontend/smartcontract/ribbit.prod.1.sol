@@ -209,7 +209,7 @@ contract RibbitV1 {
     
     // Post Feed 
     event SavePreviousFeedInfoEvent(uint256 previousFeedInfoBN);
-    event SavePreviousTagInfoByTrendEvent(uint256 previousTagInfoBN, bytes32 tag);
+    event SavePreviousTagInfoEvent(uint256 previousTagInfoBN, bytes32 tag);
     function post(bytes32 digest, uint8 hashFunction, uint8 size, bytes32[] tags) external {
         emit SavePreviousFeedInfoEvent(currentFeedInfoMap[msg.sender]);
         currentFeedInfoMap[msg.sender] = block.number;
@@ -218,7 +218,7 @@ contract RibbitV1 {
         uint8 i;
         for (i = 0; i < tags.length; i++) {
             tag = tags[i];
-            emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+            emit SavePreviousTagInfoEvent(currentTagInfoByTrendMap[tag], tag);
             currentTagInfoByTrendMap[tag] = block.number;
         }
     }
@@ -253,7 +253,7 @@ contract RibbitV1 {
                 isDonation ||         // for donation, we pop that to trend directly
                 state[parentTransactionHash][1] >= state[parentTransactionHash][2] + upvoteBar   // upvotes >= downvotes.
             ) {
-                emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+                emit SavePreviousTagInfoEvent(currentTagInfoByTrendMap[tag], tag);
                 currentTagInfoByTrendMap[tag] = block.number;
             }
         }
@@ -281,13 +281,13 @@ contract RibbitV1 {
         uint8 i;
         for (i = 0; i < tags.length; i++) {
             tag = tags[i];
-            emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[tag], tag);
+            emit SavePreviousTagInfoEvent(currentTagInfoByTrendMap[tag], tag);
             currentTagInfoByTrendMap[tag] = block.number;
         }
 
         // here we use parentTransactionHash as tag.
         // Drawback: there might be collision with the real tag, but we just ignore it.
-        emit SavePreviousTagInfoByTrendEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
+        emit SavePreviousTagInfoEvent(currentTagInfoByTrendMap[parentTransactionHash], parentTransactionHash);
         currentTagInfoByTrendMap[parentTransactionHash] = block.number;
     }
 
