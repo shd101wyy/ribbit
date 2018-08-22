@@ -25,7 +25,6 @@ interface State {
   feeds: FeedInfo[];
   loading: boolean;
   doneLoadingAll: boolean;
-  sorting: TopicSorting;
   msg: string;
 }
 
@@ -37,7 +36,6 @@ export default class TopicFeedCards extends React.Component<Props, State> {
       feeds: [],
       loading: false,
       doneLoadingAll: false,
-      sorting: TopicSorting.ByTime,
       msg: ""
     };
   }
@@ -69,19 +67,11 @@ export default class TopicFeedCards extends React.Component<Props, State> {
   async showTopic(topic: string) {
     const ribbit = this.props.ribbit;
     let blockNumber;
-    if (this.state.sorting === TopicSorting.ByTrend) {
-      blockNumber = parseInt(
-        await ribbit.contractInstance.methods
-          .getCurrentTagInfoByTrend(ribbit.formatTag(topic))
-          .call()
-      );
-    } else {
-      blockNumber = parseInt(
-        await ribbit.contractInstance.methods
-          .getCurrentTagInfoByTime(ribbit.formatTag(topic))
-          .call()
-      );
-    }
+    blockNumber = parseInt(
+      await ribbit.contractInstance.methods
+        .getCurrentTagInfoByTrend(ribbit.formatTag(topic))
+        .call()
+    );
 
     this.currentFeed = {
       blockNumber,
@@ -102,7 +92,6 @@ export default class TopicFeedCards extends React.Component<Props, State> {
   async showTopicFeeds() {
     const topic = this.props.topic;
     const ribbit = this.props.ribbit;
-    const sorting = this.state.sorting;
     if (!this.currentFeed || !this.currentFeed.blockNumber) {
       return this.setState({
         loading: false,
@@ -150,10 +139,7 @@ export default class TopicFeedCards extends React.Component<Props, State> {
         } else {
           const eventLog = transactionInfo.decodedLogs.filter(
             x =>
-              x.name ===
-                (sorting === TopicSorting.ByTime
-                  ? "SavePreviousTagInfoByTimeEvent"
-                  : "SavePreviousTagInfoByTrendEvent") &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === formattedTag
           )[0];
           let blockNumber;
@@ -176,10 +162,7 @@ export default class TopicFeedCards extends React.Component<Props, State> {
           );
 
           const feeds = this.state.feeds;
-          if (
-            sorting === TopicSorting.ByTrend &&
-            feedInfo.feedType === "upvote"
-          ) {
+          if (feedInfo.feedType === "upvote") {
             // filter out existing content
             feedInfo.feedType = "post";
             feedInfo.repostUserInfo = null;
@@ -196,10 +179,7 @@ export default class TopicFeedCards extends React.Component<Props, State> {
               break;
             }
           }
-          if (
-            !find &&
-            !(sorting == TopicSorting.ByTime && feedInfo.feedType === "upvote") // no need to display upvote for ByTime
-          ) {
+          if (!find) {
             feeds.push(feedInfo);
           }
 
@@ -246,55 +226,15 @@ export default class TopicFeedCards extends React.Component<Props, State> {
     }
   };
 
-  selectSorting = (sorting: TopicSorting) => {
-    return event => {
-      this.setState(
-        {
-          sorting,
-          feeds: []
-        },
-        () => {
-          this.showTopic(this.props.topic);
-        }
-      );
-    };
-  };
-
   render() {
     return (
       <I18n>
         {(t, { i18n }) => (
           <div className="topic-cards">
             {// no replies
-            this.state.doneLoadingAll &&
-            this.state.feeds.length === 0 ? null : (
-              <div className="btn-group card">
-                <div
-                  className={
-                    "btn" +
-                    (this.state.sorting === TopicSorting.ByTrend
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.selectSorting(TopicSorting.ByTrend)}
-                >
-                  <i className="fas fa-fire" />
-                  {t("general/by-trend")}
-                </div>
-                <div
-                  className={
-                    "btn" +
-                    (this.state.sorting === TopicSorting.ByTime
-                      ? " selected"
-                      : "")
-                  }
-                  onClick={this.selectSorting(TopicSorting.ByTime)}
-                >
-                  <i className="fas fa-clock" />
-                  {t("general/by-time")}
-                </div>
-              </div>
-            )}
+            this.state.doneLoadingAll && this.state.feeds.length === 0
+              ? null
+              : null}
             <div className="cards">
               {this.state.feeds.map((feedInfo, index) => (
                 <FeedCard

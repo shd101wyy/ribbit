@@ -1,8 +1,12 @@
-import { getContractAddress, abiArray } from "./smartcontract";
+import {
+  getContractAddress,
+  getLatestAbiArray,
+  abiMap,
+  getABIArray
+} from "./smartcontract";
 import { sha256 } from "js-sha256";
-import * as LZString from "lz-string";
-import * as abiDecoder from "abi-decoder";
 import * as chineseConv from "chinese-conv";
+import * as multihash from "../lib/multihash";
 import {
   compressString,
   hexEncode,
@@ -18,7 +22,6 @@ import {
 import * as Identicon from "identicon.js";
 import Web3 from "web3";
 import { Contract, Transaction, Log } from "web3/types";
-import { BigNumber } from "bignumber.js";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 PouchDB.plugin(PouchDBFind);
@@ -35,26 +38,8 @@ import { StateInfo, FeedInfo } from "./feed";
 import { Settings } from "./settings";
 import { BlockSchema } from "./db";
 import i18n from "../i18n/i18n";
-
-abiDecoder.addABI(abiArray);
-
-export function decodeMethod(input: string) {
-  const decodedInputData = abiDecoder.decodeMethod(input);
-  if (!decodedInputData) {
-    return null;
-  } else {
-    return transformDecodedInputData(decodedInputData);
-  }
-}
-
-export function decodeLogs(logs: Log[]) {
-  const decodedLogData = abiDecoder.decodeLogs(logs);
-  if (!decodedLogData) {
-    return null;
-  } else {
-    return transformDecodedLogData(decodedLogData);
-  }
-}
+import { AbiDecoder } from "./abi-decoder";
+import { resolve } from "path";
 
 const IgnoredCharacters = /[\s\@\#,\.\!\$\%\^\&\*\(\)\-\_\+\=\~\`\<\>\?\/\，\。]/g;
 
@@ -116,7 +101,11 @@ export class Ribbit {
   /**
    * Current connected network name
    */
-  private networkName: string;
+  public networkName: string;
+  /**
+   * Current connected network name abbreviation
+   */
+  public networkNameAbbrev: string;
   /**
    * Smart contract instance
    */
@@ -138,11 +127,20 @@ export class Ribbit {
   settings: Settings;
 
   /**
+   * Abi decoders
+   */
+  public abiDecoders: AbiDecoder[];
+
+  /**
    * Constructor
    * @param web3
    */
   constructor(web3: Web3) {
     this.web3 = web3;
+
+    this.abiDecoders = Object.keys(abiMap).map(offset => {
+      return new AbiDecoder(web3, getABIArray(offset));
+    });
   }
 
   /**
@@ -151,12 +149,16 @@ export class Ribbit {
   public async initialize() {
     this.accountAddress = (await this.web3.eth.getAccounts())[0];
     this.networkId = await this.web3.eth.net.getId();
-    this.networkName = await this.getNetworkName(this.networkId);
+    this.networkName = this.getNetworkName(this.networkId, false);
+    this.networkNameAbbrev = this.getNetworkName(this.networkId, true);
+    console.log("enter here");
     this.contractInstance = new this.web3.eth.Contract(
-      abiArray,
+      getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
+    console.log("enter here 2");
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
+    console.log("enter here 3");
 
     // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
@@ -173,8 +175,12 @@ export class Ribbit {
     // Initialize IPFS
     this.initializeIPFS();
 
+    console.log("enter here 4");
+
     // Initialize user settings
     await this.initializeSettings();
+
+    console.log("enter here 5");
 
     this.monitorAccountChange();
   }
@@ -223,7 +229,6 @@ export class Ribbit {
           return reject(error);
         } else {
           const content = file.toString("utf8");
-          // this.ipfsAdd(content);
           return resolve(content);
         }
       });
@@ -249,16 +254,32 @@ export class Ribbit {
   /**
    * Get the name of the network
    */
-  public getNetworkName(networkId: number) {
+  public getNetworkName(networkId: number, abbrev?: boolean) {
     switch (networkId) {
       case 1:
-        return "Main Ethereum Network";
+        if (abbrev) {
+          return "Main";
+        } else {
+          return "Main Ethereum Network";
+        }
       case 2:
-        return "Morden Test Network";
+        if (abbrev) {
+          return "Morden";
+        } else {
+          return "Morden Test Network";
+        }
       case 3:
-        return "Ropsten Test Network";
+        if (abbrev) {
+          return "Ropsten";
+        } else {
+          return "Ropsten Test Network";
+        }
       default:
-        return "Unknown Network";
+        if (abbrev) {
+          return "Unknown";
+        } else {
+          return "Unknown Network";
+        }
     }
   }
 
@@ -317,10 +338,49 @@ export class Ribbit {
   }
 
   /**
+   * @description Iterate over all abiDecoders
+   * @param input
+   */
+  public decodeMethod(input: string) {
+    for (let i = this.abiDecoders.length - 1; i >= 0; i--) {
+      const abiDecoder = this.abiDecoders[i];
+      const decodedInputData = abiDecoder.decodeMethod(input);
+      if (!decodedInputData) {
+        continue;
+      } else {
+        return transformDecodedInputData(decodedInputData);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @description Iterate over all abiDecoders
+   * @param input
+   */
+  public decodeLogs(logs: Log[]) {
+    for (let i = this.abiDecoders.length - 1; i >= 0; i--) {
+      const abiDecoder = this.abiDecoders[i];
+      const decodedLogData = abiDecoder.decodeLogs(logs);
+      if (!decodedLogData) {
+        continue;
+      } else {
+        return transformDecodedLogData(decodedLogData);
+      }
+    }
+    return null;
+  }
+
+  /**
    * throw error or return null if failed to post feed
    * @param message the string that you want to post.
    */
-  public async postFeed(message: string, tags = [], postAsIPFSHash = false) {
+  public async postFeed(
+    digest: string,
+    hashFunction: number,
+    size: number,
+    tags = []
+  ) {
     // Validate tags
     // TODO: change to Promise.all
     for (let i = 0; i < tags.length; i++) {
@@ -341,20 +401,18 @@ export class Ribbit {
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
-    const currentTimestamp = Date.now();
-    if (postAsIPFSHash) {
-      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
-    }
-    const compressedMessage = compressString(message);
-
     console.log("post    :");
+    console.log("    digest: ", digest);
+    console.log("    hashFunction: ", hashFunction);
+    console.log("    size: ", size);
     console.log("    tags: ", tags);
 
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .post(
-          currentTimestamp, // timestamp
-          compressedMessage, // message
+          digest,
+          hashFunction,
+          size,
           tags // tags
         )
         .send({ from: this.accountAddress })
@@ -377,11 +435,12 @@ export class Ribbit {
   }
 
   public async replyFeed(
-    message: string,
+    digest: string,
+    hashFunction: number,
+    size: number,
     tags = [],
     repostToTimeline = false,
-    parentFeedInfo: FeedInfo,
-    postAsIPFSHash = false
+    parentFeedInfo: FeedInfo
   ) {
     // Validate tags
     // TODO: change to Promise.all
@@ -403,21 +462,16 @@ export class Ribbit {
     }
     tags = Array.from(new Set(tags)); // Remove duplicate.
 
-    const currentTimestamp = Date.now();
-    if (postAsIPFSHash) {
-      message = `@[ipfs](${(await this.ipfsAdd(message)).hash})`;
-    }
-    const compressedMessage = compressString(message);
-
     const parentTransactionHash = parentFeedInfo.transactionInfo.hash;
     let authorAddress = "0x0000000000000000000000000000000000000000";
 
     return await new Promise((resolve, reject) => {
       this.contractInstance.methods
         .reply(
-          currentTimestamp, // timestamp
           parentTransactionHash, // parentTransactionHash
-          compressedMessage, // message
+          digest, // digest
+          hashFunction, // hashFunction
+          size, // size
           tags, // tags
           repostToTimeline // repostToTimeline
         )
@@ -453,7 +507,7 @@ export class Ribbit {
     const parentTransaction = await this.web3.eth.getTransaction(
       parentTransactionHash
     );
-    const decodedInputData = decodeMethod(parentTransaction.input);
+    const decodedInputData = this.decodeMethod(parentTransaction.input);
     if (!decodedInputData || Object.keys(decodedInputData).length === 0) {
       return null;
     }
@@ -553,10 +607,12 @@ export class Ribbit {
     } catch (error) {
       // do nothing here
     }
+    const blockTimestamp =
+      (await this.web3.eth.getBlock(blockNumber)).timestamp * 1000;
     const transactionCount = await this.web3.eth.getBlockTransactionCount(
       blockNumber
     );
-    const asyncFunctions = [];
+    const asyncFunctions: Promise<Transaction>[] = [];
     for (let i = 0; i < transactionCount; i++) {
       asyncFunctions.push(
         this.web3.eth.getTransactionFromBlock(blockNumber, i)
@@ -572,7 +628,7 @@ export class Ribbit {
       if (!transaction) {
         continue;
       }
-      const decodedInputData = decodeMethod(transaction.input);
+      const decodedInputData = this.decodeMethod(transaction.input);
       if (
         !decodedInputData ||
         Object.keys(decodedInputData).length === 0 ||
@@ -589,23 +645,21 @@ export class Ribbit {
         if (!logs || !logs.length) {
           continue;
         }
-        const decodedLogs = decodeLogs(logs);
+        const decodedLogs = this.decodeLogs(logs);
         const tags = [];
         decodedLogs.forEach(decodedLog => {
-          if (
-            decodedLog.name === "SavePreviousTagInfoByTimeEvent" ||
-            decodedLog.name === "SavePreviousTagInfoByTrendEvent"
-          ) {
+          if (decodedLog.name === "SavePreviousTagInfoEvent") {
             tags.push(decodedLog.events["tag"].value);
           }
         });
+
         // transaction.hash = transaction.hash.toLowerCase(); // <= for transactionHash as tag.
         const transactionInfo: TransactionInfo = Object.assign(
           transaction as object,
           {
             decodedInputData,
             decodedLogs,
-            creation: parseInt(decodedInputData.params["timestamp"].value),
+            creation: blockTimestamp + i,
             _id: transaction.hash,
             tags
           }
@@ -773,21 +827,6 @@ export class Ribbit {
    *
    * @param tag original string of tag.
    */
-  public async getNewestFeedTransactionFromTagByTime(tag: string) {
-    tag = this.formatTag(tag);
-    const currentFeedInfo = await this.contractInstance.methods
-      .getCurrentTagInfoByTime(tag)
-      .call();
-    const currentFeedBlockNumber = parseInt(currentFeedInfo);
-    return await this.getTransactionInfo({
-      blockNumber: currentFeedBlockNumber
-    });
-  }
-
-  /**
-   *
-   * @param tag original string of tag.
-   */
   public async getNewestFeedTransactionFromTagByTrend(tag: string) {
     tag = this.formatTag(tag);
     const currentFeedInfo = await this.contractInstance.methods
@@ -825,35 +864,6 @@ export class Ribbit {
     }
     return await this.getFeeds({
       userAddress,
-      blockNumber,
-      num,
-      cb
-    });
-  }
-
-  public async getFeedsFromTagByTime(
-    tag: string,
-    {
-      num = -1, // how many feeds to read?
-      blockNumber = 0,
-      transactionHash = null
-    },
-    cb: (
-      done: boolean,
-      offset?: number,
-      transactionInfo?: TransactionInfo
-    ) => void
-  ) {
-    tag = this.formatTag(tag);
-    const currentFeedInfo = await this.contractInstance.methods
-      .getCurrentTagInfoByTime(tag)
-      .call();
-    if (!blockNumber) {
-      blockNumber = parseInt(currentFeedInfo);
-    }
-    return await this.getFeeds({
-      userAddress: "",
-      tag,
       blockNumber,
       num,
       cb
@@ -935,18 +945,14 @@ export class Ribbit {
           // Tag events.
           eventLog = decodedLogs.filter(
             x =>
-              (x.name === "SavePreviousTagInfoByTimeEvent" ||
-                x.name === "SavePreviousTagInfoByTrendEvent") &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === tag
           )[0];
         }
         if (!eventLog) {
           return cb(true); // done
         } else {
-          if (
-            eventLog.name === "SavePreviousTagInfoByTrendEvent" ||
-            eventLog.name === "SavePreviousTagInfoByTimeEvent"
-          ) {
+          if (eventLog.name === "SavePreviousTagInfoEvent") {
             blockNumber = parseInt(eventLog.events["previousTagInfoBN"].value);
           } else if (eventLog.name === "SavePreviousFeedInfoEvent") {
             blockNumber = parseInt(eventLog.events["previousFeedInfoBN"].value);
@@ -1017,7 +1023,7 @@ export class Ribbit {
       userInfo.username ||
       (await this.getUsernameFromAddress(address)) ||
       "unknown";
-    userInfo.username = username;
+    userInfo.username = username.replace(/[@]+/, ""); // Sanitize username
 
     return userInfo;
   }
@@ -1090,50 +1096,77 @@ export class Ribbit {
     }
   }
 
+  // TODO: change to Promise.all for parallel
   public async getFeedStateInfo(transactionHash: string): Promise<StateInfo> {
-    const earnings = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 0).call()
-    );
-    const upvotes = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 1).call()
-    );
-    const downvotes = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 2).call()
-    );
-    const replies = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 3).call()
-    );
-    const reports = parseInt(
-      await this.contractInstance.methods.getState(transactionHash, 4).call()
-    );
-    return {
-      earnings,
-      upvotes,
-      downvotes,
-      reports,
-      replies
+    const asyncFunctions = [
+      "earnings",
+      "upvotes",
+      "downvotes",
+      "replies",
+      "reports"
+    ].map((key, offset) => {
+      return new Promise((resolve, reject) => {
+        return this.contractInstance.methods
+          .getState(transactionHash, offset)
+          .call()
+          .then(value => {
+            return resolve([key, parseInt(value)]);
+          })
+          .catch(error => {
+            return reject(error);
+          });
+      });
+    });
+    const results = await Promise.all(asyncFunctions);
+    const output: StateInfo = {
+      earnings: 0,
+      upvotes: 0,
+      downvotes: 0,
+      reports: 0,
+      replies: 0
     };
+    results.forEach(([key, value]) => {
+      output[key] = value;
+    });
+    return output;
   }
 
   public async retrieveMessage(
-    message: string
+    params: object
   ): Promise<{ message: string; ipfsHash: string }> {
-    message = decompressString(message);
-    let match = null;
-    if (
-      message.length ===
-        `@[ipfs](QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw)`.length &&
-      (match = message.match(/^@\[ipfs\]\((.+?)\)$/i))
-    ) {
-      const hash = match[1];
-      return {
-        message: await this.ipfsCat(hash),
-        ipfsHash: hash
-      };
+    if ("message" in params) {
+      // smart contract version 0
+      let message = params["message"].value;
+      message = decompressString(message);
+      let match = null;
+      if (
+        message.length ===
+          `@[ipfs](QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw)`.length &&
+        (match = message.match(/^@\[ipfs\]\((.+?)\)$/i))
+      ) {
+        const hash = match[1];
+        return {
+          message: await this.ipfsCat(hash),
+          ipfsHash: hash
+        };
+      } else {
+        return {
+          message,
+          ipfsHash: null
+        };
+      }
     } else {
+      // smart contract version 1
+      console.log("retrieve message: ", params);
+      const ipfsHash = multihash.getMultihashFromBytes32({
+        digest: params["digest"].value,
+        hashFunction: parseInt(params["hashFunction"].value, 10),
+        size: parseInt(params["size"].value, 10)
+      });
+      console.log("retrieve message ipfsHash: ", ipfsHash);
       return {
-        message,
-        ipfsHash: null
+        message: await this.ipfsCat(ipfsHash),
+        ipfsHash
       };
     }
   }
@@ -1153,9 +1186,14 @@ export class Ribbit {
         `/settings/${this.accountAddress}`
       );
       if (hash) {
-        const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
-        this.settings = settings;
-        return settings;
+        try {
+          const settings = JSON.parse(await this.ipfsCat(hash)) as Settings;
+          this.settings = settings;
+          return settings;
+        } catch (error) {
+          localStorage.removeItem(`/settings/${this.accountAddress}`); // There is error with the IPFS hash.
+          return this.initializeDefaultSettings();
+        }
       } else {
         return this.initializeDefaultSettings();
       }
@@ -1260,7 +1298,7 @@ export class Ribbit {
     await this.transactionInfoDB.destroy();
     await this.blockDB.destroy();
     if (typeof window.localStorage !== "undefined") {
-      window.localStorage.setItem(`/settings/${this.accountAddress}`, "");
+      window.localStorage.removeItem(`/settings/${this.accountAddress}`);
     }
   }
 

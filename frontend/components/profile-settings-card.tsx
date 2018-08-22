@@ -93,7 +93,7 @@ export default class ProfileSettingsCard extends React.Component<Props, State> {
 
   publishProfile = event => {
     const userInfo = {
-      username: this.state.username.trim(),
+      username: this.state.username.trim().replace(/^@+/, ""),
       name: this.state.name.trim(),
       cover: this.state.cover,
       avatar: this.state.avatar,

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { I18n } from "react-i18next";
 import { Component } from "react";
+import * as multihash from "../lib/multihash";
 
 import { UnControlled as CodeMirror, IInstance } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
@@ -34,8 +35,8 @@ interface State {
   replies: { name: string; address: string }[];
   hiddenReplies: { [key: string]: boolean }; // key is address
   postToRibbitTopic: boolean;
-  postAsIPFSHash: boolean;
   repostToTimeline: boolean;
+  generatingIPFSHash: boolean;
 }
 
 export default class Edit extends Component<Props, State> {
@@ -52,8 +53,8 @@ export default class Edit extends Component<Props, State> {
       replies: [],
       hiddenReplies: {},
       postToRibbitTopic: false,
-      postAsIPFSHash: false,
-      repostToTimeline: false
+      repostToTimeline: false,
+      generatingIPFSHash: false
     };
   }
 
@@ -64,7 +65,6 @@ export default class Edit extends Component<Props, State> {
     this.analyzeReplies();
     document.body.style.overflow = "hidden";
     this.setState({
-      postAsIPFSHash: this.props.ribbit.settings.postAsIPFSHash,
       postToRibbitTopic: this.props.ribbit.settings.postToRibbitTopic
     });
   }
@@ -165,44 +165,68 @@ export default class Edit extends Component<Props, State> {
         mentions.push(mention.address);
       }
     }
-
-    console.log(
-      `${this.props.parentFeedInfo ? "reply" : "post"} feed         : `,
-      this.state.code
-    );
-    console.log("     width replies: ", replies);
-    console.log("     with topics  : ", topics);
-    console.log("     with mentions: ", mentions);
-
-    const tags = Array.from(new Set([...topics, ...mentions, ...replies]));
     try {
-      if (this.props.parentFeedInfo) {
-        // reply
-        await ribbit.replyFeed(
-          content,
-          tags,
-          this.state.repostToTimeline,
-          this.props.parentFeedInfo,
-          this.state.postAsIPFSHash
-        );
-      } else {
-        // post
-        await ribbit.postFeed(content, tags, this.state.postAsIPFSHash);
-      }
-      window.localStorage["markdown-cache"] = "";
-      this.props.cancel();
-
       new window["Noty"]({
         type: "info",
-        text: i18n.t("notification/publish-post"),
-        timeout: 10000
+        text: i18n.t("notification/generating-ipfs-hash"),
+        timeout: 4000
       }).show();
+      console.log("generating ipfs hash");
+      this.setState({ generatingIPFSHash: true }, async () => {
+        const ipfsHash = (await this.props.ribbit.ipfsAdd(content)).hash;
+        console.log("ipfsHash: ", ipfsHash);
+        const d = multihash.getBytes32FromMultiash(ipfsHash);
+        const digest = d.digest;
+        const hashFunction = d.hashFunction;
+        const size = d.size;
+        console.log(
+          `${this.props.parentFeedInfo ? "reply" : "post"} feed         : `,
+          this.state.code
+        );
+        console.log("     width replies: ", replies);
+        console.log("     with topics  : ", topics);
+        console.log("     with mentions: ", mentions);
+
+        const tags = Array.from(new Set([...topics, ...mentions, ...replies]));
+        try {
+          if (this.props.parentFeedInfo) {
+            // reply
+            await ribbit.replyFeed(
+              digest,
+              hashFunction,
+              size,
+              tags,
+              this.state.repostToTimeline,
+              this.props.parentFeedInfo
+            );
+          } else {
+            // post
+            await ribbit.postFeed(digest, hashFunction, size, tags);
+          }
+          window.localStorage["markdown-cache"] = "";
+          this.props.cancel();
+
+          new window["Noty"]({
+            type: "info",
+            text: i18n.t("notification/publish-post"),
+            timeout: 10000
+          }).show();
+        } catch (error) {
+          new window["Noty"]({
+            type: "error",
+            text: i18n.t("notification/publish-post-failure"),
+            timeout: 10000
+          }).show();
+          this.setState({ generatingIPFSHash: false });
+        }
+      });
     } catch (error) {
-      new window["Noty"]({
+      return new window["Noty"]({
         type: "error",
-        text: i18n.t("notification/publish-post-failure"),
-        timeout: 10000
+        text: i18n.t("notification/generating-ipfs-hash-failure"),
+        timeout: 2000
       }).show();
+      this.setState({ generatingIPFSHash: false });
     }
   };
 
@@ -498,27 +522,6 @@ export default class Edit extends Component<Props, State> {
                       {" "}
                       {t("general/Post-to-ribbit")}
                     </div>
-                    <div
-                      className={
-                        "config" + (this.state.postAsIPFSHash ? "" : " hidden")
-                      }
-                      onClick={() =>
-                        this.setState(
-                          {
-                            postAsIPFSHash: !this.state.postAsIPFSHash
-                          },
-                          () => {
-                            this.props.ribbit.settings.postAsIPFSHash = this.state.postAsIPFSHash;
-                            this.props.ribbit.setSettings(
-                              this.props.ribbit.settings
-                            );
-                          }
-                        )
-                      }
-                    >
-                      {" "}
-                      {t("general/Post-as-IPFS-hash")}
-                    </div>
                   </div>
                 </div>
                 {/* preview */}
@@ -584,7 +587,7 @@ export default class Edit extends Component<Props, State> {
               </div>
             )}
             <div className="button-group">
-              {this.state.previewIsOn ? (
+              {this.state.previewIsOn && !this.state.generatingIPFSHash ? (
                 <div className="button" onClick={this.postFeed}>
                   <i className="fa fa-paper-plane" aria-hidden="true" />
                 </div>

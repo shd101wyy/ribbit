@@ -3,8 +3,7 @@ import { I18n } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { FeedInfo, formatFeedCreationTime } from "../lib/feed";
-import { UserInfo, Ribbit } from "../lib/ribbit";
-import hashHistory from "../lib/history";
+import { Ribbit } from "../lib/ribbit";
 
 interface Props {
   feedInfo: FeedInfo;

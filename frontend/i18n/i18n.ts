@@ -89,7 +89,11 @@ i18next.init({
           "Failed to delete app local cache",
         "notification/ipfs-hash-not-found": `Failed to cat IPFS hash: [{{name}}]({{link}}).`,
         "notification/wrong-networkId": `Connected to the wrong network: {{given}}。Please reconnect to: {{required}}`,
-        "notification/invalid-username": `Invalid username: {{username}}`
+        "notification/invalid-username": `Invalid username: {{username}}`,
+        "notification/generating-ipfs-hash":
+          "Generating IPFS hash, please wait...",
+        "notification/generating-ipfs-hash-failure":
+          "Failed to generate IPFS hash."
       }
     },
     zh: {
@@ -170,7 +174,9 @@ i18next.init({
         "notification/app-local-cache-deletion-failure": "无法删除程序本地缓存",
         "notification/ipfs-hash-not-found": `无法读取 IPFS 哈希：[{{name}}]({{link}}).`,
         "notification/wrong-networkId": `连接到了错误的以太坊网络 {{given}}。请连接到 {{required}}`,
-        "notification/invalid-username": `无效的用户名：{{username}}`
+        "notification/invalid-username": `无效的用户名：{{username}}`,
+        "notification/generating-ipfs-hash": "正在生成 IPFS 哈希，请稍等。。。",
+        "notification/generating-ipfs-hash-failure": "生成 IPFS 哈希失败。"
       }
     }
   }

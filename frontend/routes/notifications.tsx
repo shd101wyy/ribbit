@@ -67,7 +67,7 @@ export default class Notifications extends React.Component<Props, State> {
   async showUserNotifications(ribbit: Ribbit) {
     const blockNumber = parseInt(
       await ribbit.contractInstance.methods
-        .getCurrentTagInfoByTime(ribbit.formatTag(ribbit.accountAddress))
+        .getCurrentTagInfoByTrend(ribbit.formatTag(ribbit.accountAddress))
         .call()
     );
     this.currentFeed = {
@@ -135,7 +135,7 @@ export default class Notifications extends React.Component<Props, State> {
         } else {
           const eventLog = transactionInfo.decodedLogs.filter(
             x =>
-              x.name === "SavePreviousTagInfoByTimeEvent" &&
+              x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === formattedTag
           )[0];
           const blockNumber = parseInt(

@@ -1,8 +1,5 @@
 import { formatDate, decompressString } from "./utility";
-import {
-  TransactionInfo,
-  getTransactionCreationTimestamp
-} from "./transaction";
+import { TransactionInfo } from "./transaction";
 import { UserInfo, Ribbit } from "./ribbit";
 import { renderMarkdown } from "./markdown";
 
@@ -37,7 +34,7 @@ export interface FeedInfo {
 }
 
 export function formatFeedCreationTime(feedInfo: FeedInfo) {
-  return formatDate(getTransactionCreationTimestamp(feedInfo.transactionInfo));
+  return formatDate(feedInfo.transactionInfo.creation || 0);
 }
 
 export interface Summary {
@@ -83,7 +80,7 @@ export async function getTopicsAndMentionsFromHTML(
   div.remove();
 
   return {
-    topics,
+    topics: Array.from(new Set(topics)),
     mentions
   };
 }
@@ -289,7 +286,7 @@ export async function generateFeedInfoFromTransactionInfo(
   let repostUserDonation = parseInt(transactionInfo.value) || 0;
   if (feedType === "post") {
     const o = await ribbit.retrieveMessage(
-      transactionInfo.decodedInputData.params["message"].value
+      transactionInfo.decodedInputData.params
     );
     message = o.message;
     ipfsHash = o.ipfsHash;
@@ -312,7 +309,7 @@ export async function generateFeedInfoFromTransactionInfo(
     userInfo = await ribbit.getUserInfoFromAddress(transactionInfo.from);
 
     const o = await ribbit.retrieveMessage(
-      transactionInfo.decodedInputData.params["message"].value
+      transactionInfo.decodedInputData.params
     );
     message = o.message;
     ipfsHash = o.ipfsHash;
@@ -320,7 +317,7 @@ export async function generateFeedInfoFromTransactionInfo(
     summary = await generateSummaryFromHTML(renderMarkdown(message), ribbit);
   } else if (feedType === "reply") {
     const o = await ribbit.retrieveMessage(
-      transactionInfo.decodedInputData.params["message"].value
+      transactionInfo.decodedInputData.params
     );
     message = o.message;
     ipfsHash = o.ipfsHash;

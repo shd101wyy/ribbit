@@ -96,10 +96,3 @@ export function generateFakeTransactionInfo(): TransactionInfo {
     tags: []
   };
 }
-
-export function getTransactionCreationTimestamp(
-  transactionInfo: TransactionInfo
-) {
-  const params = transactionInfo.decodedInputData.params;
-  return parseInt(params["timestamp"].value, 10) || 0;
-}

@@ -6,13 +6,7 @@ import ImagesPanel from "./images-panel";
 import UserTopPanel from "./user-top-panel";
 import ActionsBottomPanel from "./actions-bottom-panel";
 
-import {
-  FeedInfo,
-  formatFeedCreationTime,
-  generateFeedInfoFromTransactionInfo
-} from "../lib/feed";
-import { formatDate } from "../lib/utility";
-import { getTransactionCreationTimestamp } from "../lib/transaction";
+import { FeedInfo, generateFeedInfoFromTransactionInfo } from "../lib/feed";
 import { Ribbit } from "../lib/ribbit";
 import hashHistory from "../lib/history";
 
