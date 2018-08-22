@@ -11,10 +11,11 @@ export function getContractAddress(networkId: number) {
   if (networkId === 3) {
     // Ropsten
     // return "0xd8cb86af02684b8ce9c756a6f93f407b0feb4c73";  // V0
-    return "0x5407072c7fa6f5610060de1161a24a14578e9483"; // V1
+    return "0xa7191b181ddb0654233554599be89d0fc09cce7d"; // V1
   } else if (networkId === 1) {
     // mainnet
-    return "0xbbf856d36d04a80d9f526510ceba01ea27627488"; // V0
+    // return "0xbbf856d36d04a80d9f526510ceba01ea27627488"; // V0
+    return "0x34a435f70226fa44ddd81bb2a546077b7091cf66"; // V1
   } else {
     return null;
   }
