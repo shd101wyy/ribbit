@@ -540,7 +540,7 @@ export class Ribbit {
 
     return new Promise((resolve, reject) => {
       this.contractInstance.methods
-        .upvote(Date.now(), parentTransactionHash, tags, true, authorAddress)
+        .upvote(parentTransactionHash, tags, true, authorAddress)
         .send({ from: this.accountAddress, value: wei })
         .on("error", error => {
           return reject(error);
