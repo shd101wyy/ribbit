@@ -21,7 +21,9 @@ import {
 } from "./transaction";
 import * as Identicon from "identicon.js";
 import Web3 from "web3";
-import { Contract, Transaction, Log } from "web3/types";
+import { Transaction } from "web3/eth/types";
+import { Log } from "web3/types";
+import SolidityContract from "web3/eth/contract";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 PouchDB.plugin(PouchDBFind);
@@ -39,7 +41,7 @@ import { Settings } from "./settings";
 import { BlockSchema } from "./db";
 import i18n from "../i18n/i18n";
 import { AbiDecoder } from "./abi-decoder";
-import { resolve } from "path";
+import Contract from "./contract";
 
 const IgnoredCharacters = /[\s\@\#,\.\!\$\%\^\&\*\(\)\-\_\+\=\~\`\<\>\?\/\，\。]/g;
 
@@ -151,14 +153,14 @@ export class Ribbit {
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = this.getNetworkName(this.networkId, false);
     this.networkNameAbbrev = this.getNetworkName(this.networkId, true);
-    console.log("enter here");
-    this.contractInstance = new this.web3.eth.Contract(
+    console.log("Enter here 1");
+    this.contractInstance = new Contract(
+      this.web3,
       getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
-    console.log("enter here 2");
+    console.log("Enter here 2");
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
-    console.log("enter here 3");
 
     // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
@@ -273,6 +275,12 @@ export class Ribbit {
           return "Ropsten";
         } else {
           return "Ropsten Test Network";
+        }
+      case 133753763:
+        if (abbrev) {
+          return "IELE";
+        } else {
+          return "IELE Test Network";
         }
       default:
         if (abbrev) {
@@ -805,6 +813,13 @@ export class Ribbit {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Get the version of contract
+   */
+  public async getContractVersion() {
+    return await this.contractInstance.methods.version().call();
   }
 
   /**

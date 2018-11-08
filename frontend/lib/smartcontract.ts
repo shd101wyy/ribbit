@@ -16,9 +16,16 @@ export function getContractAddress(networkId: number) {
     // mainnet
     // return "0xbbf856d36d04a80d9f526510ceba01ea27627488"; // V0
     return "0x34a435f70226fa44ddd81bb2a546077b7091cf66"; // V1
+  } else if (networkId === 133753763) {
+    // IELE testnet
+    return "0xbbf856d36d04a80d9f526510ceba01ea27627488"; // V1
   } else {
     return null;
   }
+}
+
+export function isIeleVMByContractAddress(contractAddress: string) {
+  return contractAddress === "0xbbf856d36d04a80d9f526510ceba01ea27627488";
 }
 
 export function getLatestAbiArray() {

@@ -1,4 +1,4 @@
-import { Transaction } from "web3/types";
+import { Transaction } from "web3/eth/types";
 
 export interface DecodedInputData {
   name: string;
