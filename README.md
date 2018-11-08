@@ -1,6 +1,6 @@
 # ribbit
 
-> Recommend to try this project on **Ropsten Test Network**.
+> Recommend to try this project on **Ropsten Test Network** or **IELE Testnet**.
 
 An experimental, decentralized social media web application based on Ethereum platform.  
 实验性质的，基于以太坊的去中心化社交程序。
@@ -56,6 +56,12 @@ Smart Contract:
 2.  Switch to `Ropsten Test Network`. Visit the faucet website listed below and request test ethers. Don't worry, they are fake ether coins.
 	* http://faucet.ropsten.be:3001/ and click `request 1 ether from faucet`.
 	* https://faucet.metamask.io/ and click `Send me 1 test ether!`
+> 
+> To use IELE Testnet, please make sure you configure custom RPC like below
+> ![default](https://user-images.githubusercontent.com/1908863/48178733-e22dbc80-e2e0-11e8-9313-14f41e77fba1.PNG)
+> 
+> The IELE testnet faucet could be found here: https://testnet.iohkdev.io/iele/faucet/. Enter your account address and click **Request** to get funds.
+
 3.  Visit http://shd101wyy.github.io/ribbit/ to start using ribbit. The first time you visit ribbit website, it will ask you to finish a signup. Simply finish the form and then click `Publish profile to blockchain` button to create your account. Wait for a few minutes until the transaction finishes, then refresh your browser.
 
 ![signup1](https://user-images.githubusercontent.com/1908863/40032214-ce4c5ac2-57b8-11e8-960c-490efb893258.PNG)
