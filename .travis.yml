@@ -1,0 +1,22 @@
+dist: bionic
+language: node_js
+node_js:
+  - "lts/erbium"
+install:
+  - yarn
+jobs:
+  include:
+    - stage: build
+      script:
+        - yarn install
+        - yarn build
+    - stage: deploy
+      if: branch = master
+      script:
+        - yarn install
+        - git remote set-url origin https://$GITHUB_TOKEN@github.com/shd101wyy/ribbit.git
+        - CI= yarn deploy-gh-pages
+notifications:
+  email:
+    on_success: never
+    on_failure: change

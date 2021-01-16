@@ -225,7 +225,7 @@ export class Ribbit {
             link: `https://ipfs.infura.io/ipfs/${ipfsHash}`,
           })
         );
-      }, 1000);
+      }, 5000);
       this.ipfs.files.cat(ipfsHash, (error, file) => {
         clearTimeout(timeout);
         if (error) {
