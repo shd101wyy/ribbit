@@ -3,8 +3,6 @@ import * as ReactDOM from "react-dom";
 import { Router, Route, Switch } from "react-router";
 import { I18nextProvider } from "react-i18next";
 const Web3 = require("web3");
-
-// import Web3 from "web3";
 import hashHistory from "./lib/history";
 import { Ribbit } from "./lib/ribbit";
 
@@ -47,11 +45,23 @@ class App extends React.Component<Props, State> {
       web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     } else {
       console.log("metamask installed.");
-      web3 = new Web3(window["web3"].currentProvider);
+    
+      if (typeof window["ethereum"] !== "undefined") {
+        web3 = new Web3(window["ethereum"]);
+        try {
+          // Request account access if needed
+          await window["ethereum"].enable();
+        } catch (error) {
+          // User denied account access...
+        }
+      } else {
+        web3 = new Web3(window["web3"].currentProvider);
+      }
     }
     const ribbit = new Ribbit(web3);
     window["web3"] = web3; // override metamask web3.
     window["ribbit"] = ribbit;
+    
     console.log("start initializing user.");
     try {
       await ribbit.initialize();

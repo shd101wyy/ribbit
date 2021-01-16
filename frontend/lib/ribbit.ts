@@ -2,7 +2,7 @@ import {
   getContractAddress,
   getLatestAbiArray,
   abiMap,
-  getABIArray
+  getABIArray,
 } from "./smartcontract";
 import { sha256 } from "js-sha256";
 import * as chineseConv from "chinese-conv";
@@ -11,17 +11,18 @@ import {
   compressString,
   hexEncode,
   decompressString,
-  hexDecode
+  hexDecode,
 } from "./utility";
 import {
   TransactionInfo,
   DecodedLogData,
   transformDecodedInputData,
-  transformDecodedLogData
+  transformDecodedLogData,
 } from "./transaction";
 import * as Identicon from "identicon.js";
 import Web3 from "web3";
-import { Contract, Transaction, Log } from "web3/types";
+import { Transaction, Log } from "web3-core";
+import { Contract } from "web3-eth-contract";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
 PouchDB.plugin(PouchDBFind);
@@ -138,7 +139,7 @@ export class Ribbit {
   constructor(web3: Web3) {
     this.web3 = web3;
 
-    this.abiDecoders = Object.keys(abiMap).map(offset => {
+    this.abiDecoders = Object.keys(abiMap).map((offset) => {
       return new AbiDecoder(web3, getABIArray(offset));
     });
   }
@@ -151,25 +152,27 @@ export class Ribbit {
     this.networkId = await this.web3.eth.net.getId();
     this.networkName = this.getNetworkName(this.networkId, false);
     this.networkNameAbbrev = this.getNetworkName(this.networkId, true);
-    console.log("enter here");
+    console.log("accountAddress: ", this.accountAddress);
+    console.log("networkId: ", this.networkId);
+    console.log("networkName: ", this.networkName);
+
     this.contractInstance = new this.web3.eth.Contract(
       getLatestAbiArray(),
       getContractAddress(this.networkId)
     );
-    console.log("enter here 2");
     this.userInfo = await this.getUserInfoFromAddress(this.accountAddress);
-    console.log("enter here 3");
+    console.log("userInfo: ", this.userInfo);
 
     // Initialize database
     this.transactionInfoDB = new PouchDB<TransactionInfo>(
       "ribbit/transactionInfo"
     );
     await this.transactionInfoDB["createIndex"]({
-      index: { fields: ["creation", "blockNumber", "from", "tags", "hash"] }
+      index: { fields: ["creation", "blockNumber", "from", "tags", "hash"] },
     });
     this.blockDB = new PouchDB<BlockSchema>("ribbit/block");
     await this.blockDB["createIndex"]({
-      index: { fields: ["blockNumber", "fullySynced"] }
+      index: { fields: ["blockNumber", "fullySynced"] },
     });
 
     // Initialize IPFS
@@ -190,7 +193,7 @@ export class Ribbit {
     this.ipfs = ipfsAPI({
       host: "ipfs.infura.io",
       port: "5001",
-      protocol: "https"
+      protocol: "https",
     });
     window["ipfsNode"] = this.ipfs;
   }
@@ -219,7 +222,7 @@ export class Ribbit {
         return resolve(
           i18n.t("notification/ipfs-hash-not-found", {
             name: ipfsHash.slice(0, 6) + "...",
-            link: `https://ipfs.infura.io/ipfs/${ipfsHash}`
+            link: `https://ipfs.infura.io/ipfs/${ipfsHash}`,
           })
         );
       }, 1000);
@@ -416,18 +419,18 @@ export class Ribbit {
           tags // tags
         )
         .send({ from: this.accountAddress })
-        .on("error", error => {
+        .on("error", (error) => {
           return reject(error);
         })
-        .on("transactionHash", hash => {
+        .on("transactionHash", (hash) => {
           console.log("post feed txHash: ", hash);
           return resolve(hash);
         })
-        .on("receipt", receipt => {
+        .on("receipt", (receipt) => {
           new window["Noty"]({
             type: "success",
             text: i18n.t("notification/publish-post-success"),
-            timeout: 10000
+            timeout: 10000,
           }).show();
           console.log("post feed receipt", receipt);
         });
@@ -476,18 +479,18 @@ export class Ribbit {
           repostToTimeline // repostToTimeline
         )
         .send({ from: this.accountAddress })
-        .on("error", error => {
+        .on("error", (error) => {
           return reject(error);
         })
-        .on("transactionHash", hash => {
+        .on("transactionHash", (hash) => {
           console.log("reply feed txHash: ", hash);
           return resolve(hash);
         })
-        .on("receipt", receipt => {
+        .on("receipt", (receipt) => {
           new window["Noty"]({
             type: "success",
             text: i18n.t("notification/publish-reply-success"),
-            timeout: 10000
+            timeout: 10000,
           }).show();
           console.log("reply feed receipt", receipt);
         });
@@ -521,7 +524,7 @@ export class Ribbit {
       tags = decodedInputData.params["tags"].value;
     } else if (decodedInputData.name === "reply") {
       tags = decodedInputData.params["tags"].value;
-      tags = tags.filter(tag => {
+      tags = tags.filter((tag) => {
         return !tag.startsWith("0x000000000000000000000000");
       }); // remove user that were mentioned in that post.
     }
@@ -542,18 +545,18 @@ export class Ribbit {
       this.contractInstance.methods
         .upvote(parentTransactionHash, tags, true, authorAddress)
         .send({ from: this.accountAddress, value: wei })
-        .on("error", error => {
+        .on("error", (error) => {
           return reject(error);
         })
-        .on("transactionHash", hash => {
+        .on("transactionHash", (hash) => {
           console.log("upvote txHash: ", hash);
           return resolve(hash);
         })
-        .on("receipt", receipt => {
+        .on("receipt", (receipt) => {
           new window["Noty"]({
             type: "success",
             text: i18n.t("notification/publish-upvote-success"),
-            timeout: 10000
+            timeout: 10000,
           }).show();
           console.log("upvote receipt: ", receipt);
         });
@@ -568,18 +571,18 @@ export class Ribbit {
       this.contractInstance.methods
         .downvote(parentTransactionHash, false)
         .send({ from: this.accountAddress })
-        .on("error", error => {
+        .on("error", (error) => {
           return reject(error);
         })
-        .on("transactionHash", hash => {
+        .on("transactionHash", (hash) => {
           console.log("downvote txHash: ", hash);
           return resolve(hash);
         })
-        .on("receipt", receipt => {
+        .on("receipt", (receipt) => {
           new window["Noty"]({
             type: "success",
             text: i18n.t("notification/publish-downvote-success"),
-            timeout: 10000
+            timeout: 10000,
           }).show();
           console.log("downvote receipt: ", receipt);
         });
@@ -607,8 +610,10 @@ export class Ribbit {
     } catch (error) {
       // do nothing here
     }
+
+    console.log("getBlock: ", await this.web3.eth.getBlock(blockNumber));
     const blockTimestamp =
-      (await this.web3.eth.getBlock(blockNumber)).timestamp * 1000;
+      ((await this.web3.eth.getBlock(blockNumber)) as any).timestamp * 1000;
     const transactionCount = await this.web3.eth.getBlockTransactionCount(
       blockNumber
     );
@@ -647,7 +652,7 @@ export class Ribbit {
         }
         const decodedLogs = this.decodeLogs(logs);
         const tags = [];
-        decodedLogs.forEach(decodedLog => {
+        decodedLogs.forEach((decodedLog) => {
           if (decodedLog.name === "SavePreviousTagInfoEvent") {
             tags.push(decodedLog.events["tag"].value);
           }
@@ -661,7 +666,7 @@ export class Ribbit {
             decodedLogs,
             creation: blockTimestamp + i,
             _id: transaction.hash,
-            tags
+            tags,
           }
         ) as TransactionInfo;
         try {
@@ -683,7 +688,7 @@ export class Ribbit {
         await this.blockDB.put({
           blockNumber,
           fullySynced: true,
-          _id: "block_" + blockNumber.toString()
+          _id: "block_" + blockNumber.toString(),
         });
       } catch (error) {
         console.log(error);
@@ -708,7 +713,7 @@ export class Ribbit {
       tag = "",
       blockNumber = 0,
       transactionHash = "",
-      maxCreation = 0
+      maxCreation = 0,
       // TODO: there might be multiple ribbit transaction in one block,
       //       we need to sort them by timestamp.
       // timestamp => timestamp in transaction should be greater than this.
@@ -749,8 +754,8 @@ export class Ribbit {
       const res = await this.transactionInfoDB["find"]({
         selector: {
           hash: transactionHash,
-          creation: { $lt: maxCreation }
-        }
+          creation: { $lt: maxCreation },
+        },
         // sort: ["creation"],
         // limit: 1
       });
@@ -769,8 +774,8 @@ export class Ribbit {
         selector: {
           from: userAddress,
           blockNumber: blockNumber,
-          creation: { $lt: maxCreation }
-        }
+          creation: { $lt: maxCreation },
+        },
         // sort: [{"creation": "desc"}],
         // limit: 1
       });
@@ -787,10 +792,10 @@ export class Ribbit {
         selector: {
           blockNumber: blockNumber,
           tags: {
-            $in: [tag]
+            $in: [tag],
           },
-          creation: { $lt: maxCreation }
-        }
+          creation: { $lt: maxCreation },
+        },
         // sort: ["creation"],
         // limit: 1
       });
@@ -819,7 +824,7 @@ export class Ribbit {
     const currentFeedBlockNumber = parseInt(currentFeedInfo);
     return await this.getTransactionInfo({
       userAddress,
-      blockNumber: currentFeedBlockNumber
+      blockNumber: currentFeedBlockNumber,
     });
   }
 
@@ -834,7 +839,7 @@ export class Ribbit {
       .call();
     const currentFeedBlockNumber = parseInt(currentFeedInfo);
     return await this.getTransactionInfo({
-      blockNumber: currentFeedBlockNumber
+      blockNumber: currentFeedBlockNumber,
     });
   }
 
@@ -848,7 +853,7 @@ export class Ribbit {
     userAddress: string,
     {
       num = -1, // how many feeds to read?
-      blockNumber = 0
+      blockNumber = 0,
     },
     cb: (
       done: boolean,
@@ -866,7 +871,7 @@ export class Ribbit {
       userAddress,
       blockNumber,
       num,
-      cb
+      cb,
     });
   }
 
@@ -875,7 +880,7 @@ export class Ribbit {
     {
       num = -1, // how many feeds to read?
       blockNumber = 0,
-      transactionHash = null
+      transactionHash = null,
     },
     cb: (
       done: boolean,
@@ -893,7 +898,7 @@ export class Ribbit {
       tag,
       blockNumber,
       num,
-      cb
+      cb,
     });
   }
 
@@ -910,7 +915,7 @@ export class Ribbit {
       done: boolean,
       offset?: number,
       transactionInfo?: TransactionInfo
-    ) => {}
+    ) => {},
   }: {
     userAddress?: string;
     tag?: string;
@@ -928,7 +933,7 @@ export class Ribbit {
       const transactionInfo = await this.getTransactionInfo({
         userAddress,
         tag,
-        blockNumber
+        blockNumber,
       });
       if (!transactionInfo) {
         return cb(true); // done.
@@ -939,12 +944,12 @@ export class Ribbit {
         if (!tag) {
           // PostEvent or RepostEvent.
           eventLog = decodedLogs.filter(
-            x => x.name === "SavePreviousFeedInfoEvent"
+            (x) => x.name === "SavePreviousFeedInfoEvent"
           )[0];
         } else {
           // Tag events.
           eventLog = decodedLogs.filter(
-            x =>
+            (x) =>
               x.name === "SavePreviousTagInfoEvent" &&
               x.events["tag"].value === tag
           )[0];
@@ -1049,18 +1054,18 @@ export class Ribbit {
             compressString(JSON.stringify(userInfoCopy))
           )
           .send({ from: this.accountAddress })
-          .on("error", error => {
+          .on("error", (error) => {
             return reject(error);
           })
-          .on("transactionHash", hash => {
+          .on("transactionHash", (hash) => {
             return resolve(hash);
           })
-          .on("receipt", receipt => {
+          .on("receipt", (receipt) => {
             console.log("finish setUserMetadata: ", receipt);
             new window["Noty"]({
               type: "success",
               text: i18n.t("notification/publish-profile-success"),
-              timeout: 60000
+              timeout: 60000,
             }).show();
           });
       });
@@ -1078,18 +1083,18 @@ export class Ribbit {
             compressString(JSON.stringify(userInfoCopy))
           )
           .send({ from: this.accountAddress })
-          .on("error", error => {
+          .on("error", (error) => {
             return reject(error);
           })
-          .on("transactionHash", hash => {
+          .on("transactionHash", (hash) => {
             return resolve(hash);
           })
-          .on("receipt", receipt => {
+          .on("receipt", (receipt) => {
             console.log("finish setUserMetadata: ", receipt);
             new window["Noty"]({
               type: "success",
               text: i18n.t("notification/publish-profile-success"),
-              timeout: 10000
+              timeout: 10000,
             }).show();
           });
       });
@@ -1103,16 +1108,16 @@ export class Ribbit {
       "upvotes",
       "downvotes",
       "replies",
-      "reports"
+      "reports",
     ].map((key, offset) => {
       return new Promise((resolve, reject) => {
         return this.contractInstance.methods
           .getState(transactionHash, offset)
           .call()
-          .then(value => {
+          .then((value) => {
             return resolve([key, parseInt(value)]);
           })
-          .catch(error => {
+          .catch((error) => {
             return reject(error);
           });
       });
@@ -1123,7 +1128,7 @@ export class Ribbit {
       upvotes: 0,
       downvotes: 0,
       reports: 0,
-      replies: 0
+      replies: 0,
     };
     results.forEach(([key, value]) => {
       output[key] = value;
@@ -1147,12 +1152,12 @@ export class Ribbit {
         const hash = match[1];
         return {
           message: await this.ipfsCat(hash),
-          ipfsHash: hash
+          ipfsHash: hash,
         };
       } else {
         return {
           message,
-          ipfsHash: null
+          ipfsHash: null,
         };
       }
     } else {
@@ -1161,12 +1166,12 @@ export class Ribbit {
       const ipfsHash = multihash.getMultihashFromBytes32({
         digest: params["digest"].value,
         hashFunction: parseInt(params["hashFunction"].value, 10),
-        size: parseInt(params["size"].value, 10)
+        size: parseInt(params["size"].value, 10),
       });
       console.log("retrieve message ipfsHash: ", ipfsHash);
       return {
         message: await this.ipfsCat(ipfsHash),
-        ipfsHash
+        ipfsHash,
       };
     }
   }
@@ -1206,14 +1211,14 @@ export class Ribbit {
     const followingTopics = [
       {
         topic: "ribbit",
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     ];
     const followingUsernames = [
       {
         username: this.userInfo.username,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      },
     ];
     /*
     if (this.userInfo.username !== "ribbit") {
@@ -1229,7 +1234,7 @@ export class Ribbit {
       postToRibbitTopic: true,
       followingUsernames,
       followingTopics,
-      language: "en"
+      language: "en",
     };
     return this.settings;
   }
@@ -1246,7 +1251,7 @@ export class Ribbit {
     if (!found) {
       followingUsernames.push({
         username: username,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       return await this.setSettings(this.settings);
     }
@@ -1276,7 +1281,7 @@ export class Ribbit {
     if (!found) {
       followingTopics.push({
         topic: topic,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       return await this.setSettings(this.settings);
     }
