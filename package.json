@@ -48,6 +48,7 @@
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^1.0.0",
     "eslint": "^5.2.0",
+    "gh-pages": "^3.1.0",
     "http-server": "^0.11.1",
     "json-loader": "^0.5.7",
     "less": "^3.0.1",
@@ -66,7 +67,9 @@
     "dev": "webpack --config webpack.config.js  --mode development --watch",
     "build": "webpack --config webpack.config.js  --mode production",
     "serve": "http-server ./dist -p 12345",
-    "format": "prettier --write --ignore-path .gitignore \"{.,frontend/**}/{*.{js,ts,tsx,less},ts*.json}\""
+    "format": "prettier --write --ignore-path .gitignore \"{.,frontend/**}/{*.{js,ts,tsx,less},ts*.json}\"",
+    "predeploy": "yarn build",
+    "deploy-gh-pages": "yarn build && gh-pages-clean && node gh-pages-deploy.js"
   },
   "repository": {
     "type": "git",
@@ -77,5 +80,5 @@
   "bugs": {
     "url": "https://github.com/shd101wyy/ribbit/issues"
   },
-  "homepage": "https://github.com/shd101wyy/ribbit#readme"
+  "homepage": "https://github.com/shd101wyy/ribbit"
 }
