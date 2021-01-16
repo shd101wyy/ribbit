@@ -138,18 +138,18 @@ ribbit 中发布的文字是基于 Markdown 格式的。
 ### 开发
 
 ```bash
-$ npm run frontend:prepare # 安装相应的依赖
+$ yarn                     # 安装相应的依赖
                            # 如果你使用的是 Windows，请先运行下面的命令：
                            #   $ npm install --global --production windows-build-tools
-$ npm run frontend:dev     # 开始 building 以及 watching 前端文件。
+$ yarn dev                 # 开始 building 以及 watching 前端文件。
                            # 打开一个新的 terminal 终端，然后运行 =>
-$ npm run server:start     # 启动 http://127.0.0.1:12345 地址下的服务器。
+$ yarn serve               # 启动 http://127.0.0.1:12345 地址下的服务器。
 ```
 
 ### 部署
 
 ```bash
-$ npm run frontend:build
+$ yarn build
 ```
 
 然后复制 `./dist` 下的文件到你的服务器。

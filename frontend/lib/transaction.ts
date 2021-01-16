@@ -1,5 +1,4 @@
-import { Transaction } from "web3/types";
-
+import { Transaction } from "web3-core";
 export interface DecodedInputData {
   name: string;
   params: {
@@ -30,13 +29,13 @@ export function transformDecodedInputData(decodedInputData: {
 }): DecodedInputData {
   const transformedDecodedInputData: DecodedInputData = {
     name: decodedInputData.name,
-    params: {}
+    params: {},
   };
   for (let i = 0; i < decodedInputData.params.length; i++) {
     const param = decodedInputData.params[i];
     transformedDecodedInputData.params[param.name] = {
       value: param.value,
-      type: param.type
+      type: param.type,
     };
   }
   return transformedDecodedInputData;
@@ -50,19 +49,19 @@ export function transformDecodedLogData(
   }[]
 ): DecodedLogData[] {
   const arr = [];
-  decodedLogData.forEach(data => {
+  decodedLogData.forEach((data) => {
     const events = {};
     for (let i = 0; i < data.events.length; i++) {
       const event = data.events[i];
       events[event.name] = {
         type: event.type,
-        value: event.value
+        value: event.value,
       };
     }
     arr.push({
       address: data.address,
       events,
-      name: data.name
+      name: data.name,
     });
   });
   return arr;
@@ -87,12 +86,12 @@ export function generateFakeTransactionInfo(): TransactionInfo {
       params: {
         timestamp: {
           value: Date.now(),
-          type: "uint"
-        }
-      }
+          type: "uint",
+        },
+      },
     },
     decodedLogs: [],
     creation: 0,
-    tags: []
+    tags: [],
   };
 }
